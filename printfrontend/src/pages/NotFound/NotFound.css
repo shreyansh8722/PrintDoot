@@ -1,0 +1,110 @@
+.not-found-page {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background-color: #f9fafb;
+}
+
+.not-found-container {
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+}
+
+.not-found-content {
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.not-found-title {
+    font-size: 8rem;
+    font-weight: 800;
+    color: #1a233a;
+    margin: 0;
+    line-height: 1;
+    background: linear-gradient(135deg, #1a233a 0%, #667eea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.not-found-subtitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a233a;
+    margin: 1rem 0 0.5rem;
+}
+
+.not-found-message {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 1rem 0 2rem;
+    line-height: 1.6;
+}
+
+.not-found-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.not-found-button {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.not-found-button-primary {
+    background-color: #1a233a;
+    color: white;
+}
+
+.not-found-button-primary:hover {
+    background-color: #2d3748;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 35, 58, 0.3);
+}
+
+.not-found-button-secondary {
+    background-color: white;
+    color: #1a233a;
+    border: 2px solid #1a233a;
+}
+
+.not-found-button-secondary:hover {
+    background-color: #f3f4f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 35, 58, 0.2);
+}
+
+@media (max-width: 640px) {
+    .not-found-title {
+        font-size: 5rem;
+    }
+
+    .not-found-subtitle {
+        font-size: 1.5rem;
+    }
+
+    .not-found-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .not-found-actions {
+        flex-direction: column;
+    }
+
+    .not-found-button {
+        width: 100%;
+    }
+}

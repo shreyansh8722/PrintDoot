@@ -1,0 +1,585 @@
+{
+    "info": {
+        "_postman_id": "vistaprint-clone-id",
+        "name": "Vistaprint Clone API (Latest)",
+        "description": "Updated Collection for Vistaprint Clone Backend.\n\n**Modules**:\n- Public API (Users, Catalog, Designs, Orders)\n- Zakeke Integration\n- Admin API\n\n**Auth**: Basic Auth (testuser/password123).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api/v1",
+            "type": "string"
+        }
+    ],
+    "auth": {
+        "type": "basic",
+        "basic": [
+            {
+                "key": "password",
+                "value": "password123",
+                "type": "string"
+            },
+            {
+                "key": "username",
+                "value": "testuser",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Module A: Users",
+            "item": [
+                {
+                    "name": "Register User",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"testuser_new\",\n    \"password\": \"password123\",\n    \"email\": \"new@example.com\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"company_name\": \"Acme Corp\",\n    \"phone\": \"555-0123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/users/register/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "register",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get My Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/users/1/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "1",
+                                ""
+                            ]
+                        },
+                        "description": "Note: get_object is overridden to return current user, so any ID might work if filtered."
+                    }
+                },
+                {
+                    "name": "Addresses",
+                    "item": [
+                        {
+                            "name": "List My Addresses",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/addresses/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "addresses",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Add Address",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"type\": \"shipping\",\n    \"recipient_name\": \"Jane Doe\",\n    \"phone_number\": \"555-0999\",\n    \"street\": \"456 Innovation Dr\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zip_code\": \"94103\",\n    \"country\": \"USA\",\n    \"is_default\": true\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/addresses/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "addresses",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Module B: Catalog (Public)",
+            "item": [
+                {
+                    "name": "Categories & Subcategories",
+                    "item": [
+                        {
+                            "name": "List Categories",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/categories/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "categories",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Subcategories (Nested)",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/categories/1/subcategories/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "categories",
+                                        "1",
+                                        "subcategories",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Products",
+                    "item": [
+                        {
+                            "name": "List All Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/products/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Products in Subcategory (Nested)",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/categories/1/subcategories/1/products/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "categories",
+                                        "1",
+                                        "subcategories",
+                                        "1",
+                                        "products",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Search Products",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/products/?search=business",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "search",
+                                            "value": "business"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Banners",
+                    "item": [
+                        {
+                            "name": "List Active Banners",
+                            "request": {
+                                "auth": {
+                                    "type": "noauth"
+                                },
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/banners/?placement=homepage",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "banners",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "placement",
+                                            "value": "homepage"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Module C: Designs",
+            "item": [
+                {
+                    "name": "List My Designs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/my-designs/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "my-designs",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create New Design",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product\": 1,\n    \"name\": \"My Custom Card\",\n    \"design_json\": {\"version\": \"1.0\", \"canvas\": \"...\"},\n    \"tags\": [\"business\"]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/my-designs/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "my-designs",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Module D: Orders",
+            "item": [
+                {
+                    "name": "Create Order (Checkout)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"shipping_address\": 1,\n    \"items\": [\n        {\n            \"product\": 1,\n            \"quantity\": 100,\n            \"design\": 1\n        }\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List My Orders",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/orders/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Module E: Zakeke Integration",
+            "item": [
+                {
+                    "name": "Get S2S Token",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/zakeke/token/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "zakeke",
+                                "token",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Retrieve Catalog",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/zakeke/catalog/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "zakeke",
+                                "catalog",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product Options",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/zakeke/1/options/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "zakeke",
+                                "1",
+                                "options",
+                                ""
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Sync Customizer Status",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/zakeke/1/customizer/",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "zakeke",
+                                "1",
+                                "customizer",
+                                ""
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Module F: Admin API",
+            "item": [
+                {
+                    "name": "Admin: Users",
+                    "item": [
+                        {
+                            "name": "List All Users",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/admin/users/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "admin",
+                                        "users",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "User Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/admin/users/stats/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "admin",
+                                        "users",
+                                        "stats",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Admin: Catalog",
+                    "item": [
+                        {
+                            "name": "Category Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/admin/categories/stats/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "admin",
+                                        "categories",
+                                        "stats",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Product Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{base_url}}/admin/products/stats/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "admin",
+                                        "products",
+                                        "stats",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Bulk Update Stock",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"updates\": [\n        {\"id\": 1, \"stock_quantity\": 500},\n        {\"id\": 2, \"stock_quantity\": 1000}\n    ]\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{base_url}}/admin/products/bulk_update_stock/",
+                                    "host": [
+                                        "{{base_url}}"
+                                    ],
+                                    "path": [
+                                        "admin",
+                                        "products",
+                                        "bulk_update_stock",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

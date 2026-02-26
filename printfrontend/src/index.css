@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Global Animations ── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.35s ease-out both;
+}
+
+.animate-slideDown {
+    animation: slideDown 0.25s ease-out both;
+}
+
+/* ── Smooth page transitions ── */
+.main-content > * {
+    animation: fadeInUp 0.3s ease-out both;
+}
+
+/* ── Focus Visible — accessible keyboard focus rings ── */
+*:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Remove outline for mouse clicks, keep for keyboard */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ── Smooth scrolling ── */
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Better selection color ── */
+::selection {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+/* ── Skeleton shimmer animation ── */
+@keyframes shimmer {
+    0% {
+        background-position: -400px 0;
+    }
+    100% {
+        background-position: 400px 0;
+    }
+}
+
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+}

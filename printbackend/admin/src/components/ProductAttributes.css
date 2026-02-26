@@ -1,0 +1,401 @@
+/* Tabs */
+.modal-tabs {
+    display: flex;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 24px;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    transition: all 0.2s;
+}
+
+.tab-button.active {
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
+}
+
+.tab-button:hover {
+    color: #4f46e5;
+}
+
+/* Attributes Tab */
+.attributes-tab,
+.print-specs-tab {
+    padding: 16px 0;
+}
+
+.tab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.tab-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #1a1a1a;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state p {
+    margin: 8px 0;
+}
+
+/* Attribute Cards */
+.attributes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.attribute-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    background: #f9fafb;
+}
+
+.attr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 12px;
+}
+
+.attr-header h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    color: #1a1a1a;
+}
+
+.attr-type {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #e0e7ff;
+    color: #4338ca;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.badge-required,
+.badge-default {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #fee2e2;
+    color: #991b1b;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badge-default {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.attr-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit-small,
+.btn-delete-small {
+    padding: 6px 12px;
+    font-size: 13px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-edit-small {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.btn-edit-small:hover {
+    background: #bfdbfe;
+}
+
+.btn-delete-small {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.btn-delete-small:hover {
+    background: #fecaca;
+}
+
+/* Attribute Values */
+.attr-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.value-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    font-size: 13px;
+    color: #374151;
+}
+
+.price-adjust {
+    color: #059669;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* Attribute Form Modal */
+.attr-form-modal {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.btn-close:hover {
+    color: #1a1a1a;
+}
+
+.form-body {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Values Section */
+.values-section {
+    background: #f9fafb;
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 16px;
+}
+
+.value-form {
+    display: grid;
+    grid-template-columns: 1.5fr 1.5fr 1fr auto auto;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: end;
+}
+
+.value-form input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.value-form .checkbox-label {
+    margin: 0;
+    padding: 10px 12px;
+}
+
+.values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.value-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.value-item span:first-child {
+    flex: 1;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+
+.value-item .price {
+    color: #059669;
+    font-weight: 600;
+}
+
+.value-item .badge {
+    padding: 2px 8px;
+    background: #d1fae5;
+    color: #065f46;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    line-height: 1;
+}
+
+.btn-remove:hover {
+    color: #991b1b;
+}
+
+.form-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Print Specs Tab */
+.specs-display {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.spec-row {
+    display: flex;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+}
+
+.spec-row label {
+    font-weight: 600;
+    color: #374151;
+    width: 180px;
+}
+
+.spec-row span,
+.spec-row a {
+    color: #1a1a1a;
+}
+
+.spec-row a {
+    text-decoration: underline;
+    color: #4f46e5;
+}
+
+.specs-form {
+    margin-top: 16px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-delete {
+    padding: 10px 20px;
+    background: #fee2e2;
+    color: #991b1b;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-delete:hover {
+    background: #fecaca;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 20px 0;
+}

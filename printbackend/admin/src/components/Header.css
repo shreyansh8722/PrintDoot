@@ -1,0 +1,95 @@
+.header {
+    height: var(--header-height);
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+}
+
+.header-logo {
+    width: var(--sidebar-width);
+    /* Align roughly with sidebar width */
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.logo-highlight {
+    color: #00bcd4;
+    /* Cyan/Blue tone matching image */
+    background: #e0f7fa;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 4px;
+}
+
+.header-search {
+    flex: 1;
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1px solid #00897b;
+    border-radius: 30px;
+    /* Rounded pill shape */
+    outline: none;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00897b;
+}
+
+.header-profile {
+    width: var(--sidebar-width);
+    /* Balance right side */
+    display: flex;
+    justify-content: flex-end;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #fca5a5;
+    /* Placeholder color */
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+}
+
+.avatar svg {
+    color: #fff;
+}

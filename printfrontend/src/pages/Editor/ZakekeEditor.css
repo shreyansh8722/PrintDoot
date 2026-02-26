@@ -1,0 +1,79 @@
+.zakeke-editor-page {
+    width: 100%;
+    height: calc(100vh - 100px);
+    /* Adjust to fit below header */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    background: #fbfbfc;
+}
+
+.zakeke-sdk-target {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+#zakeke-container {
+    width: 100%;
+    height: 100%;
+}
+
+/* Ensure the iframe inside matches the container */
+#zakeke-container iframe {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.zakeke-loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.zakeke-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1a1a1a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.zakeke-error-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 100px);
+    background: #f8f9fa;
+}
+
+.zakeke-error-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    max-width: 400px;
+}

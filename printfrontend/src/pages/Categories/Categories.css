@@ -1,0 +1,24 @@
+.categories-page {
+  width: 100%;
+}
+
+/* Sidebar + Content row */
+.categories-layout {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Sidebar */
+.categories-layout > :first-child {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+/* Right content area */
+.categories-content {
+  flex: 1;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}

@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.md
+other/
+admin/
+docker-compose.yml
+backend/.env
+backend/__pycache__
+backend/logs/
+backend/*.sqlite3
+backend/staticfiles/
