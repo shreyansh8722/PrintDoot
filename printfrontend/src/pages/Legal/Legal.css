@@ -909,3 +909,122 @@
     border-radius: 0 8px 8px 0;
     color: #0e7490;
 }
+
+/* ========================================
+   Plain Text Legal Pages
+   ======================================== */
+.legal-plain {
+    max-width: 860px;
+    margin: 0 auto;
+    background: white;
+    padding: 3rem 3.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.legal-plain h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+.legal-plain .legal-updated {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.legal-plain h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.legal-plain p {
+    font-size: 0.9375rem;
+    color: #374151;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+}
+
+.legal-plain a {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+.legal-plain a:hover {
+    color: #1d4ed8;
+}
+
+.legal-plain strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.legal-plain ul {
+    padding-left: 1.5rem;
+    margin: 0.75rem 0 1.25rem;
+}
+
+.legal-plain ul li {
+    font-size: 0.9375rem;
+    color: #374151;
+    line-height: 1.75;
+    margin-bottom: 0.5rem;
+    list-style-type: disc;
+}
+
+.legal-plain table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.875rem;
+}
+
+.legal-plain table th {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: 600;
+    color: #374151;
+}
+
+.legal-plain table td {
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+
+.legal-plain table code {
+    font-family: ui-monospace, monospace;
+    font-size: 0.8125rem;
+    background: #f3f4f6;
+    padding: 0.125rem 0.375rem;
+    border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+    .legal-plain {
+        padding: 2rem 1.25rem;
+    }
+
+    .legal-plain h1 {
+        font-size: 1.5rem;
+    }
+
+    .legal-plain table {
+        font-size: 0.8125rem;
+    }
+
+    .legal-plain table th,
+    .legal-plain table td {
+        padding: 0.5rem;
+    }
+}
