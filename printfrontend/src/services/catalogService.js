@@ -195,6 +195,50 @@ const catalogService = {
             throw error;
         }
     },
+
+    // ========================================
+    // Favorites
+    // ========================================
+
+    async getFavorites() {
+        try {
+            const response = await apiHook.get('/favorites/');
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching favorites:', error);
+            throw error;
+        }
+    },
+
+    async getFavoriteIds() {
+        try {
+            const response = await apiHook.get('/favorites/ids/');
+            return response.data.product_ids || [];
+        } catch (error) {
+            console.error('Error fetching favorite IDs:', error);
+            return [];
+        }
+    },
+
+    async toggleFavorite(productId) {
+        try {
+            const response = await apiHook.post('/favorites/toggle/', { product_id: productId });
+            return response.data;
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            throw error;
+        }
+    },
+
+    async removeFavorite(productId) {
+        try {
+            const response = await apiHook.post('/favorites/remove/', { product_id: productId });
+            return response.data;
+        } catch (error) {
+            console.error('Error removing favorite:', error);
+            throw error;
+        }
+    },
 };
 
 // Helper: Transform Backend Product -> Frontend Format

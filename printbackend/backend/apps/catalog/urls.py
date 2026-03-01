@@ -1,13 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
-from .views import CategoryViewSet, SubcategoryViewSet, ProductViewSet, ProductReviewViewSet, BannerViewSet
+from .views import CategoryViewSet, SubcategoryViewSet, ProductViewSet, ProductReviewViewSet, BannerViewSet, FavoriteViewSet
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet, basename='category')
 router.register(r'products', ProductViewSet, basename='product')
 router.register(r'reviews', ProductReviewViewSet, basename='review')
 router.register(r'banners', BannerViewSet, basename='banner')
+router.register(r'favorites', FavoriteViewSet, basename='favorite')
 
 
 # Nested routes

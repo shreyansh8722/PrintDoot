@@ -2,10 +2,10 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
-from .models import Category, Subcategory, Product, ProductReview, Banner
+from .models import Category, Subcategory, Product, ProductReview, Banner, Favorite
 from .serializers import (
     CategorySerializer, SubcategorySerializer, ProductSerializer,
-    ProductReviewSerializer, BannerSerializer,
+    ProductReviewSerializer, BannerSerializer, FavoriteSerializer,
 )
 
 
@@ -242,3 +242,59 @@ class BannerViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(placement=placement)
         
         return queryset.order_by('display_order', '-created_at')
+
+
+# ========================================
+# Favorites ViewSet
+# ========================================
+class FavoriteViewSet(viewsets.GenericViewSet):
+    """
+    Manage user favorites (wishlist).
+    All endpoints require authentication.
+    """
+    serializer_class = FavoriteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Favorite.objects.filter(user=self.request.user).select_related('product')
+
+    def list(self, request):
+        """GET /api/v1/favorites/ — list user's favorites"""
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'])
+    def toggle(self, request):
+        """POST /api/v1/favorites/toggle/ — add or remove a product from favorites"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'product_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=product_id, is_active=True)
+        except Product.DoesNotExist:
+            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        favorite, created = Favorite.objects.get_or_create(user=request.user, product=product)
+        if not created:
+            favorite.delete()
+            return Response({'status': 'removed', 'product_id': product.id})
+        return Response({'status': 'added', 'product_id': product.id}, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'])
+    def ids(self, request):
+        """GET /api/v1/favorites/ids/ — get list of favorited product IDs (lightweight)"""
+        ids = list(self.get_queryset().values_list('product_id', flat=True))
+        return Response({'product_ids': ids})
+
+    @action(detail=False, methods=['post'])
+    def remove(self, request):
+        """POST /api/v1/favorites/remove/ — remove a product from favorites"""
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({'detail': 'product_id is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        deleted, _ = Favorite.objects.filter(user=request.user, product_id=product_id).delete()
+        if deleted:
+            return Response({'status': 'removed', 'product_id': int(product_id)})
+        return Response({'detail': 'Not in favorites.'}, status=status.HTTP_404_NOT_FOUND)

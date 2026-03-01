@@ -1,5 +1,7 @@
-import React, { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import catalogService from '../../services/catalogService';
+import userService from '../../services/userService';
 
 /* ── Image with skeleton shimmer ── */
 function CarouselImage({ src, alt, className = '' }) {
@@ -28,9 +30,82 @@ function CarouselImage({ src, alt, className = '' }) {
     );
 }
 
+/* ── Heart SVG icons ── */
+const HeartOutline = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+);
+
+const HeartFilled = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+);
+
 const ProductCarousel = ({ title, items, type = "product", className = "" }) => {
     const scrollRef = useRef(null);
     const scrollAmount = type === "category" ? 280 : 320;
+    const navigate = useNavigate();
+    const [favoriteIds, setFavoriteIds] = useState(new Set());
+    const [togglingIds, setTogglingIds] = useState(new Set());
+
+    // Load user's favorite IDs on mount
+    useEffect(() => {
+        const loadFavorites = async () => {
+            try {
+                const isLoggedIn = userService.isAuthenticated();
+                if (isLoggedIn) {
+                    const ids = await catalogService.getFavoriteIds();
+                    setFavoriteIds(new Set(ids));
+                }
+            } catch {
+                // Not logged in or error — ignore
+            }
+        };
+        if (type === 'product') loadFavorites();
+    }, [type]);
+
+    const handleToggleFavorite = useCallback(async (e, productId) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isLoggedIn = userService.isAuthenticated();
+        if (!isLoggedIn) {
+            navigate('/login', { state: { from: { pathname: window.location.pathname } } });
+            return;
+        }
+
+        if (togglingIds.has(productId)) return;
+
+        setTogglingIds(prev => new Set(prev).add(productId));
+
+        // Optimistic UI
+        setFavoriteIds(prev => {
+            const next = new Set(prev);
+            if (next.has(productId)) next.delete(productId);
+            else next.add(productId);
+            return next;
+        });
+
+        try {
+            await catalogService.toggleFavorite(productId);
+        } catch {
+            // Revert on error
+            setFavoriteIds(prev => {
+                const next = new Set(prev);
+                if (next.has(productId)) next.delete(productId);
+                else next.add(productId);
+                return next;
+            });
+        } finally {
+            setTogglingIds(prev => {
+                const next = new Set(prev);
+                next.delete(productId);
+                return next;
+            });
+        }
+    }, [togglingIds, navigate]);
 
     const scroll = (direction) => {
         if (scrollRef.current) {
@@ -136,6 +211,9 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                             );
                         }
 
+                        const isFav = (item.productId || item.id) ? favoriteIds.has(item.productId || item.id) : false;
+                        const isToggling = (item.productId || item.id) ? togglingIds.has(item.productId || item.id) : false;
+
                         // Product card
                         return (
                             <div
@@ -174,6 +252,21 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                             <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] uppercase font-bold px-2.5 py-1 rounded-full z-10">
                                                 {item.discount}
                                             </div>
+                                        )}
+
+                                        {/* Heart / Favorite button */}
+                                        {(item.productId || item.id) && (
+                                            <button
+                                                onClick={(e) => handleToggleFavorite(e, item.productId || item.id)}
+                                                disabled={isToggling}
+                                                className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${isFav
+                                                    ? 'bg-red-50 text-red-500 shadow-sm'
+                                                    : 'bg-white/80 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-red-50 shadow-sm'
+                                                    } ${isToggling ? 'opacity-50 scale-90' : 'hover:scale-110'}`}
+                                                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                                            >
+                                                {isFav ? <HeartFilled /> : <HeartOutline />}
+                                            </button>
                                         )}
                                     </div>
 

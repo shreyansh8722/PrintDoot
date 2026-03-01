@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Category, Subcategory, Product, ProductImage, ProductReview, Banner
+from .models import Category, Subcategory, Product, ProductImage, ProductReview, Banner, Favorite
 from apps.zakeke.models import ZakekeProduct
 
 
@@ -132,3 +132,17 @@ class BannerSerializer(serializers.ModelSerializer):
         """Transform buttons_json to match frontend format"""
         return obj.buttons_json if obj.buttons_json else []
 
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    product_id = serializers.IntegerField(source='product.id', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_slug = serializers.CharField(source='product.slug', read_only=True)
+    product_image = serializers.URLField(source='product.primary_image', read_only=True)
+    product_price = serializers.DecimalField(source='product.base_price', max_digits=10, decimal_places=2, read_only=True)
+    product_final_price = serializers.ReadOnlyField(source='product.final_price')
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'product_id', 'product_name', 'product_slug', 'product_image',
+                  'product_price', 'product_final_price', 'created_at']
+        read_only_fields = ['id', 'created_at']
