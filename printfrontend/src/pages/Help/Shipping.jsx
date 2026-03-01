@@ -30,11 +30,10 @@ const Shipping = () => {
 
     const shippingTimeline = [
         { phase: 'Order Placed', duration: 'Immediate', description: 'Your order is confirmed and payment is processed' },
-        { phase: 'Production', duration: '2-3 days', description: 'Your items are being printed and prepared' },
-        { phase: 'Quality Check', duration: '1 day', description: 'Items are checked for quality and packaging' },
-        { phase: 'Shipped', duration: 'Varies', description: 'Items are dispatched and tracking information is sent' },
-        { phase: 'In Transit', duration: '2-5 days', description: 'Items are on the way to your address' },
-        { phase: 'Delivered', duration: '-', description: 'Items are delivered to your address' }
+        { phase: 'Production', duration: '1-2 days', description: 'Your items are being printed and prepared' },
+        { phase: 'Shipped', duration: 'Within 2 days', description: 'Orders are shipped via registered domestic courier companies and/or speed post. Tracking info is emailed.' },
+        { phase: 'In Transit', duration: '2-5 days', description: 'Items are on the way to the address provided at the time of purchase' },
+        { phase: 'Delivered', duration: '-', description: 'Items are delivered and confirmation is sent to your registered email ID' }
     ];
 
     return (
@@ -116,8 +115,8 @@ const Shipping = () => {
                             </div>
                             <h3>Delivery Areas</h3>
                             <p>
-                                We ship to all major cities and towns across India. Remote locations may take 
-                                additional 2-3 days. Delivery to P.O. Boxes is not available.
+                                Orders are shipped through registered domestic courier companies and/or speed post only.
+                                Delivery is made to the address provided by the buyer at the time of purchase.
                             </p>
                         </div>
                     </ScrollReveal>
@@ -129,8 +128,8 @@ const Shipping = () => {
                             </div>
                             <h3>Processing Time</h3>
                             <p>
-                                Most orders are processed within 1-2 business days. Custom products may take 
-                                3-5 business days. You'll receive an email when your order ships.
+                                Orders are shipped within 2 days from the date of the order and/or payment, subject to
+                                courier company / post office norms. You'll receive an email when your order ships.
                             </p>
                         </div>
                     </ScrollReveal>
@@ -142,7 +141,7 @@ const Shipping = () => {
                             </div>
                             <h3>Tracking Your Order</h3>
                             <p>
-                                Once shipped, you'll receive a tracking number via email and SMS. Track your 
+                                Once shipped, you'll receive a tracking number via email and SMS. Track your
                                 order in real-time from our tracking page or your order details.
                             </p>
                         </div>

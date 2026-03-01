@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 /* ── Single hero card with skeleton loading ── */
-function HeroCard({ item }) {
+function HeroCard({ item, isFullWidth = false }) {
     const navigate = useNavigate();
     const [imgLoaded, setImgLoaded] = useState(false);
 
@@ -15,48 +15,119 @@ function HeroCard({ item }) {
         }
     };
 
+    if (isFullWidth) {
+        return (
+            <div className="relative h-[400px] sm:h-[480px] lg:h-[540px] overflow-hidden group">
+                {/* Skeleton */}
+                {!imgLoaded && (
+                    <div className="absolute inset-0 skeleton-shimmer bg-gray-200" />
+                )}
+
+                {/* Background image with subtle zoom on hover */}
+                <img
+                    src={item.image}
+                    alt={item.title}
+                    onLoad={() => setImgLoaded(true)}
+                    className={`absolute inset-0 w-full h-full object-cover transition-all duration-[1.2s] ease-out group-hover:scale-[1.03] ${imgLoaded ? 'opacity-100' : 'opacity-0'
+                        }`}
+                />
+
+                {/* Gradient overlay — left side for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent" />
+
+                {/* Content overlay — left-aligned */}
+                <div className={`absolute bottom-0 left-0 top-0 flex items-center transition-all duration-700 ${imgLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+                    }`}>
+                    <div className="px-8 sm:px-12 lg:px-16 max-w-lg">
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
+                            {item.title}
+                        </h2>
+
+                        {item.subtitle && (
+                            <p className="mt-3 text-lg sm:text-xl text-white/80 font-medium">
+                                {item.subtitle}
+                            </p>
+                        )}
+
+                        <div className="mt-6 flex gap-3 flex-wrap">
+                            {item.buttons?.map((btn, idx) => {
+                                const btnClass = btn.primary
+                                    ? "bg-white text-gray-900 hover:bg-gray-100 shadow-lg"
+                                    : "bg-white/15 text-white border border-white/40 hover:bg-white/25 backdrop-blur-sm";
+
+                                if (btn.link && btn.link !== '#' && !btn.link.startsWith('http')) {
+                                    return (
+                                        <Link
+                                            key={idx}
+                                            to={btn.link}
+                                            className={`${btnClass} px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 active:scale-95 inline-block text-center`}
+                                        >
+                                            {btn.label}
+                                        </Link>
+                                    );
+                                }
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleButtonClick(btn.link)}
+                                        className={`${btnClass} px-6 py-3 rounded-full text-sm font-semibold transition-all duration-300 active:scale-95`}
+                                    >
+                                        {btn.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Standard card (used in secondary grid)
     return (
-        <div className="relative h-[420px] overflow-hidden group">
-            {/* Skeleton placeholder */}
+        <div className="relative h-[380px] sm:h-[420px] overflow-hidden group rounded-xl">
+            {/* Skeleton */}
             {!imgLoaded && (
-                <div className="absolute inset-0 skeleton-shimmer bg-gray-200" />
+                <div className="absolute inset-0 skeleton-shimmer bg-gray-200 rounded-xl" />
             )}
 
-            {/* Actual image — fades in when loaded */}
+            {/* Image with hover zoom */}
             <img
                 src={item.image}
                 alt={item.title}
                 onLoad={() => setImgLoaded(true)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                    imgLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
             />
 
-            {/* Content overlay */}
-            <div className={`absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-sm transition-all duration-500 group-hover:shadow-2xl group-hover:bg-white ${
-                imgLoaded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
-            }`}>
-                <h2 className="text-2xl font-bold text-black mb-1">
+            {/* Bottom gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+            {/* Content overlay — bottom */}
+            <div className={`absolute bottom-0 left-0 right-0 p-6 transition-all duration-500 ${imgLoaded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+                }`}>
+                <h2 className="text-2xl font-bold text-white mb-1 leading-tight">
                     {item.title}
                 </h2>
 
                 {item.subtitle && (
-                    <p className="mt-2 text-gray-600 font-medium italic">
+                    <p className="mt-1 text-white/75 font-medium text-sm">
                         {item.subtitle}
                     </p>
                 )}
 
                 <div className="mt-4 flex gap-3 flex-wrap">
                     {item.buttons?.map((btn, idx) => {
+                        const btnClass = btn.primary
+                            ? "bg-white text-gray-900 hover:bg-gray-100"
+                            : "bg-white/15 text-white border border-white/40 hover:bg-white/25 backdrop-blur-sm";
+
                         if (btn.link && btn.link !== '#' && !btn.link.startsWith('http')) {
                             return (
                                 <Link
                                     key={idx}
                                     to={btn.link}
-                                    className={`${btn.primary
-                                        ? "bg-black text-white hover:bg-gray-800"
-                                        : "bg-white text-black border border-black hover:bg-gray-50"
-                                        } px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-95 inline-block text-center`}
+                                    className={`${btnClass} px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95 inline-block text-center`}
                                 >
                                     {btn.label}
                                 </Link>
@@ -66,37 +137,74 @@ function HeroCard({ item }) {
                             <button
                                 key={idx}
                                 onClick={() => handleButtonClick(btn.link)}
-                                className={`${btn.primary
-                                        ? "bg-black text-white hover:bg-gray-800"
-                                        : "bg-white text-black border border-black hover:bg-gray-50"
-                                    } px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-95`}
+                                className={`${btnClass} px-5 py-2.5 rounded-full text-xs font-semibold transition-all duration-200 active:scale-95`}
                             >
                                 {btn.label}
                             </button>
                         );
                     })}
                 </div>
-
-                {item.footer && (
-                    <div className="mt-4 pt-4 border-t border-gray-100 text-xs text-gray-500 flex items-center gap-1">
-                        {item.footer.split(">").map((text, i, arr) => (
-                            <React.Fragment key={i}>
-                                <span>{text.trim()}</span>
-                                {i < arr.length - 1 && <span className="opacity-30">❯</span>}
-                            </React.Fragment>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );
 }
 
-const SectionHero = ({ data, className = "" }) => {
+/* ── Hero slider with auto-play for full-width mode ── */
+const SectionHero = ({ data, variant = "grid", className = "" }) => {
+    const [activeSlide, setActiveSlide] = useState(0);
+
+    const nextSlide = useCallback(() => {
+        setActiveSlide((prev) => (prev + 1) % data.length);
+    }, [data.length]);
+
+    // Auto-play for slider variant
+    useEffect(() => {
+        if (variant !== 'slider') return;
+        const timer = setInterval(nextSlide, 5000);
+        return () => clearInterval(timer);
+    }, [variant, nextSlide]);
+
+    if (variant === 'slider') {
+        return (
+            <section className={`w-full bg-white overflow-hidden relative ${className}`}>
+                {/* Slides */}
+                <div className="relative">
+                    {data.map((item, index) => (
+                        <div
+                            key={item.id}
+                            className={`transition-opacity duration-700 ease-in-out ${index === activeSlide ? 'opacity-100 relative' : 'opacity-0 absolute inset-0'
+                                }`}
+                        >
+                            <HeroCard item={item} isFullWidth={true} />
+                        </div>
+                    ))}
+                </div>
+
+                {/* Slide indicators */}
+                {data.length > 1 && (
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                        {data.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setActiveSlide(idx)}
+                                className={`transition-all duration-300 rounded-full ${idx === activeSlide
+                                        ? 'w-8 h-2.5 bg-white'
+                                        : 'w-2.5 h-2.5 bg-white/50 hover:bg-white/70'
+                                    }`}
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+                )}
+            </section>
+        );
+    }
+
+    // Grid variant (for secondary hero)
     return (
-        <section className={`w-full py-10 bg-white overflow-hidden ${className}`}>
-            <div className="w-full">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[5px]">
+        <section className={`w-full py-4 bg-white overflow-hidden ${className}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data.map((item) => (
                         <HeroCard key={item.id} item={item} />
                     ))}

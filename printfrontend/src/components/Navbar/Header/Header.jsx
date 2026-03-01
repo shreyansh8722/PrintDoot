@@ -25,8 +25,16 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopQuery, setDesktopQuery] = useState("");
+  const [scrolled, setScrolled] = useState(false);
 
   const searchRef = useRef(null);
+
+  // Track scroll for subtle header shadow
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check authentication status
   const checkAuth = () => {
@@ -40,7 +48,7 @@ export default function Header() {
 
   useEffect(() => {
     checkAuth();
-  }, [location.pathname]); // Re-check on route change
+  }, [location.pathname]);
 
   // Close dropdowns + mobile menu on route change
   useEffect(() => {
@@ -78,17 +86,37 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+    <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
+      {/* Top utility bar */}
+      <div className="hidden lg:block bg-gray-900 text-gray-300">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-8 text-[11px] font-medium">
+          <div className="flex items-center gap-6">
+            <a href="tel:02522669393" className="hover:text-white transition-colors flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              02522-669393
+            </a>
+            <Link to="/help" className="hover:text-white transition-colors">Help & Support</Link>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link to="/track-order" className="hover:text-white transition-colors">Track Order</Link>
+            <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Main header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-6">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rotate-45"></div>
-          <span className="text-2xl sm:text-4xl font-bold text-gray-900">printdoot</span>
+        <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+          <div className="w-8 h-8 bg-blue-600 rotate-45 rounded-sm group-hover:rotate-[405deg] transition-transform duration-500" />
+          <span className="text-2xl sm:text-[28px] font-extrabold text-gray-900 tracking-tight">printdoot</span>
         </Link>
 
         {/* Search — Desktop */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+        <div className="hidden md:flex flex-1 max-w-lg mx-6">
           <div ref={searchRef} className="relative w-full">
             <form
               onSubmit={(e) => {
@@ -103,24 +131,17 @@ export default function Header() {
               }}
               className="w-full"
             >
-              <input
-                type="text"
-                value={desktopQuery}
-                onChange={(e) => setDesktopQuery(e.target.value)}
-                placeholder="Search products, categories…"
-                onFocus={() => setShowSearch(true)}
-                className="w-full border border-gray-200 rounded-full py-2.5 pl-5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-gray-400 transition-all"
-              />
-              <button
-                type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
-              >
-                <svg className="w-5 h-5 cursor-pointer"
-                  fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round"
-                    d="M21 21l-4.35-4.35m1.85-5.65a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
-                </svg>
-              </button>
+              <div className="relative">
+                <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+                <input
+                  type="text"
+                  value={desktopQuery}
+                  onChange={(e) => setDesktopQuery(e.target.value)}
+                  placeholder="Search products, categories…"
+                  onFocus={() => setShowSearch(true)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                />
+              </div>
             </form>
             {showSearch && (
               <SearchDropdown
@@ -131,26 +152,10 @@ export default function Header() {
           </div>
         </div>
 
-
         {/* Right Nav — Desktop */}
-        <nav className="hidden lg:flex items-center gap-5 font-medium text-[13px] text-gray-700 flex-shrink-0">
-          <Link to="/help" className="flex items-center gap-1.5 group">
-            <IoMdHelpCircleOutline className="text-lg text-gray-500 group-hover:text-black transition-colors" />
-            <div className="border-b-2 border-transparent group-hover:border-gray-400 pb-0.5 transition-all">
-              <p className="font-semibold text-gray-800 leading-tight">Help is here</p>
-              <p className="text-[11px] text-gray-400">02522-669393</p>
-            </div>
-          </Link>
-
-          <Link to="/account/designs" className="flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent hover:border-gray-400 transition-all">
-            <BsFolder2 className="text-base" />
-            <span>My Projects</span>
-          </Link>
-
-          <Link to="/favorites" className="flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent hover:border-gray-400 transition-all">
-            <FaRegHeart className="text-base" />
-            <span>My Favorites</span>
-          </Link>
+        <nav className="hidden lg:flex items-center gap-2 flex-shrink-0">
+          <NavIconLink to="/account/designs" icon={<BsFolder2 className="text-[22px]" />} label="Projects" />
+          <NavIconLink to="/favorites" icon={<FaRegHeart className="text-[20px]" />} label="Favorites" />
 
           {/* Sign In / Account */}
           {isAuthenticated ? (
@@ -159,9 +164,11 @@ export default function Header() {
               onMouseEnter={() => setShowAccount(true)}
               onMouseLeave={() => setShowAccount(false)}
             >
-              <Link to="/account" className="flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent hover:border-gray-400 transition-all">
-                <LuUserRound className="text-base" />
-                <span>Hi, {username}</span>
+              <Link to="/account" className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900 group">
+                <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {username.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[10px] font-medium tracking-wide">{username.length > 8 ? username.slice(0, 8) + '…' : username}</span>
               </Link>
               {showAccount && <AccountDropdown onLogout={handleLogout} />}
             </div>
@@ -171,35 +178,35 @@ export default function Header() {
               onMouseLeave={() => setShowSignIn(false)}
               className="relative"
             >
-              <Link to="/login" className="flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent hover:border-gray-400 transition-all">
-                <LuUserRound className="text-base" />
-                <span>Sign in</span>
+              <Link to="/login" className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900">
+                <LuUserRound className="text-[22px]" />
+                <span className="text-[11px] font-semibold tracking-wide">Sign in</span>
               </Link>
               {showSignIn && <SignInDropdown />}
             </div>
           )}
 
-          <Link to="/cart" className="flex items-center gap-1.5 pb-0.5 border-b-2 border-transparent hover:border-gray-400 transition-all">
-            <MdOutlineShoppingBag className="text-lg" />
-            <span>Cart</span>
+          <Link to="/cart" className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900 relative">
+            <MdOutlineShoppingBag className="text-[22px]" />
+            <span className="text-[11px] font-semibold tracking-wide">Cart</span>
           </Link>
         </nav>
 
-        {/* Mobile icons — Cart, Search, Hamburger */}
-        <div className="flex lg:hidden items-center gap-3">
+        {/* Mobile icons */}
+        <div className="flex lg:hidden items-center gap-1">
           <button
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="p-2 text-gray-600 hover:text-black transition-colors"
+            className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Search"
           >
             <IoSearchOutline className="text-xl" />
           </button>
-          <Link to="/cart" className="p-2 text-gray-600 hover:text-black transition-colors">
+          <Link to="/cart" className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all relative">
             <MdOutlineShoppingBag className="text-xl" />
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 text-gray-600 hover:text-black transition-colors"
+            className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Open menu"
           >
             <HiOutlineMenuAlt3 className="text-2xl" />
@@ -207,7 +214,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile search bar — slides down */}
+      {/* Mobile search bar */}
       {mobileSearchOpen && (
         <div className="md:hidden px-4 pb-3 animate-slideDown">
           <form
@@ -223,19 +230,14 @@ export default function Header() {
             }}
             className="relative"
           >
+            <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
             <input
               type="text"
               name="mobile-search"
               placeholder="Search products…"
               autoFocus
-              className="w-full border border-gray-200 rounded-full py-2.5 pl-5 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+              className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
             />
-            <button
-              type="submit"
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
-            >
-              <IoSearchOutline className="text-lg" />
-            </button>
           </form>
         </div>
       )}
@@ -244,41 +246,37 @@ export default function Header() {
       <NavBar />
 
       {/* ── Mobile Slide-out Menu ── */}
-      {/* Overlay */}
       <div
         onClick={() => setMobileMenuOpen(false)}
-        className={`fixed inset-0 bg-black/40 z-[60] transition-opacity duration-300 lg:hidden ${
-          mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
       />
-      {/* Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-[300px] max-w-[85vw] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-out lg:hidden ${
-          mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-[320px] max-w-[85vw] bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-out lg:hidden ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
-        {/* Close */}
+        {/* Close header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <span className="font-bold text-lg text-gray-900">Menu</span>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
             aria-label="Close menu"
           >
-            <IoMdClose className="text-2xl text-gray-600" />
+            <IoMdClose className="text-xl text-gray-600" />
           </button>
         </div>
 
         {/* User greeting */}
-        <div className="px-5 py-4 bg-gray-50 border-b border-gray-100">
+        <div className="px-5 py-4 bg-gradient-to-br from-gray-50 to-blue-50/40 border-b border-gray-100">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-11 h-11 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
                 {username.charAt(0).toUpperCase()}
               </div>
               <div>
                 <p className="font-semibold text-gray-900">Hi, {username}</p>
-                <Link to="/account" onClick={() => setMobileMenuOpen(false)} className="text-xs text-blue-600 hover:underline">View Account</Link>
+                <Link to="/account" onClick={() => setMobileMenuOpen(false)} className="text-xs text-blue-600 hover:underline font-medium">View Account</Link>
               </div>
             </div>
           ) : (
@@ -287,7 +285,7 @@ export default function Header() {
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-3"
             >
-              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+              <div className="w-11 h-11 bg-gray-200 rounded-full flex items-center justify-center">
                 <LuUserRound className="text-xl text-gray-500" />
               </div>
               <div>
@@ -299,7 +297,7 @@ export default function Header() {
         </div>
 
         {/* Nav links */}
-        <nav className="py-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+        <nav className="py-3 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
           <MobileNavLink to="/view-all" icon={<MdOutlineShoppingBag className="text-lg" />} label="Shop All Products" onClose={() => setMobileMenuOpen(false)} />
           <MobileNavLink to="/account/designs" icon={<BsFolder2 className="text-lg" />} label="My Projects" onClose={() => setMobileMenuOpen(false)} />
           <MobileNavLink to="/favorites" icon={<FaRegHeart className="text-lg" />} label="My Favorites" onClose={() => setMobileMenuOpen(false)} />
@@ -320,7 +318,7 @@ export default function Header() {
               <div className="my-2 mx-5 border-t border-gray-100" />
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-5 py-3 text-left text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                className="w-full flex items-center gap-3 px-5 py-3.5 text-left text-red-600 hover:bg-red-50 transition-colors text-sm font-medium rounded-lg mx-2"
               >
                 Sign Out
               </button>
@@ -332,13 +330,23 @@ export default function Header() {
   );
 }
 
+/* ── Helper: Desktop nav icon button ── */
+function NavIconLink({ to, icon, label }) {
+  return (
+    <Link to={to} className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900">
+      {icon}
+      <span className="text-[11px] font-semibold tracking-wide">{label}</span>
+    </Link>
+  );
+}
+
 /* ── Helper: Mobile nav link ── */
 function MobileNavLink({ to, icon, label, onClose }) {
   return (
     <Link
       to={to}
       onClick={onClose}
-      className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-gray-50 hover:text-black transition-colors text-sm font-medium"
+      className="flex items-center gap-3 px-5 py-3.5 text-gray-700 hover:bg-gray-50 hover:text-black transition-colors text-sm font-medium"
     >
       {icon && <span className="w-5 text-gray-400">{icon}</span>}
       {!icon && <span className="w-5" />}
@@ -346,4 +354,3 @@ function MobileNavLink({ to, icon, label, onClose }) {
     </Link>
   );
 }
-

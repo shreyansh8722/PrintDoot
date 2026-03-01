@@ -1,259 +1,202 @@
 import React from 'react';
-import { FaUndo, FaCheckCircle, FaTimesCircle, FaClock, FaShieldAlt } from 'react-icons/fa';
+import { FaUndo, FaCheckCircle, FaTimesCircle, FaClock, FaTruck } from 'react-icons/fa';
 import ScrollReveal from '../../components/ScrollReveal';
+import DynamicLegalPage from './DynamicLegalPage';
 import './Legal.css';
 
 const RefundPolicy = () => {
-    const eligibleItems = [
-        'Defective or damaged products received',
-        'Wrong item delivered (different from what was ordered)',
-        'Printing errors caused by PrintDoot (misprints, smudges, color discrepancies)',
-        'Missing items from your order',
-        'Products that do not match the approved proof/preview',
-    ];
-
-    const nonEligibleItems = [
-        'Customized products where the error is in the customer-submitted design',
-        'Products damaged due to misuse, mishandling, or negligence after delivery',
-        'Items returned after 14 days of delivery',
-        'Products with minor color variations due to screen-to-print differences',
-        'Items where the customer approved a digital proof before printing',
-        'Gift cards or downloadable digital products',
-    ];
-
-    const refundTimeline = [
-        {
-            step: '1',
-            title: 'Submit Return Request',
-            description: 'Log into your account → My Orders → Select Order → Request Return. Provide the reason and upload photos if the product is damaged.',
-            duration: 'Day 0',
-        },
-        {
-            step: '2',
-            title: 'Review & Approval',
-            description: 'Our team reviews your request and either approves it or contacts you for more information.',
-            duration: '1–2 business days',
-        },
-        {
-            step: '3',
-            title: 'Return Pickup / Ship Back',
-            description: 'Once approved, we arrange a pickup or provide a return shipping label. Pack the item securely in its original packaging.',
-            duration: '2–3 business days',
-        },
-        {
-            step: '4',
-            title: 'Inspection & Quality Check',
-            description: 'We inspect the returned item to verify the issue. You\'ll receive an email confirmation once inspection is complete.',
-            duration: '1–2 business days',
-        },
-        {
-            step: '5',
-            title: 'Refund Processed',
-            description: 'Refund is initiated to your original payment method. Bank processing may take additional time.',
-            duration: '5–7 business days',
-        },
-    ];
-
     return (
-        <div className="legal-page">
-            <div className="legal-container">
-                {/* Hero Section */}
-                <ScrollReveal direction="down" delay={0.1}>
-                    <div className="legal-hero">
-                        <div className="hero-icon">
-                            <FaUndo />
+        <DynamicLegalPage pageType="refund" title="Refund, Cancellation & Return Policy" icon={<FaUndo />}>
+            <div className="legal-page">
+                <div className="legal-container">
+                    {/* Hero Section */}
+                    <ScrollReveal direction="down" delay={0.1}>
+                        <div className="legal-hero">
+                            <div className="hero-icon">
+                                <FaUndo />
+                            </div>
+                            <h1>Refund, Cancellation &amp; Return Policy</h1>
+                            <p>Last updated: {new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                         </div>
-                        <h1>Refund & Return Policy</h1>
-                        <p>Last updated: {new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    </div>
-                </ScrollReveal>
+                    </ScrollReveal>
 
-                {/* Introduction */}
-                <ScrollReveal direction="up" delay={0.2}>
-                    <div className="legal-intro">
-                        <p>
-                            At PrintDoot, customer satisfaction is our top priority. We stand behind the quality of our products 
-                            and want you to be completely happy with your purchase. If something isn't right, we're here to help. 
-                            Please review our refund and return policy below.
-                        </p>
-                    </div>
-                </ScrollReveal>
-
-                {/* Return Window */}
-                <ScrollReveal direction="up" delay={0.3}>
-                    <section className="legal-section">
-                        <h2>1. Return Window</h2>
-                        <p>
-                            You may request a return within <strong>14 days</strong> of receiving your order. Returns requested 
-                            after 14 days will not be accepted unless the product is defective and the defect was not immediately apparent.
-                        </p>
-                        <p>
-                            To be eligible for a return, items must be in their original condition and packaging, unused, and undamaged 
-                            (except for the defect being reported).
-                        </p>
-                    </section>
-                </ScrollReveal>
-
-                {/* Eligible Items */}
-                <ScrollReveal direction="up" delay={0.4}>
-                    <section className="legal-section">
-                        <h2>2. Eligible for Return & Refund</h2>
-                        <p>The following situations qualify for a return and/or refund:</p>
-                        <ul className="purpose-list">
-                            {eligibleItems.map((item, index) => (
-                                <li key={index}>
-                                    <FaCheckCircle className="list-icon" style={{ color: '#059669' }} />
-                                    <span>{item}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                </ScrollReveal>
-
-                {/* Non-Eligible Items */}
-                <ScrollReveal direction="up" delay={0.5}>
-                    <section className="legal-section">
-                        <h2>3. Not Eligible for Return</h2>
-                        <p>The following items/situations are not eligible for return or refund:</p>
-                        <ul className="purpose-list">
-                            {nonEligibleItems.map((item, index) => (
-                                <li key={index}>
-                                    <FaTimesCircle className="list-icon" style={{ color: '#ef4444' }} />
-                                    <span>{item}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </section>
-                </ScrollReveal>
-
-                {/* How to Request a Return */}
-                <ScrollReveal direction="up" delay={0.6}>
-                    <section className="legal-section">
-                        <h2>4. How to Request a Return</h2>
-                        <div className="section-content">
-                            <p>Follow these steps to initiate a return:</p>
-                            <ol className="nested-list" style={{ listStyleType: 'decimal' }}>
-                                <li>Log in to your PrintDoot account</li>
-                                <li>Navigate to <strong>My Orders</strong> from your dashboard</li>
-                                <li>Select the order containing the item(s) you wish to return</li>
-                                <li>Click <strong>"Request Return"</strong> and select the affected items</li>
-                                <li>Choose the reason for return and provide a description</li>
-                                <li>Upload photos of the defective/damaged product (if applicable)</li>
-                                <li>Submit your request – you'll receive a confirmation email</li>
-                            </ol>
-                            <p style={{ marginTop: '1rem' }}>
-                                Alternatively, you can contact our support team at <a href="mailto:support@printdoot.com">support@printdoot.com</a> or 
-                                call <a href="tel:+912522669393">+91 2522-669393</a>.
+                    {/* Introduction */}
+                    <ScrollReveal direction="up" delay={0.2}>
+                        <div className="legal-intro">
+                            <p>
+                                This refund and cancellation policy outlines how you can cancel or seek a refund for a product / service that you have purchased through the Platform. Please read the following sections carefully.
                             </p>
                         </div>
-                    </section>
-                </ScrollReveal>
+                    </ScrollReveal>
 
-                {/* Refund Timeline */}
-                <ScrollReveal direction="up" delay={0.7}>
-                    <section className="legal-section">
-                        <h2>5. Refund Process & Timeline</h2>
-                        <p>Once your return request is submitted, here's what to expect:</p>
-                        <div className="refund-timeline">
-                            {refundTimeline.map((item, index) => (
-                                <ScrollReveal key={index} direction="up" delay={0.1 + index * 0.08}>
-                                    <div className="refund-timeline-step">
-                                        <div className="refund-step-number">{item.step}</div>
-                                        <div className="refund-step-content">
-                                            <h4>{item.title}</h4>
-                                            <p>{item.description}</p>
-                                            <span className="refund-step-duration">
-                                                <FaClock /> {item.duration}
-                                            </span>
+                    <div className="legal-content">
+                        {/* Cancellation Policy */}
+                        <ScrollReveal direction="up" delay={0.25}>
+                            <section className="legal-section">
+                                <h2>1. Cancellation Policy</h2>
+                                <div className="section-content">
+                                    <p>
+                                        Cancellations will only be considered if the request is made within <strong>2 days</strong> of placing the order. However, cancellation requests may not be entertained if the orders have been communicated to such sellers / merchant(s) listed on the Platform and they have initiated the process of shipping them, or the product is out for delivery.
+                                    </p>
+                                    <p>
+                                        In such an event, you may choose to reject the product at the doorstep.
+                                    </p>
+                                    <div className="rights-note">
+                                        <strong>Note:</strong> PrintDoot does not accept cancellation requests for perishable items like flowers, eatables, etc. However, the refund / replacement can be made if the user establishes that the quality of the product delivered is not good.
+                                    </div>
+                                </div>
+                            </section>
+                        </ScrollReveal>
+
+                        {/* Damaged / Defective Items */}
+                        <ScrollReveal direction="up" delay={0.3}>
+                            <section className="legal-section">
+                                <h2>2. Damaged or Defective Items</h2>
+                                <div className="section-content">
+                                    <p>
+                                        In case of receipt of damaged or defective items, please report to our customer service team. The request would be entertained once the seller / merchant listed on the Platform, has checked and determined the same at its own end. This should be reported within <strong>2 days</strong> of receipt of products.
+                                    </p>
+                                    <p>
+                                        In case you feel that the product received is not as shown on the site or as per your expectations, you must bring it to the notice of our customer service within <strong>2 days</strong> of receiving the product. The customer service team after looking into your complaint will take an appropriate decision.
+                                    </p>
+                                    <p>
+                                        In case of complaints regarding the products that come with a warranty from the manufacturers, please refer the issue to them.
+                                    </p>
+                                </div>
+                            </section>
+                        </ScrollReveal>
+
+                        {/* Refund Processing */}
+                        <ScrollReveal direction="up" delay={0.35}>
+                            <section className="legal-section">
+                                <h2>3. Refund Processing</h2>
+                                <div className="section-content">
+                                    <p>In case of any refunds approved by PrintDoot, it will take <strong>1 day</strong> for the refund to be processed to you.</p>
+                                    <div className="refund-timeline">
+                                        {[
+                                            { step: '1', title: 'Report the Issue', description: 'Contact customer service within 2 days of receiving the product with photos if applicable.', duration: 'Day 0' },
+                                            { step: '2', title: 'Review & Verification', description: 'Our team and the seller/merchant verify the issue at their end.', duration: '1–2 business days' },
+                                            { step: '3', title: 'Approval & Refund', description: 'Once approved, refund is processed to your original payment method.', duration: '1 business day' },
+                                        ].map((item, index) => (
+                                            <ScrollReveal key={index} direction="up" delay={0.1 + index * 0.08}>
+                                                <div className="refund-timeline-step">
+                                                    <div className="refund-step-number">{item.step}</div>
+                                                    <div className="refund-step-content">
+                                                        <h4>{item.title}</h4>
+                                                        <p>{item.description}</p>
+                                                        <span className="refund-step-duration">
+                                                            <FaClock /> {item.duration}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </ScrollReveal>
+                                        ))}
+                                    </div>
+                                </div>
+                            </section>
+                        </ScrollReveal>
+
+                        {/* Return Policy */}
+                        <ScrollReveal direction="up" delay={0.4}>
+                            <section className="legal-section">
+                                <h2>4. Return Policy</h2>
+                                <div className="section-content">
+                                    <p>
+                                        We offer refund / exchange within the first <strong>1 day</strong> from the date of your purchase. If 1 day has passed since your purchase, you will not be offered a return, exchange or refund of any kind.
+                                    </p>
+
+                                    <h4 style={{ marginTop: '1.5rem', marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600, color: '#1a1a1a' }}>Eligible for Return</h4>
+                                    <ul className="purpose-list">
+                                        {[
+                                            'The purchased item should be unused and in the same condition as you received it',
+                                            'The item must have original packaging',
+                                            'Defective or damaged products are eligible for replacement',
+                                        ].map((item, index) => (
+                                            <li key={index}>
+                                                <FaCheckCircle className="list-icon" style={{ color: '#059669' }} />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <h4 style={{ marginTop: '1.5rem', marginBottom: '0.75rem', fontSize: '1.1rem', fontWeight: 600, color: '#1a1a1a' }}>Not Eligible for Return</h4>
+                                    <ul className="purpose-list">
+                                        {[
+                                            'Items purchased on sale may not be eligible for return/exchange',
+                                            'Certain category of products/items exempted from returns',
+                                            'Items returned after the return window has passed',
+                                        ].map((item, index) => (
+                                            <li key={index}>
+                                                <FaTimesCircle className="list-icon" style={{ color: '#ef4444' }} />
+                                                <span>{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <p style={{ marginTop: '1rem' }}>
+                                        For exchange / return accepted request(s) (as applicable), once your returned product / item is received and inspected by us, we will send you an email to notify you about receipt of the returned / exchanged product. If the same has been approved after the quality check at our end, your request (i.e. return/exchange) will be processed in accordance with our policies.
+                                    </p>
+                                </div>
+                            </section>
+                        </ScrollReveal>
+
+                        {/* Shipping Policy */}
+                        <ScrollReveal direction="up" delay={0.45}>
+                            <section className="legal-section">
+                                <h2>5. Shipping Policy</h2>
+                                <div className="section-content">
+                                    <p>
+                                        The orders for the user are shipped through registered domestic courier companies and/or speed post only. Orders are shipped within <strong>2 days</strong> from the date of the order and/or payment or as per the delivery date agreed at the time of order confirmation and delivering of the shipment, subject to courier company / post office norms.
+                                    </p>
+                                    <div className="sharing-list">
+                                        <div className="sharing-item">
+                                            <h4><FaTruck style={{ marginRight: '0.5rem', display: 'inline' }} />Shipping Timeline</h4>
+                                            <p>Orders are shipped within 2 days from the date of order/payment.</p>
+                                        </div>
+                                        <div className="sharing-item">
+                                            <h4>Delivery Address</h4>
+                                            <p>Delivery of all orders will be made to the address provided by the buyer at the time of purchase.</p>
+                                        </div>
+                                        <div className="sharing-item">
+                                            <h4>Confirmation</h4>
+                                            <p>Delivery of our services will be confirmed on your email ID as specified at the time of registration.</p>
                                         </div>
                                     </div>
-                                </ScrollReveal>
-                            ))}
-                        </div>
-                    </section>
-                </ScrollReveal>
+                                    <div className="rights-note" style={{ marginTop: '1.5rem' }}>
+                                        <strong>Note:</strong> Platform Owner shall not be liable for any delay in delivery by the courier company / postal authority. If there are any shipping cost(s) levied by the seller or the Platform Owner, the same is not refundable.
+                                    </div>
+                                </div>
+                            </section>
+                        </ScrollReveal>
 
-                {/* Refund Methods */}
-                <ScrollReveal direction="up" delay={0.8}>
-                    <section className="legal-section">
-                        <h2>6. Refund Methods</h2>
-                        <div className="section-content">
-                            <p>Refunds are processed to the original payment method used at checkout:</p>
-                            <ul className="nested-list">
-                                <li><strong>Credit/Debit Card:</strong> Refund credited back to the card within 5–7 business days after processing</li>
-                                <li><strong>UPI:</strong> Refund sent to the originating UPI ID within 3–5 business days</li>
-                                <li><strong>Net Banking:</strong> Refund credited to the bank account within 5–7 business days</li>
-                                <li><strong>Cash on Delivery (COD):</strong> Refund via bank transfer – you'll be asked to provide account details</li>
-                            </ul>
-                            <p style={{ marginTop: '1rem' }}>
-                                <strong>Note:</strong> Processing times may vary depending on your bank or payment provider. 
-                                PrintDoot is not responsible for delays caused by third-party payment processors.
-                            </p>
-                        </div>
-                    </section>
-                </ScrollReveal>
+                        {/* Contact */}
+                        <ScrollReveal direction="up" delay={0.5}>
+                            <section className="legal-section">
+                                <h2>6. Contact Us</h2>
+                                <div className="section-content">
+                                    <p>If you have questions about our refund and return policy, please contact us:</p>
+                                    <div className="contact-details">
+                                        <p><strong>Email:</strong> <a href="mailto:support@printdoot.com">support@printdoot.com</a></p>
+                                        <p><strong>Phone:</strong> <a href="tel:+919717222125">+91 97172-22125</a></p>
+                                        <p><strong>Address:</strong> 15 B HSIIDC SECTOR 31 FARIDABAD, Pin 121003, HARYANA</p>
+                                        <p><strong>Hours:</strong> Monday – Friday, 9:00 AM – 6:00 PM IST</p>
+                                    </div>
+                                </div>
+                            </section>
+                        </ScrollReveal>
+                    </div>
 
-                {/* Shipping Costs */}
-                <ScrollReveal direction="up" delay={0.9}>
-                    <section className="legal-section">
-                        <h2>7. Return Shipping Costs</h2>
-                        <div className="section-content">
-                            <ul className="nested-list">
-                                <li>If the return is due to our error (defective product, wrong item, misprint), we will cover the return shipping cost</li>
-                                <li>If the return is for any other reason (e.g., changed mind), return shipping costs will be deducted from your refund</li>
-                                <li>We arrange pickup for most locations. If pickup is not available in your area, we'll provide a return shipping label</li>
-                            </ul>
+                    {/* Contact CTA */}
+                    <ScrollReveal direction="up" delay={0.55}>
+                        <div className="legal-contact">
+                            <h3>Need Help with Returns?</h3>
+                            <p>Our customer service team is here to assist you.</p>
+                            <a href="/contact" className="btn-primary">Contact Us</a>
                         </div>
-                    </section>
-                </ScrollReveal>
-
-                {/* Exchanges */}
-                <ScrollReveal direction="up" delay={1.0}>
-                    <section className="legal-section">
-                        <h2>8. Exchanges</h2>
-                        <p>
-                            We currently do not offer direct exchanges. If you received the wrong item or a defective product, 
-                            please request a return and place a new order. We will prioritize the processing of your refund and 
-                            new order to minimize any delay.
-                        </p>
-                    </section>
-                </ScrollReveal>
-
-                {/* Cancellations */}
-                <ScrollReveal direction="up" delay={1.1}>
-                    <section className="legal-section">
-                        <h2>9. Order Cancellations</h2>
-                        <div className="section-content">
-                            <p>
-                                You may cancel your order within <strong>2 hours</strong> of placing it, provided it has not yet entered 
-                                production. Once an order is in the "Processing" or "Printing" stage, it cannot be cancelled.
-                            </p>
-                            <p>
-                                To cancel an order, go to My Orders → select the order → click "Cancel Order" (if available), 
-                                or contact our support team immediately.
-                            </p>
-                            <p>
-                                If your order is successfully cancelled, a full refund will be issued to your original payment method 
-                                within 5–7 business days.
-                            </p>
-                        </div>
-                    </section>
-                </ScrollReveal>
-
-                {/* Contact */}
-                <ScrollReveal direction="up" delay={1.2}>
-                    <section className="legal-section">
-                        <h2>10. Contact Us</h2>
-                        <p>If you have questions about our refund and return policy, please contact us:</p>
-                        <div className="section-content">
-                            <p><strong>Email:</strong> <a href="mailto:support@printdoot.com">support@printdoot.com</a></p>
-                            <p><strong>Phone:</strong> <a href="tel:+912522669393">+91 2522-669393</a></p>
-                            <p><strong>Hours:</strong> Monday – Saturday, 9:00 AM – 6:00 PM IST</p>
-                        </div>
-                    </section>
-                </ScrollReveal>
+                    </ScrollReveal>
+                </div>
             </div>
-        </div>
+        </DynamicLegalPage>
     );
 };
 

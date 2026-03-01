@@ -7,14 +7,39 @@ import ScrollReveal from '../../components/ScrollReveal';
 import LottieAnimation from '../../components/LottieAnimation';
 import {
     heroData,
-    heroDataSecondary
+    heroDataSecondary,
+    recentlyViewed,
+    popularProducts as staticPopularProducts
 } from '../../data/homeData';
 import catalogService from '../../services/catalogService';
 
+/* ── Trust / Value Prop Strip ── */
+function TrustStrip() {
+    const items = [
+        { icon: "🚚", text: "Free Shipping Over ₹999" },
+        { icon: "✦", text: "Premium Quality Guaranteed" },
+        { icon: "↩️", text: "Easy Returns & Refunds" },
+        { icon: "🎨", text: "1000+ Design Templates" },
+    ];
+
+    return (
+        <div className="w-full bg-gray-900 text-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="flex flex-wrap justify-center sm:justify-between items-center gap-4 sm:gap-6 py-3.5">
+                    {items.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-medium tracking-wide">
+                            <span className="text-base">{item.icon}</span>
+                            <span className="text-white/90">{item.text}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function Homepage() {
     const [categories, setCategories] = useState([]);
-    const [featuredProducts, setFeaturedProducts] = useState([]);
-    const [popularProducts, setPopularProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -22,61 +47,15 @@ function Homepage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                // Fetch Categories
+                // Fetch Categories from API
                 const categoriesData = await catalogService.getCategories();
-                // Map to carousel format
                 const mappedCategories = categoriesData.map(cat => ({
                     id: cat.id,
                     title: cat.name,
                     img: cat.image || "https://placehold.co/400x400?text=Category",
-                    href: `/categories/${cat.slug}` // Assumes routing setup
+                    href: `/categories/${cat.slug}`
                 }));
                 setCategories(mappedCategories);
-
-                // Fetch Featured Products (using as Popular)
-                const productsResult = await catalogService.getProducts({ featured: true });
-                const productsData = productsResult.products || productsResult;
-                setPopularProducts(productsData.slice(0, 12)); // Limit to 12 items
-
-                // For Recently Viewed, check localStorage first, then fallback to latest products
-                try {
-                    const recentlyViewedIds = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-                    const allResult = await catalogService.getProducts();
-                    const allProducts = allResult.products || allResult;
-                    let recentProducts = [];
-                    
-                    if (recentlyViewedIds.length > 0) {
-                        // Filter products by recently viewed IDs (preserve order from localStorage)
-                        const recentlyViewedMap = new Map();
-                        allProducts.forEach(p => {
-                            if (recentlyViewedIds.includes(p.id)) {
-                                recentlyViewedMap.set(p.id, p);
-                            }
-                        });
-                        // Sort by the order in recentlyViewedIds
-                        recentProducts = recentlyViewedIds
-                            .map(id => recentlyViewedMap.get(id))
-                            .filter(p => p !== undefined)
-                            .slice(0, 8);
-                    }
-                    
-                    // If we don't have enough recently viewed, fill with latest products
-                    if (recentProducts.length < 8) {
-                        const existingIds = new Set(recentProducts.map(p => p.id));
-                        const additionalProducts = allProducts
-                            .filter(p => !existingIds.has(p.id))
-                            .slice(0, 8 - recentProducts.length);
-                        recentProducts = [...recentProducts, ...additionalProducts];
-                    }
-                    
-                    setFeaturedProducts(recentProducts.slice(0, 8));
-                } catch (recentError) {
-                    // Fallback: just show latest products if recently viewed fails
-                    const allFallback = await catalogService.getProducts();
-                    const allFallbackProducts = allFallback.products || allFallback;
-                    setFeaturedProducts(allFallbackProducts.slice(0, 8));
-                }
-
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch homepage data", err);
@@ -98,12 +77,17 @@ function Homepage() {
 
     return (
         <div className="bg-white">
-            <ScrollReveal direction="down" delay={0.1}>
-                <SectionHero data={heroData} />
+            {/* Full-width hero slider */}
+            <ScrollReveal direction="fade" delay={0.1}>
+                <SectionHero data={heroData} variant="slider" />
             </ScrollReveal>
 
-            <ScrollReveal direction="up" delay={0.2}>
-                <div className="py-8">
+            {/* Trust strip */}
+            <TrustStrip />
+
+            {/* Categories */}
+            <ScrollReveal direction="up" delay={0.15}>
+                <div className="py-12">
                     <ProductCarousel
                         title="Explore All Categories"
                         items={categories}
@@ -112,37 +96,41 @@ function Homepage() {
                 </div>
             </ScrollReveal>
 
-            <ScrollReveal direction="up" delay={0.3}>
-                <div className="py-8">
+            {/* Recently Viewed — uses static data from homeData.js */}
+            <ScrollReveal direction="up" delay={0.15}>
+                <div className="py-12">
                     <ProductCarousel
                         title="Your Recently Viewed Items"
-                        items={featuredProducts}
+                        items={recentlyViewed}
                         type="product"
                     />
                 </div>
             </ScrollReveal>
 
-            <ScrollReveal direction="up" delay={0.4}>
-                <div className="py-8">
+            {/* Popular Products — uses static data from homeData.js */}
+            <ScrollReveal direction="up" delay={0.15}>
+                <div className="py-12">
                     <ProductCarousel
                         title="Our Most Popular Products"
-                        items={popularProducts}
+                        items={staticPopularProducts}
                         type="product"
                     />
                 </div>
             </ScrollReveal>
 
-            <ScrollReveal direction="up" delay={0.5}>
-                <SectionHero data={heroDataSecondary} className="py-0" />
+            {/* Secondary hero grid */}
+            <ScrollReveal direction="up" delay={0.15}>
+                <SectionHero data={heroDataSecondary} variant="grid" className="py-4" />
             </ScrollReveal>
 
-            <ScrollReveal direction="up" delay={0.6}>
-                <div className="py-8">
+            {/* Newsletter & About */}
+            <ScrollReveal direction="up" delay={0.15}>
+                <div className="py-12">
                     <Discount />
                 </div>
             </ScrollReveal>
         </div>
-    )
+    );
 }
 
 export default Homepage;

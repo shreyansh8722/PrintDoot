@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/v1/', include('apps.designs.urls')),
     path('api/v1/', include('apps.orders.urls')),
     path('api/v1/zakeke/', include('apps.zakeke.urls')),
+    path('api/v1/pages/', include('apps.pages.urls')),
     
     # Admin API
     path('api/v1/admin/', include('apps.users.admin_urls')),

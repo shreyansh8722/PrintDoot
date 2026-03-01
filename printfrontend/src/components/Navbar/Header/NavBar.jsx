@@ -10,56 +10,63 @@ const NavBar = () => {
   const [activeId, setActiveId] = useState(null);
   const location = useLocation();
 
-  // Fetch menu once
   useEffect(() => {
     fetchMenuData()
       .then(setMenu)
       .finally(() => setLoading(false));
   }, []);
 
-  // Close mega menu on route change
   useEffect(() => {
     setActiveId(null);
   }, [location.pathname]);
 
-  // Show skeleton while loading — reserves exact layout space
   if (loading) {
     return (
-      <nav className="max-w-[1800px] w-full relative">
+      <nav className="max-w-7xl mx-auto w-full relative border-t border-gray-100">
         <NavBarSkeleton />
       </nav>
     );
   }
 
   return (
-    <nav className="max-w-[1800px] w-full relative">
-      <ul className="max-w-[1800px] mx-auto px-6 lg:flex hidden justify-between items-center gap-6 font-semibold text-[14px]">
-        {/* Static View All Link */}
-        <li className="py-3 cursor-pointer text-center hover:text-cyan-600 transition-colors">
-          <Link to="/view-all">View All</Link>
-        </li>
-
-        {menu.map((item) => (
-          <li
-            key={item.id}
-            onMouseEnter={() => setActiveId(item.id)}
-            onMouseLeave={() => setActiveId(null)}
-            className="py-3 cursor-pointer text-center"
-          >
+    <nav className="w-full border-t border-gray-100">
+      <div className="max-w-7xl mx-auto relative">
+        <ul className="lg:flex hidden justify-center items-center px-4 font-semibold text-[14px]">
+          {/* View All */}
+          <li>
             <Link
-              to={`/categories/${item.id}`}
-              className="hover:text-cyan-600 transition-colors block"
-              onClick={() => setActiveId(null)}
+              to="/view-all"
+              className="block py-3 px-3 text-gray-700 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50/50 whitespace-nowrap"
             >
-              {item.label}
+              View All
             </Link>
-
-            {activeId === item.id && (
-              <MegaMenu sections={item.sections} />
-            )}
           </li>
-        ))}
-      </ul>
+
+          {menu.map((item) => (
+            <li
+              key={item.id}
+              onMouseEnter={() => setActiveId(item.id)}
+              onMouseLeave={() => setActiveId(null)}
+              className="static"
+            >
+              <Link
+                to={`/categories/${item.id}`}
+                className={`block py-3 px-3 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
+                  ? 'text-blue-600 border-blue-600'
+                  : 'text-gray-700 border-transparent hover:text-gray-900'
+                  }`}
+                onClick={() => setActiveId(null)}
+              >
+                {item.label}
+              </Link>
+
+              {activeId === item.id && (
+                <MegaMenu sections={item.sections} />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
     </nav>
   );
 };

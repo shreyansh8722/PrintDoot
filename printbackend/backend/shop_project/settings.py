@@ -100,6 +100,7 @@ INSTALLED_APPS = [
     'apps.designs',
     'apps.orders',
     'apps.zakeke',
+    'apps.pages',
 ]
 
 MIDDLEWARE = [

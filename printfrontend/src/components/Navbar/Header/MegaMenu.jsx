@@ -6,7 +6,7 @@ const MegaMenu = ({ sections }) => {
   const [hoveredLink, setHoveredLink] = useState(null);
 
   return (
-    <div className="absolute left-0 top-full w-full bg-white border-t shadow-md z-50 overflow-x-hidden animate-slideDown">
+    <div className="absolute left-0 top-full w-full bg-white border-t shadow-lg z-50 animate-slideDown">
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8 text-[13px]">
 
         {/* Links Grid */}
