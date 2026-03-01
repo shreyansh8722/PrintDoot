@@ -60,7 +60,7 @@ export const exploreCategories = [
 
 export const recentlyViewed = [
     {
-        id: 100,
+        id: 131,
         title: "Personalized Pen With Name, Customized Parker Classic Gold Trim Ball Pen With Name Engraved On It A Gift For Teacher, Professor, Sir And Madam On Teacher Day",
         price: "₹499.00",
         originalPrice: "₹799.00",
@@ -117,7 +117,7 @@ export const recentlyViewed = [
 
 export const popularProducts = [
     {
-        id: 100,
+        id: 131,
         title: "Personalized Pen With Name, Customized Parker Classic Gold Trim Ball Pen With Name Engraved On It A Gift For Teacher, Professor, Sir And Madam On Teacher Day",
         price: "₹499.00",
         discount: "Buy 1 at ₹499",
@@ -163,7 +163,7 @@ export const popularProducts = [
 /* ── Static Products (full detail for frontend-only items) ── */
 export const staticProducts = {
     "personalized-pen": {
-        id: 100,
+        id: 131,
         slug: "personalized-pen",
         title: "Personalized Pen With Name, Customized Parker Classic Gold Trim Ball Pen With Name Engraved On It A Gift For Teacher, Professor, Sir And Madam On Teacher Day",
         price: "₹499.00",

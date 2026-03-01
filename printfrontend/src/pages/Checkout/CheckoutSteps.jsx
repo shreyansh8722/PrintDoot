@@ -31,20 +31,18 @@ export default function CheckoutSteps({ currentStep }) {
           return (
             <div key={step.key} className="flex flex-col items-center relative z-10 flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                  isCompleted
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${isCompleted
                     ? 'bg-black text-white'
                     : isActive
-                    ? 'bg-black text-white ring-4 ring-black/10 scale-110'
-                    : 'bg-gray-200 text-gray-500'
-                }`}
+                      ? 'bg-black text-white ring-4 ring-black/10 scale-110'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
               >
                 {isCompleted ? <FaCheck className="text-xs" /> : <Icon className="text-sm" />}
               </div>
               <span
-                className={`mt-2 text-xs font-semibold transition-colors ${
-                  isActive ? 'text-black' : isCompleted ? 'text-gray-700' : 'text-gray-400'
-                }`}
+                className={`mt-2 text-xs font-semibold transition-colors ${isActive ? 'text-black' : isCompleted ? 'text-gray-700' : 'text-gray-400'
+                  }`}
               >
                 {step.label}
               </span>
@@ -61,13 +59,12 @@ export default function CheckoutSteps({ currentStep }) {
           return (
             <div key={step.key} className="flex items-center gap-2 flex-1">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                  isCompleted
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${isCompleted
                     ? 'bg-black text-white'
                     : isActive
-                    ? 'bg-black text-white'
-                    : 'bg-gray-200 text-gray-400'
-                }`}
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-400'
+                  }`}
               >
                 {isCompleted ? <FaCheck className="text-[10px]" /> : idx + 1}
               </div>
@@ -103,7 +100,7 @@ export function OrderSummarySidebar({ cartItems }) {
   const totalItems = cartItems.reduce((a, i) => a + (i.quantity || 1), 0);
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <h3 className="text-lg font-bold text-gray-900 mb-5">Order Summary</h3>
 
       {/* Items list */}

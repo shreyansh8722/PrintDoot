@@ -158,11 +158,10 @@ const CheckoutAddress = () => {
                                                                 setSelectedAddress(address.id);
                                                                 setError('');
                                                             }}
-                                                            className={`relative text-left w-full p-5 rounded-xl border-2 transition-all duration-200 ${
-                                                                isSelected
+                                                            className={`relative text-left w-full p-5 rounded-xl border-2 transition-all duration-200 ${isSelected
                                                                     ? 'border-black bg-gray-50 ring-1 ring-black/5'
                                                                     : 'border-gray-200 hover:border-gray-400'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {/* Selected indicator */}
                                                             {isSelected && (
@@ -355,28 +354,27 @@ const CheckoutAddress = () => {
                                 </>
                             )}
                         </div>
+                        {/* ── Actions inside main column ── */}
+                        <div className="flex items-center justify-between mt-6">
+                            <button
+                                onClick={() => navigate('/cart')}
+                                className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
+                            >
+                                <FaArrowLeft className="text-xs" /> Back to Cart
+                            </button>
+                            <button
+                                onClick={handleContinue}
+                                className="flex items-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10"
+                            >
+                                Continue to Shipping <FaArrowRight className="text-xs" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
                         <OrderSummarySidebar cartItems={cartItems} />
                     </div>
-                </div>
-
-                {/* ── Bottom Actions ── */}
-                <div className="flex items-center justify-between mt-8">
-                    <button
-                        onClick={() => navigate('/cart')}
-                        className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
-                    >
-                        <FaArrowLeft className="text-xs" /> Back to Cart
-                    </button>
-                    <button
-                        onClick={handleContinue}
-                        className="flex items-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10"
-                    >
-                        Continue to Shipping <FaArrowRight className="text-xs" />
-                    </button>
                 </div>
             </div>
         </div>

@@ -137,23 +137,21 @@ const CheckoutPayment = () => {
                                                 if (!isCodDisabled) setPaymentMethod(method.id);
                                             }}
                                             disabled={isCodDisabled}
-                                            className={`relative w-full text-left flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 ${
-                                                isCodDisabled
-                                                    ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
-                                                    : isSelected
+                                            className={`relative w-full text-left flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 ${isCodDisabled
+                                                ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed'
+                                                : isSelected
                                                     ? 'border-black bg-gray-50 ring-1 ring-black/5'
                                                     : 'border-gray-200 hover:border-gray-400'
-                                            }`}
+                                                }`}
                                         >
                                             {/* Icon */}
                                             <div
-                                                className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                    isCodDisabled
-                                                        ? 'bg-gray-100 text-gray-300'
-                                                        : isSelected
+                                                className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${isCodDisabled
+                                                    ? 'bg-gray-100 text-gray-300'
+                                                    : isSelected
                                                         ? 'bg-black text-white'
                                                         : 'bg-gray-100 text-gray-500'
-                                                } transition-colors`}
+                                                    } transition-colors`}
                                             >
                                                 {isCodDisabled ? <FaBan className="text-lg" /> : <Icon className="text-lg" />}
                                             </div>
@@ -204,33 +202,32 @@ const CheckoutPayment = () => {
                                 </span>
                             </div>
                         </div>
+                        {/* ── Back link inside main column ── */}
+                        <div className="mt-6">
+                            <button
+                                onClick={() =>
+                                    navigate('/checkout/shipping', {
+                                        state: { shippingAddress: shippingAddressId },
+                                    })
+                                }
+                                className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
+                            >
+                                <FaArrowLeft className="text-xs" /> Back to Shipping
+                            </button>
+                        </div>
                     </div>
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
                         <OrderSummarySidebar cartItems={cartItems} />
+                        <button
+                            onClick={handleContinue}
+                            disabled={loading}
+                            className="w-full flex items-center justify-center gap-2 mt-4 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10 disabled:opacity-50"
+                        >
+                            {loading ? 'Processing…' : 'Review Order'} <FaArrowRight className="text-xs" />
+                        </button>
                     </div>
-                </div>
-
-                {/* ── Bottom Actions ── */}
-                <div className="flex items-center justify-between mt-8">
-                    <button
-                        onClick={() =>
-                            navigate('/checkout/shipping', {
-                                state: { shippingAddress: shippingAddressId },
-                            })
-                        }
-                        className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
-                    >
-                        <FaArrowLeft className="text-xs" /> Back to Shipping
-                    </button>
-                    <button
-                        onClick={handleContinue}
-                        disabled={loading}
-                        className="flex items-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10 disabled:opacity-50"
-                    >
-                        {loading ? 'Processing…' : 'Review Order'} <FaArrowRight className="text-xs" />
-                    </button>
                 </div>
             </div>
         </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
     FaCheckCircle,
@@ -8,6 +8,7 @@ import {
     FaTruck,
     FaBoxOpen,
     FaEnvelope,
+    FaPrint,
 } from 'react-icons/fa';
 import orderService from '../../services/orderService';
 
@@ -24,6 +25,7 @@ const CheckoutSuccess = () => {
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
+    const invoiceRef = useRef(null);
 
     useEffect(() => {
         if (orderId) loadOrder();
@@ -38,6 +40,49 @@ const CheckoutSuccess = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handlePrintInvoice = () => {
+        const printContent = invoiceRef.current;
+        if (!printContent) return;
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Invoice - Order #${order?.id || ''}</title>
+                <style>
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #1a1a1a; }
+                    .inv-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid #e5e7eb; }
+                    .inv-title { font-size: 28px; font-weight: 800; }
+                    .inv-sub { font-size: 12px; color: #6b7280; margin-top: 4px; }
+                    .inv-meta { text-align: right; }
+                    .inv-meta p { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+                    .inv-meta strong { color: #1a1a1a; }
+                    .inv-section { margin-bottom: 24px; }
+                    .inv-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; margin-bottom: 8px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+                    th { text-align: left; padding: 10px 12px; background: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; font-weight: 700; }
+                    td { padding: 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+                    th:last-child, td:last-child { text-align: right; }
+                    .inv-totals { margin-top: 16px; margin-left: auto; width: 280px; }
+                    .inv-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+                    .inv-total { border-top: 2px solid #1a1a1a; padding-top: 12px; margin-top: 8px; font-size: 18px; font-weight: 800; }
+                    .inv-footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #9ca3af; }
+                </style>
+            </head>
+            <body>
+                ${printContent.innerHTML}
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
     };
 
     if (loading) {
@@ -96,9 +141,8 @@ const CheckoutSuccess = () => {
                                         Status
                                     </p>
                                     <span
-                                        className={`inline-block mt-1 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${
-                                            STATUS_COLORS[order.status?.toLowerCase()] || 'bg-gray-100 text-gray-700'
-                                        }`}
+                                        className={`inline-block mt-1 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full ${STATUS_COLORS[order.status?.toLowerCase()] || 'bg-gray-100 text-gray-700'
+                                            }`}
                                     >
                                         {order.status}
                                     </span>
@@ -194,14 +238,9 @@ const CheckoutSuccess = () => {
                                     const addr = order.shipping_address_details || order.shipping_address_detail;
                                     return (
                                         <div className="text-sm text-gray-700 leading-relaxed">
-                                            <p className="font-bold text-gray-900">
-                                                {addr.recipient_name}
-                                            </p>
+                                            <p className="font-bold text-gray-900">{addr.recipient_name}</p>
                                             <p>{addr.street}</p>
-                                            <p>
-                                                {addr.city}, {addr.state}{' '}
-                                                {addr.zip_code}
-                                            </p>
+                                            <p>{addr.city}, {addr.state} {addr.zip_code}</p>
                                             <p>{addr.country}</p>
                                         </div>
                                     );
@@ -222,6 +261,109 @@ const CheckoutSuccess = () => {
                     </div>
                 )}
 
+                {/* ── Hidden printable invoice (offscreen) ── */}
+                {order && (
+                    <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+                        <div ref={invoiceRef}>
+                            <div className="inv-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, paddingBottom: 24, borderBottom: '2px solid #e5e7eb' }}>
+                                <div>
+                                    <div style={{ fontSize: 28, fontWeight: 800 }}>INVOICE</div>
+                                    <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>PrintDoot</div>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                    <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>
+                                        <strong style={{ color: '#1a1a1a' }}>Order #</strong> {order.id}
+                                    </p>
+                                    <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>
+                                        <strong style={{ color: '#1a1a1a' }}>Date:</strong>{' '}
+                                        {new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    </p>
+                                    <p style={{ fontSize: 13, color: '#6b7280' }}>
+                                        <strong style={{ color: '#1a1a1a' }}>Status:</strong> {order.status}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {(() => {
+                                const addr = order.shipping_address_details || order.shipping_address_detail;
+                                if (!addr) return null;
+                                return (
+                                    <div style={{ marginBottom: 24 }}>
+                                        <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#6b7280', marginBottom: 8 }}>
+                                            Ship To
+                                        </div>
+                                        <p style={{ fontSize: 15, fontWeight: 700 }}>{addr.recipient_name}</p>
+                                        <p style={{ fontSize: 14, lineHeight: 1.6 }}>{addr.street}</p>
+                                        <p style={{ fontSize: 14, lineHeight: 1.6 }}>{addr.city}, {addr.state} {addr.zip_code}</p>
+                                        <p style={{ fontSize: 14, lineHeight: 1.6 }}>{addr.country}</p>
+                                    </div>
+                                );
+                            })()}
+
+                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 8 }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', background: '#f9fafb', borderBottom: '2px solid #e5e7eb', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, color: '#6b7280', fontWeight: 700 }}>Item</th>
+                                        <th style={{ textAlign: 'left', padding: '10px 12px', background: '#f9fafb', borderBottom: '2px solid #e5e7eb', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, color: '#6b7280', fontWeight: 700 }}>Qty</th>
+                                        <th style={{ textAlign: 'right', padding: '10px 12px', background: '#f9fafb', borderBottom: '2px solid #e5e7eb', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, color: '#6b7280', fontWeight: 700 }}>Price</th>
+                                        <th style={{ textAlign: 'right', padding: '10px 12px', background: '#f9fafb', borderBottom: '2px solid #e5e7eb', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5, color: '#6b7280', fontWeight: 700 }}>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {order.items?.map((item, idx) => (
+                                        <tr key={idx}>
+                                            <td style={{ padding: 12, borderBottom: '1px solid #f3f4f6', fontSize: 14 }}>
+                                                {item.product_name_snapshot || `Product #${item.product}`}
+                                            </td>
+                                            <td style={{ padding: 12, borderBottom: '1px solid #f3f4f6', fontSize: 14 }}>
+                                                {item.quantity}
+                                            </td>
+                                            <td style={{ padding: 12, borderBottom: '1px solid #f3f4f6', fontSize: 14, textAlign: 'right' }}>
+                                                ₹{parseFloat(item.unit_price).toFixed(2)}
+                                            </td>
+                                            <td style={{ padding: 12, borderBottom: '1px solid #f3f4f6', fontSize: 14, textAlign: 'right' }}>
+                                                ₹{parseFloat(item.total_price || item.unit_price * item.quantity).toFixed(2)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            <div style={{ marginTop: 16, marginLeft: 'auto', width: 280 }}>
+                                {order.subtotal != null && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 14 }}>
+                                        <span>Subtotal</span><span>₹{parseFloat(order.subtotal).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {order.tax_total != null && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 14 }}>
+                                        <span>Taxes (GST)</span><span>₹{parseFloat(order.tax_total).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                {order.shipping_total != null && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 14 }}>
+                                        <span>Shipping</span>
+                                        <span>{parseFloat(order.shipping_total) === 0 ? 'FREE' : `₹${parseFloat(order.shipping_total).toFixed(2)}`}</span>
+                                    </div>
+                                )}
+                                {order.discount_total != null && parseFloat(order.discount_total) > 0 && (
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: 14 }}>
+                                        <span>Discount</span><span>−₹{parseFloat(order.discount_total).toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #1a1a1a', paddingTop: 12, marginTop: 8, fontSize: 18, fontWeight: 800 }}>
+                                    <span>Total</span><span>₹{parseFloat(order.total_amount).toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div style={{ marginTop: 48, paddingTop: 24, borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: 12, color: '#9ca3af' }}>
+                                <p>Thank you for your order!</p>
+                                <p style={{ marginTop: 4 }}>Payment: {order.payment_method?.replace(/_/g, ' ')?.toUpperCase() || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* ── Info banner ── */}
                 <div className="mt-8 flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-5">
                     <FaEnvelope className="text-blue-500 mt-0.5 flex-shrink-0" />
@@ -233,17 +375,25 @@ const CheckoutSuccess = () => {
 
                 {/* ── Action buttons ── */}
                 <div className="flex flex-wrap items-center justify-center gap-4 mt-8 mb-4">
+                    {order && (
+                        <button
+                            onClick={handlePrintInvoice}
+                            className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10"
+                        >
+                            <FaPrint className="text-xs" /> Print Invoice
+                        </button>
+                    )}
                     {orderId && (
                         <Link
                             to={`/account/orders/${orderId}`}
-                            className="px-6 py-3 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10"
+                            className="px-6 py-3 border-2 border-gray-900 text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-900 hover:text-white transition"
                         >
                             View Order Details
                         </Link>
                     )}
                     <Link
                         to="/account/orders"
-                        className="px-6 py-3 border-2 border-gray-900 text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-900 hover:text-white transition"
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold text-sm hover:border-black hover:text-black transition"
                     >
                         My Orders
                     </Link>

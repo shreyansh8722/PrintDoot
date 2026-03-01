@@ -35,3 +35,8 @@ class OrderCreateThrottle(UserRateThrottle):
 class PaymentThrottle(UserRateThrottle):
     """Limits payment operations — prevents payment abuse."""
     scope = 'payment'
+
+
+class ShippingThrottle(AnonRateThrottle):
+    """Limits shipping rate/serviceability lookups — prevents Shipmozo API quota abuse."""
+    scope = 'shipping'

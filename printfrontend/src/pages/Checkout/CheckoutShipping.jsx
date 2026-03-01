@@ -18,7 +18,7 @@ import {
 
 const METHOD_META = {
     standard: { name: 'Standard Delivery', icon: FaTruck },
-    express:  { name: 'Express Delivery',  icon: FaBolt },
+    express: { name: 'Express Delivery', icon: FaBolt },
     priority: { name: 'Priority Delivery', icon: FaRocket },
 };
 
@@ -203,17 +203,15 @@ const CheckoutShipping = () => {
                                                 key={option.method}
                                                 type="button"
                                                 onClick={() => setSelectedShipping(option.method)}
-                                                className={`relative w-full text-left flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 ${
-                                                    isSelected
+                                                className={`relative w-full text-left flex items-start gap-4 p-5 rounded-xl border-2 transition-all duration-200 ${isSelected
                                                         ? 'border-black bg-gray-50 ring-1 ring-black/5'
                                                         : 'border-gray-200 hover:border-gray-400'
-                                                }`}
+                                                    }`}
                                             >
                                                 {/* Icon */}
                                                 <div
-                                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                        isSelected ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'
-                                                    } transition-colors`}
+                                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${isSelected ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'
+                                                        } transition-colors`}
                                                 >
                                                     <Icon className="text-lg" />
                                                 </div>
@@ -280,29 +278,28 @@ const CheckoutShipping = () => {
                                 <span>All shipments are insured and include real-time tracking updates via SMS & email.</span>
                             </div>
                         </div>
+                        {/* ── Actions inside main column ── */}
+                        <div className="flex items-center justify-between mt-6">
+                            <button
+                                onClick={() => navigate('/checkout/address', { state: { shippingAddress: shippingAddressId } })}
+                                className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
+                            >
+                                <FaArrowLeft className="text-xs" /> Back to Address
+                            </button>
+                            <button
+                                onClick={handleContinue}
+                                disabled={loadingOptions || shippingOptions.length === 0}
+                                className="flex items-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Continue to Payment <FaArrowRight className="text-xs" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
                         <OrderSummarySidebar cartItems={cartItems} />
                     </div>
-                </div>
-
-                {/* ── Bottom Actions ── */}
-                <div className="flex items-center justify-between mt-8">
-                    <button
-                        onClick={() => navigate('/checkout/address', { state: { shippingAddress: shippingAddressId } })}
-                        className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
-                    >
-                        <FaArrowLeft className="text-xs" /> Back to Address
-                    </button>
-                    <button
-                        onClick={handleContinue}
-                        disabled={loadingOptions || shippingOptions.length === 0}
-                        className="flex items-center gap-2 px-8 py-3.5 bg-black text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition shadow-lg shadow-black/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Continue to Payment <FaArrowRight className="text-xs" />
-                    </button>
                 </div>
             </div>
         </div>

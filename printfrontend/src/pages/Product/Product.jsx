@@ -210,7 +210,28 @@ export default function Product() {
         setLoading(true);
         if (!activeSlug) return;
 
-        // Check static products first
+        // Try the API first (backend database)
+        try {
+          const data = await catalogService.getProductBySlug(activeSlug);
+          if (data) {
+            setProduct(data);
+            const imgs = data.images?.length > 0 ? data.images : [data.image || "https://placehold.co/600x400?text=No+Image"];
+            setImageList(imgs);
+            setActiveImage(imgs[0]);
+            setQuantity(1);
+            try {
+              const relResult = data.subcategory
+                ? await catalogService.getProducts({ subcategory: data.subcategory })
+                : await catalogService.getProducts();
+              const related = (relResult.products || relResult).filter(p => p.id !== data.id).slice(0, 8);
+              setRelatedProducts(related);
+            } catch { setRelatedProducts([]); }
+            setLoading(false);
+            return;
+          }
+        } catch { /* API failed, try static fallback */ }
+
+        // Fall back to static products (for items not yet in DB)
         const staticProduct = staticProducts[activeSlug];
         if (staticProduct) {
           setProduct(staticProduct);
@@ -222,23 +243,6 @@ export default function Product() {
           setQuantity(1);
           setLoading(false);
           return;
-        }
-
-        // Fall back to API
-        const data = await catalogService.getProductBySlug(activeSlug);
-        if (data) {
-          setProduct(data);
-          const imgs = data.images?.length > 0 ? data.images : [data.image || "https://placehold.co/600x400?text=No+Image"];
-          setImageList(imgs);
-          setActiveImage(imgs[0]);
-          setQuantity(1);
-          try {
-            const relResult = data.subcategory
-              ? await catalogService.getProducts({ subcategory: data.subcategory })
-              : await catalogService.getProducts();
-            const related = (relResult.products || relResult).filter(p => p.id !== data.id).slice(0, 8);
-            setRelatedProducts(related);
-          } catch { setRelatedProducts([]); }
         }
       } catch (err) { console.error("Failed to load product", err); }
       finally { setLoading(false); }

@@ -299,6 +299,50 @@ class OrderSerializer(serializers.ModelSerializer):
         except Exception:
             pass  # Don't fail order creation if email fails
 
+        # Auto-push COD orders to Shipmozo immediately
+        if order.payment_method and order.payment_method.lower() == 'cod':
+            try:
+                from apps.orders import shipmozo_service
+                from .models import Shipment, ShipmentTrackingEvent
+                import logging
+                logger = logging.getLogger(__name__)
+
+                push_result = shipmozo_service.push_order(order)
+                if push_result.get('success'):
+                    shipmozo_order_id = push_result.get('shipmozo_order_id', '')
+                    logger.info(f"COD Order #{order.id} auto-pushed to Shipmozo: {shipmozo_order_id}")
+
+                    # Try auto-assigning courier
+                    awb_code = ''
+                    courier_name = ''
+                    try:
+                        assign_result = shipmozo_service.auto_assign_courier(shipmozo_order_id)
+                        if assign_result.get('success'):
+                            awb_code = assign_result.get('awb_number', '')
+                            courier_name = assign_result.get('courier_company', '')
+                    except Exception:
+                        pass
+
+                    # Create local Shipment record
+                    from django.utils import timezone as tz
+                    Shipment.objects.create(
+                        order=order,
+                        carrier=courier_name or 'Shipmozo',
+                        tracking_number=awb_code,
+                        label_url='',
+                        status='label_created',
+                        weight_kg=0.5,
+                        shiprocket_order_id=shipmozo_order_id,
+                        shiprocket_shipment_id='',
+                        awb_code=awb_code,
+                        courier_name=courier_name,
+                    )
+                else:
+                    logger.warning(f"Shipmozo push failed for COD order #{order.id}: {push_result.get('message')}")
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f"Shipmozo auto-push failed for COD order #{order.id}: {e}")
+
         return order
 
 

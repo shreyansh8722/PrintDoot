@@ -49,15 +49,21 @@ class ZakekeViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def catalog(self, request):
         """Endpoint for Zakeke to retrieve the product catalog."""
-        search = request.query_params.get('search')
+        search = request.query_params.get('search', '').strip()
         page = int(request.query_params.get('page', 1))
-        page_size = 20 # Zakeke doesn't specify size, usually 10-50 is fine.
+        page_size = 200  # Zakeke pulls all products; return large pages
 
-        products = Product.objects.filter(is_active=True)
+        products = Product.objects.filter(is_active=True).order_by('id')
         if search:
-            products = products.filter(name__icontains=search) | products.filter(id__icontains=search)
-            
+            from django.db.models import Q
+            q = Q(name__icontains=search) | Q(sku__icontains=search)
+            # Also try numeric ID search
+            if search.isdigit():
+                q |= Q(id=int(search))
+            products = products.filter(q)
+
         # Pagination
+        total = products.count()
         start = (page - 1) * page_size
         end = start + page_size
         products_page = products[start:end]

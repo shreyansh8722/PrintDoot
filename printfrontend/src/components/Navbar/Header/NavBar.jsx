@@ -3,6 +3,7 @@ import { useLocation, Link } from "react-router-dom";
 import { fetchMenuData } from "../services/menuApi.js";
 import MegaMenu from "./MegaMenu";
 import { NavBarSkeleton } from "../../Skeleton";
+import { FaChevronDown } from "react-icons/fa";
 
 const NavBar = () => {
   const [menu, setMenu] = useState([]);
@@ -47,17 +48,23 @@ const NavBar = () => {
               key={item.id}
               onMouseEnter={() => setActiveId(item.id)}
               onMouseLeave={() => setActiveId(null)}
-              className="static"
+              className="static flex items-center"
             >
+              {/* Dot separator */}
+              <span className="text-gray-300 text-[6px] select-none">●</span>
+
               <Link
                 to={`/categories/${item.id}`}
-                className={`block py-3 px-3 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
+                className={`flex items-center gap-1.5 py-3 px-3 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
                   ? 'text-blue-600 border-blue-600'
                   : 'text-gray-700 border-transparent hover:text-gray-900'
                   }`}
                 onClick={() => setActiveId(null)}
               >
                 {item.label}
+                {item.sections && item.sections.length > 0 && (
+                  <FaChevronDown className={`text-[8px] transition-transform duration-200 ${activeId === item.id ? 'rotate-180' : ''}`} />
+                )}
               </Link>
 
               {activeId === item.id && (

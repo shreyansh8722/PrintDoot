@@ -8,7 +8,7 @@ from django.http import FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.conf import settings as django_settings
-from shop_project.throttles import OrderCreateThrottle, PaymentThrottle
+from shop_project.throttles import OrderCreateThrottle, PaymentThrottle, ShippingThrottle
 from .models import (
     Order, OrderItem, Invoice, ReturnRequest, Refund,
     RazorpayTransaction, PaymentLog, Shipment, ShipmentTrackingEvent,
@@ -300,11 +300,66 @@ class VerifyPaymentView(APIView):
             except Exception as email_err:
                 logger.warning(f"Failed to send payment email after verify: {email_err}")
 
+            # Auto-push order to Shipmozo
+            shipmozo_result = {}
+            try:
+                from . import shipmozo_service
+                from .models import Shipment, ShipmentTrackingEvent # Import models here
+                order = transaction.order
+                push_result = shipmozo_service.push_order(order)
+                if push_result.get('success'):
+                    shipmozo_order_id = push_result.get('shipmozo_order_id', '')
+                    logger.info(f"Order #{order.id} auto-pushed to Shipmozo: {shipmozo_order_id}")
+
+                    # Try auto-assigning courier
+                    awb_code = ''
+                    courier_name = ''
+                    try:
+                        assign_result = shipmozo_service.auto_assign_courier(shipmozo_order_id)
+                        if assign_result.get('success'):
+                            awb_code = assign_result.get('awb_number', '')
+                            courier_name = assign_result.get('courier_company', '')
+                    except Exception as assign_err:
+                        logger.warning(f"Shipmozo auto-assign skipped for order #{order.id}: {assign_err}")
+
+                    # Create local Shipment record
+                    from django.utils import timezone as tz
+                    shipment = Shipment.objects.create(
+                        order=order,
+                        carrier=courier_name or 'Shipmozo',
+                        tracking_number=awb_code,
+                        label_url='',
+                        status='label_created',
+                        weight_kg=0.5,
+                        shiprocket_order_id=shipmozo_order_id,
+                        shiprocket_shipment_id='',
+                        awb_code=awb_code,
+                        courier_name=courier_name,
+                    )
+                    ShipmentTrackingEvent.objects.create(
+                        shipment=shipment,
+                        status='Order Placed',
+                        status_code='label_created',
+                        description=f'Order paid and pushed to Shipmozo. Courier: {courier_name or "pending assignment"}',
+                        location='',
+                        event_time=tz.now(),
+                    )
+                    shipmozo_result = {
+                        'shipmozo_order_id': shipmozo_order_id,
+                        'awb_number': awb_code,
+                        'courier': courier_name,
+                    }
+                else:
+                    logger.warning(f"Shipmozo push failed for order #{transaction.order_id}: {push_result.get('message')}")
+            except Exception as shipmozo_err:
+                logger.warning(f"Shipmozo auto-push failed for order #{transaction.order_id}: {shipmozo_err}")
+
             return Response({
                 'success': True,
                 'message': 'Payment verified successfully.',
                 'order_id': transaction.order_id,
                 'transaction': RazorpayTransactionSerializer(transaction).data,
+                'shipmozo': shipmozo_result,
             })
         else:
             return Response(
@@ -390,6 +445,7 @@ class CheckServiceabilityView(APIView):
     Returns whether the pincode is serviceable, available methods, and COD flag.
     """
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ShippingThrottle]
 
     def post(self, request):
         serializer = CheckServiceabilitySerializer(data=request.data)
@@ -414,6 +470,7 @@ class CalculateShippingView(APIView):
     Returns shipping cost breakdown for the given parameters.
     """
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ShippingThrottle]
 
     def post(self, request):
         serializer = CalculateShippingSerializer(data=request.data)
@@ -467,7 +524,7 @@ class CreateShipmentView(APIView):
     POST /tracking/create-shipment/
     Body: { "order_id": 123, "weight_kg": 0.5, "length": 20, "breadth": 15, "height": 10 }
 
-    Creates a shipment in Shiprocket for the given order.
+    Creates a shipment via Shipmozo for the given order.
     Admin/staff only.
     """
     permission_classes = [permissions.IsAdminUser]
@@ -479,28 +536,48 @@ class CreateShipmentView(APIView):
         order_id = serializer.validated_data['order_id']
         order = Order.objects.get(id=order_id)
 
-        from .shiprocket_service import create_shiprocket_order
+        from . import shipmozo_service
 
+        # Step 1: Push order to Shipmozo
         try:
-            result = create_shiprocket_order(order)
+            push_result = shipmozo_service.push_order(order)
         except Exception as e:
             return Response(
-                {'error': f'Failed to create Shiprocket shipment: {str(e)}'},
+                {'error': f'Failed to push order to Shipmozo: {str(e)}'},
                 status=status.HTTP_502_BAD_GATEWAY
             )
+
+        if not push_result.get('success'):
+            return Response(
+                {'error': push_result.get('message', 'Failed to push order to Shipmozo')},
+                status=status.HTTP_502_BAD_GATEWAY
+            )
+
+        shipmozo_order_id = push_result.get('shipmozo_order_id', '')
+
+        # Step 2: Auto-assign courier (gets AWB + courier)
+        awb_code = ''
+        courier_name = ''
+        try:
+            assign_result = shipmozo_service.auto_assign_courier(shipmozo_order_id)
+            if assign_result.get('success'):
+                awb_code = assign_result.get('awb_number', '')
+                courier_name = assign_result.get('courier_company', '')
+        except Exception as e:
+            logger.warning(f'Shipmozo auto-assign failed: {e}')
 
         # Create local Shipment record
         shipment = Shipment.objects.create(
             order=order,
-            carrier=result.get('courier_name', 'Shiprocket'),
-            tracking_number=result.get('awb_code', ''),
-            label_url=result.get('label_url', ''),
+            carrier=courier_name or 'Shipmozo',
+            tracking_number=awb_code,
+            label_url='',
             status='label_created',
             weight_kg=serializer.validated_data.get('weight_kg', 0.5),
-            shiprocket_order_id=result.get('shiprocket_order_id', ''),
-            shiprocket_shipment_id=result.get('shiprocket_shipment_id', ''),
-            awb_code=result.get('awb_code', ''),
-            courier_name=result.get('courier_name', ''),
+            shiprocket_order_id=shipmozo_order_id,  # Reusing field for Shipmozo order ID
+            shiprocket_shipment_id='',
+            awb_code=awb_code,
+            courier_name=courier_name,
         )
 
         # Create initial tracking event
@@ -509,7 +586,7 @@ class CreateShipmentView(APIView):
             shipment=shipment,
             status='Label Created',
             status_code='label_created',
-            description='Shipment order created in Shiprocket',
+            description=f'Order pushed to Shipmozo. Courier: {courier_name or "pending"}',
             location='',
             event_time=tz.now(),
         )
@@ -529,7 +606,7 @@ class TrackShipmentView(APIView):
     """
     GET /tracking/{order_id}/
     Returns tracking details for an order's shipment.
-    Also fetches latest updates from Shiprocket API.
+    Also fetches latest updates from Shipmozo API.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -547,50 +624,67 @@ class TrackShipmentView(APIView):
 
         shipment = order.shipment
 
-        # Optionally refresh from Shiprocket (if AWB is available)
+        # Optionally refresh from Shipmozo (if AWB is available)
         refresh = request.query_params.get('refresh', 'false').lower() == 'true'
         if refresh and shipment.awb_code:
             try:
-                from .shiprocket_service import track_shipment_by_awb
-                tracking_data = track_shipment_by_awb(shipment.awb_code)
+                from . import shipmozo_service
+                tracking_result = shipmozo_service.track_order(shipment.awb_code)
 
-                # Update shipment status if changed
-                if tracking_data.get('current_status'):
-                    from .shiprocket_service import STATUS_MAP
-                    mapped = STATUS_MAP.get(
-                        tracking_data['current_status'].upper(), shipment.status
-                    )
-                    if mapped != shipment.status:
-                        shipment.status = mapped
-                        shipment.save()
+                if tracking_result.get('success'):
+                    tracking_data = tracking_result.get('tracking_data', {})
 
-                # Add new tracking events
-                for activity in tracking_data.get('activities', []):
-                    event_time_str = activity.get('event_time', '')
-                    from django.utils import timezone as tz
-                    from datetime import datetime
-                    event_time = tz.now()
-                    if event_time_str:
-                        for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S'):
-                            try:
-                                event_time = datetime.strptime(event_time_str, fmt)
-                                event_time = tz.make_aware(event_time)
-                                break
-                            except (ValueError, TypeError):
-                                continue
-
-                    ShipmentTrackingEvent.objects.get_or_create(
-                        shipment=shipment,
-                        event_time=event_time,
-                        status=activity.get('status', ''),
-                        defaults={
-                            'status_code': activity.get('status_code', ''),
-                            'location': activity.get('location', ''),
-                            'description': activity.get('description', ''),
+                    # Update shipment status if changed
+                    current_status = tracking_data.get('current_status') or tracking_data.get('status', '')
+                    if current_status:
+                        STATUS_MAP = {
+                            'DELIVERED': 'delivered',
+                            'IN TRANSIT': 'in_transit',
+                            'OUT FOR DELIVERY': 'out_for_delivery',
+                            'PICKED UP': 'picked_up',
+                            'PICKUP SCHEDULED': 'pickup_scheduled',
+                            'RTO INITIATED': 'rto_initiated',
+                            'RTO DELIVERED': 'rto_delivered',
+                            'CANCELED': 'cancelled',
+                            'CANCELLED': 'cancelled',
+                            'SHIPPED': 'in_transit',
+                            'PENDING': 'label_created',
                         }
-                    )
+                        mapped = STATUS_MAP.get(current_status.upper(), shipment.status)
+                        if mapped != shipment.status:
+                            shipment.status = mapped
+                            shipment.save()
+
+                    # Add tracking events from scan history
+                    scans = tracking_data.get('scans', tracking_data.get('tracking_events', []))
+                    if isinstance(scans, list):
+                        from django.utils import timezone as tz
+                        from datetime import datetime
+                        for scan in scans:
+                            event_time = tz.now()
+                            event_time_str = scan.get('date', scan.get('event_time', ''))
+                            if event_time_str:
+                                for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%d-%m-%Y %H:%M:%S'):
+                                    try:
+                                        event_time = datetime.strptime(event_time_str, fmt)
+                                        event_time = tz.make_aware(event_time)
+                                        break
+                                    except (ValueError, TypeError):
+                                        continue
+
+                            ShipmentTrackingEvent.objects.get_or_create(
+                                shipment=shipment,
+                                event_time=event_time,
+                                status=scan.get('status', scan.get('activity', '')),
+                                defaults={
+                                    'status_code': scan.get('status_code', ''),
+                                    'location': scan.get('location', scan.get('city', '')),
+                                    'description': scan.get('description', scan.get('activity', '')),
+                                    'raw_data': scan,
+                                }
+                            )
             except Exception as e:
-                logger.warning(f"Failed to refresh tracking from Shiprocket: {e}")
+                logger.warning(f"Failed to refresh tracking from Shipmozo: {e}")
 
         serializer = ShipmentSerializer(shipment)
         return Response(serializer.data)

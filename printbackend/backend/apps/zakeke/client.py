@@ -49,7 +49,7 @@ class ZakekeClient:
             data['customercode'] = customercode
 
         try:
-            response = requests.post(self.TOKEN_URL, headers=headers, data=data)
+            response = requests.post(self.TOKEN_URL, headers=headers, data=data, timeout=10)
             response.raise_for_status()
             token_data = response.json()
             

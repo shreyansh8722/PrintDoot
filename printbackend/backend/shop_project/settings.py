@@ -276,6 +276,7 @@ REST_FRAMEWORK = {
         'contact': '5/hour',       # Contact form — 5 per hour
         'order_create': '20/hour', # Order creation — 20 per hour
         'payment': '30/hour',      # Payment operations — 30 per hour
+        'shipping': '30/minute',   # Shipping rate lookups — 30 per minute per IP
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
@@ -324,6 +325,13 @@ SHIPROCKET_EMAIL = os.getenv('SHIPROCKET_EMAIL', '')
 SHIPROCKET_PASSWORD = os.getenv('SHIPROCKET_PASSWORD', '')
 SHIPROCKET_PICKUP_LOCATION = os.getenv('SHIPROCKET_PICKUP_LOCATION', 'Primary')
 SHIPROCKET_WEBHOOK_TOKEN = os.getenv('SHIPROCKET_WEBHOOK_TOKEN', '')
+
+# --------------------------------------------------
+# Shipmozo Configuration
+# --------------------------------------------------
+SHIPMOZO_PUBLIC_KEY = os.getenv('SHIPMOZO_PUBLIC_KEY', '')
+SHIPMOZO_PRIVATE_KEY = os.getenv('SHIPMOZO_PRIVATE_KEY', '')
+STORE_PINCODE = os.getenv('STORE_PINCODE', '413512')
 
 # --------------------------------------------------
 # File Storage (S3 or Local)

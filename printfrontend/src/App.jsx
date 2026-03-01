@@ -43,6 +43,7 @@ import Cookies from './pages/Legal/Cookies';
 import RefundPolicy from './pages/Legal/RefundPolicy';
 import MyDesigns from './pages/Account/MyDesigns';
 import MyAssets from './pages/Account/MyAssets';
+import Favorites from './pages/Favorites/Favorites';
 import NotFound from './pages/NotFound/NotFound';
 
 // Components
@@ -78,6 +79,7 @@ function App() {
                     <Route path="/editor/:templateId" element={<Editor />} />
                     <Route path="/zakeke-editor/:productId" element={<ZakekeEditor />} />
                     <Route path="/cart" element={<Cart />} />
+                    <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
 
                     {/* Checkout Routes */}
                     <Route path="/checkout/address" element={<ProtectedRoute><CheckoutAddress /></ProtectedRoute>} />

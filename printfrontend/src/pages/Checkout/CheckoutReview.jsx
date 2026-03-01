@@ -355,11 +355,29 @@ const CheckoutReview = () => {
                                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition resize-none"
                             />
                         </div>
+                        {/* ── Back link inside main column ── */}
+                        <div className="mt-6">
+                            <button
+                                onClick={() =>
+                                    navigate('/checkout/payment', {
+                                        state: {
+                                            shippingAddress: addressId,
+                                            shippingMethod,
+                                            shippingCost,
+                                            shippingEta,
+                                        },
+                                    })
+                                }
+                                className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
+                            >
+                                <FaArrowLeft className="text-xs" /> Back to Payment
+                            </button>
+                        </div>
                     </div>
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h3 className="text-lg font-bold text-gray-900 mb-5">Price Details</h3>
 
                             <div className="space-y-3 text-sm">
@@ -418,25 +436,6 @@ const CheckoutReview = () => {
                             </p>
                         </div>
                     </div>
-                </div>
-
-                {/* ── Bottom Back ── */}
-                <div className="mt-8">
-                    <button
-                        onClick={() =>
-                            navigate('/checkout/payment', {
-                                state: {
-                                    shippingAddress: addressId,
-                                    shippingMethod,
-                                    shippingCost,
-                                    shippingEta,
-                                },
-                            })
-                        }
-                        className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-black transition"
-                    >
-                        <FaArrowLeft className="text-xs" /> Back to Payment
-                    </button>
                 </div>
             </div>
         </div>
