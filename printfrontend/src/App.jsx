@@ -71,13 +71,13 @@ function App() {
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/view-all" element={<Categories />} />
                     <Route path="/categories/:category" element={<Categories />} />
-                    <Route path="/categories/:category/:productSlug" element={<ProtectedRoute><Product /></ProtectedRoute>} />
-                    <Route path="/product" element={<ProtectedRoute><Product /></ProtectedRoute>} />
-                    <Route path="/product/:slug" element={<ProtectedRoute><Product /></ProtectedRoute>} />
-                    <Route path="/product/:slug/templates" element={<ProtectedRoute><TemplateSelection /></ProtectedRoute>} />
-                    <Route path="/editor/:templateId" element={<ProtectedRoute><Editor /></ProtectedRoute>} />
-                    <Route path="/zakeke-editor/:productId" element={<ProtectedRoute><ZakekeEditor /></ProtectedRoute>} />
-                    <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                    <Route path="/categories/:category/:productSlug" element={<Product />} />
+                    <Route path="/product" element={<Product />} />
+                    <Route path="/product/:slug" element={<Product />} />
+                    <Route path="/product/:slug/templates" element={<TemplateSelection />} />
+                    <Route path="/editor/:templateId" element={<Editor />} />
+                    <Route path="/zakeke-editor/:productId" element={<ZakekeEditor />} />
+                    <Route path="/cart" element={<Cart />} />
 
                     {/* Checkout Routes */}
                     <Route path="/checkout/address" element={<ProtectedRoute><CheckoutAddress /></ProtectedRoute>} />
