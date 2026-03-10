@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaStar } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaStar, FaSortAmountDown } from 'react-icons/fa';
 import Breadcrumb from './Breadcrumb/Breadcrumb';
 import CategoryHero from './Part/Part';
 import Sidebar from './Sidebar/Sidebar';
@@ -44,11 +44,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className={`flex items-center gap-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
-          currentPage <= 1
+        className={`flex items-center gap-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${currentPage <= 1
             ? 'text-gray-300 cursor-not-allowed'
             : 'text-gray-700 hover:bg-gray-100 hover:text-black'
-        }`}
+          }`}
       >
         <FaChevronLeft className="text-xs" /> Prev
       </button>
@@ -63,11 +62,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`min-w-[40px] h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${
-              currentPage === page
+            className={`min-w-[40px] h-10 flex items-center justify-center text-sm font-medium rounded-lg transition-all ${currentPage === page
                 ? 'bg-black text-white shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100 hover:text-black'
-            }`}
+              }`}
           >
             {page}
           </button>
@@ -78,11 +76,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className={`flex items-center gap-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
-          currentPage >= totalPages
+        className={`flex items-center gap-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${currentPage >= totalPages
             ? 'text-gray-300 cursor-not-allowed'
             : 'text-gray-700 hover:bg-gray-100 hover:text-black'
-        }`}
+          }`}
       >
         Next <FaChevronRight className="text-xs" />
       </button>
@@ -114,6 +111,9 @@ function Categories() {
     categorySlug: categorySlug || '',
   });
 
+  // Sorting
+  const [ordering, setOrdering] = useState('-created_at');
+
   // Sync URL category param with filter state
   useEffect(() => {
     setFilters((prev) => ({ ...prev, categorySlug: categorySlug || '' }));
@@ -133,6 +133,7 @@ function Categories() {
       const query = {
         page: currentPage,
         page_size: PRODUCTS_PER_PAGE,
+        ordering: ordering,
       };
 
       // Apply category filter
@@ -173,7 +174,7 @@ function Categories() {
     } finally {
       setLoading(false);
     }
-  }, [categorySlug, currentPage, filters]);
+  }, [categorySlug, currentPage, filters, ordering]);
 
   useEffect(() => {
     fetchData();
@@ -191,6 +192,12 @@ function Categories() {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  /* ── Handle sort change ── */
+  const handleSortChange = (newOrdering) => {
+    setOrdering(newOrdering);
+    setCurrentPage(1);
   };
 
   /* ── Derive displayed categories & sections ── */
@@ -280,6 +287,23 @@ function Categories() {
                   </span>
                 )}
               </p>
+
+              {/* Sort dropdown */}
+              <div className="flex items-center gap-2">
+                <FaSortAmountDown className="text-gray-400 text-xs" />
+                <select
+                  value={ordering}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className="text-sm border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black cursor-pointer"
+                >
+                  <option value="-created_at">Newest First</option>
+                  <option value="base_price">Price: Low → High</option>
+                  <option value="-base_price">Price: High → Low</option>
+                  <option value="-avg_rating">Top Rated</option>
+                  <option value="name">Name: A → Z</option>
+                  <option value="-name">Name: Z → A</option>
+                </select>
+              </div>
             </div>
 
             {/* Active filter pills */}
@@ -347,7 +371,7 @@ function Categories() {
                   </p>
                   <button
                     onClick={() => handleFilterChange({ minPrice: '', maxPrice: '', minRating: '', categorySlug: '' })}
-                    className="mt-4 text-blue-600 hover:underline text-sm font-medium"
+                    className="mt-4 text-brand hover:underline text-sm font-medium"
                   >
                     Clear all filters
                   </button>

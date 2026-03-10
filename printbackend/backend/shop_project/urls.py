@@ -33,6 +33,7 @@ urlpatterns = [
     # Admin API
     path('api/v1/admin/', include('apps.users.admin_urls')),
     path('api/v1/admin/', include('apps.catalog.admin_urls')),
+    path('api/v1/admin/', include('apps.pages.admin_urls')),
 ]
 
 if settings.DEBUG:

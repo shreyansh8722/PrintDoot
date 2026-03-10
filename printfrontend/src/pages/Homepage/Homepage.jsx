@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Homepage.css';
 import SectionHero from '../../components/Shared/SectionHero';
 import ProductCarousel from '../../components/Shared/ProductCarousel';
+import OffersMarquee from '../../components/Shared/OffersMarquee';
 import Discount from './Discount/Discount';
 import ScrollReveal from '../../components/ScrollReveal';
 import LottieAnimation from '../../components/LottieAnimation';
@@ -12,31 +13,6 @@ import {
     popularProducts as staticPopularProducts
 } from '../../data/homeData';
 import catalogService from '../../services/catalogService';
-
-/* ── Trust / Value Prop Strip ── */
-function TrustStrip() {
-    const items = [
-        { icon: "🚚", text: "Free Shipping Over ₹999" },
-        { icon: "✦", text: "Premium Quality Guaranteed" },
-        { icon: "↩️", text: "Easy Returns & Refunds" },
-        { icon: "🎨", text: "1000+ Design Templates" },
-    ];
-
-    return (
-        <div className="w-full bg-gray-900 text-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                <div className="flex flex-wrap justify-center sm:justify-between items-center gap-4 sm:gap-6 py-3.5">
-                    {items.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-2 text-xs sm:text-sm font-medium tracking-wide">
-                            <span className="text-base">{item.icon}</span>
-                            <span className="text-white/90">{item.text}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 function Homepage() {
     const [categories, setCategories] = useState([]);
@@ -69,25 +45,25 @@ function Homepage() {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen bg-white">
+            <div className="flex justify-center items-center h-screen bg-surface">
                 <LottieAnimation type="loading" width={100} height={100} />
             </div>
         );
     }
 
     return (
-        <div className="bg-white">
+        <div className="bg-surface">
             {/* Full-width hero slider */}
             <ScrollReveal direction="fade" delay={0.1}>
                 <SectionHero data={heroData} variant="slider" />
             </ScrollReveal>
 
-            {/* Trust strip */}
-            <TrustStrip />
+            {/* Offers marquee */}
+            <OffersMarquee />
 
             {/* Categories */}
             <ScrollReveal direction="up" delay={0.15}>
-                <div className="py-12">
+                <div className="py-6 sm:py-12">
                     <ProductCarousel
                         title="Explore All Categories"
                         items={categories}
@@ -98,7 +74,7 @@ function Homepage() {
 
             {/* Recently Viewed — uses static data from homeData.js */}
             <ScrollReveal direction="up" delay={0.15}>
-                <div className="py-12">
+                <div className="py-6 sm:py-12">
                     <ProductCarousel
                         title="Your Recently Viewed Items"
                         items={recentlyViewed}
@@ -109,7 +85,7 @@ function Homepage() {
 
             {/* Popular Products — uses static data from homeData.js */}
             <ScrollReveal direction="up" delay={0.15}>
-                <div className="py-12">
+                <div className="py-6 sm:py-12">
                     <ProductCarousel
                         title="Our Most Popular Products"
                         items={staticPopularProducts}
@@ -125,7 +101,7 @@ function Homepage() {
 
             {/* Newsletter & About */}
             <ScrollReveal direction="up" delay={0.15}>
-                <div className="py-12">
+                <div className="py-6 sm:py-12">
                     <Discount />
                 </div>
             </ScrollReveal>

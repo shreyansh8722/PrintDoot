@@ -1,7 +1,17 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-from .models import LegalPage
-from .serializers import LegalPageListSerializer, LegalPageDetailSerializer
+from .models import LegalPage, Offer
+from .serializers import LegalPageListSerializer, LegalPageDetailSerializer, OfferSerializer
+
+
+class OfferListView(generics.ListAPIView):
+    """Public endpoint — list all active offers for the marquee."""
+    serializer_class = OfferSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        return Offer.objects.filter(is_active=True)
 
 
 class LegalPageListView(generics.ListAPIView):

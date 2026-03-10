@@ -1,5 +1,12 @@
 from rest_framework import serializers
-from .models import LegalPage
+from .models import LegalPage, Offer
+
+
+class OfferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Offer
+        fields = ['id', 'text', 'icon', 'link', 'is_active', 'display_order', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class LegalPageListSerializer(serializers.ModelSerializer):

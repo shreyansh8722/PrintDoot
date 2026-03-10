@@ -15,7 +15,7 @@ const MegaMenu = ({ sections }) => {
             <div key={i}>
               <h4 className="font-semibold mb-3 text-gray-900">
                 {section.path ? (
-                  <Link to={section.path} className="hover:text-blue-600 transition-colors">
+                  <Link to={section.path} className="hover:text-brand transition-colors">
                     {section.title}
                   </Link>
                 ) : (
@@ -32,7 +32,7 @@ const MegaMenu = ({ sections }) => {
                     >
                       {link.name}
                       {link.isNew && (
-                        <span className="ml-2 text-[10px] bg-cyan-600 text-white px-2 py-0.5 rounded-full font-bold">
+                        <span className="ml-2 text-[10px] bg-brand text-white px-2 py-0.5 rounded-full font-bold">
                           NEW
                         </span>
                       )}
@@ -68,7 +68,7 @@ const MegaMenu = ({ sections }) => {
               {hoveredLink.description || "Customize this product to your needs."}
             </p>
 
-            <Link to={hoveredLink.path} className="mt-auto block text-center text-xs font-semibold text-blue-600 hover:text-blue-800 pt-3">
+            <Link to={hoveredLink.path} className="mt-auto block text-center text-xs font-semibold text-brand hover:text-brand-500 pt-3">
               Customize Now &rarr;
             </Link>
           </div>

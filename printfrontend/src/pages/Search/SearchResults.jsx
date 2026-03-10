@@ -128,7 +128,7 @@ const SearchResults = () => {
     useEffect(() => {
         catalogService.getCategories()
             .then(data => setCategories(data))
-            .catch(() => {});
+            .catch(() => { });
     }, []);
 
     /* ─ Sync searchInput when URL query changes ─ */
@@ -141,11 +141,11 @@ const SearchResults = () => {
         }
     }, [query]);
 
-    /* ─ Fetch products whenever query / page changes ─ */
+    /* ─ Fetch products whenever query / page / filters change ─ */
     useEffect(() => {
         fetchProducts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query, currentPage]);
+    }, [query, currentPage, selectedCategory, priceMin, priceMax, sortBy]);
 
     const fetchProducts = async () => {
         try {
@@ -154,6 +154,21 @@ const SearchResults = () => {
 
             const params = { page: currentPage, page_size: 20 };
             if (query) params.search = query;
+            if (selectedCategory) params.category = selectedCategory;
+            if (priceMin !== '') params.min_price = priceMin;
+            if (priceMax !== '') params.max_price = priceMax;
+
+            // Map frontend sort values to backend ordering params
+            const orderingMap = {
+                price_asc: 'base_price',
+                price_desc: '-base_price',
+                name_asc: 'name',
+                newest: '-created_at',
+                relevance: '-created_at',
+            };
+            if (sortBy && orderingMap[sortBy]) {
+                params.ordering = orderingMap[sortBy];
+            }
 
             const result = await catalogService.getProducts(params);
             setProducts(result.products || []);
@@ -195,49 +210,11 @@ const SearchResults = () => {
         setInStockOnly(false);
     };
 
-    /* ─ Client-side filter + sort ─ */
-    const filteredProducts = useMemo(() => {
-        let list = [...products];
-
-        if (selectedCategory) {
-            list = list.filter(p =>
-                p.subcategory_name?.toLowerCase() === selectedCategory.toLowerCase() ||
-                (p.category?.slug || '') === selectedCategory ||
-                String(p.category?.id || '') === selectedCategory
-            );
-        }
-
-        if (priceMin !== '') {
-            const min = parseFloat(priceMin);
-            if (!isNaN(min)) list = list.filter(p => Number(p.finalPrice || p.base_price || 0) >= min);
-        }
-        if (priceMax !== '') {
-            const max = parseFloat(priceMax);
-            if (!isNaN(max)) list = list.filter(p => Number(p.finalPrice || p.base_price || 0) <= max);
-        }
-
-        if (inStockOnly) {
-            list = list.filter(p => p.in_stock !== false);
-        }
-
-        switch (sortBy) {
-            case 'price_asc':
-                list.sort((a, b) => Number(a.finalPrice || a.base_price || 0) - Number(b.finalPrice || b.base_price || 0));
-                break;
-            case 'price_desc':
-                list.sort((a, b) => Number(b.finalPrice || b.base_price || 0) - Number(a.finalPrice || a.base_price || 0));
-                break;
-            case 'name_asc':
-                list.sort((a, b) => (a.title || a.name || '').localeCompare(b.title || b.name || ''));
-                break;
-            case 'newest':
-                list.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-                break;
-            default:
-                break;
-        }
-        return list;
-    }, [products, selectedCategory, priceMin, priceMax, inStockOnly, sortBy]);
+    /* ─ Apply in-stock filter client-side (not available as backend param) ─ */
+    const displayProducts = useMemo(() => {
+        if (!inStockOnly) return products;
+        return products.filter(p => p.in_stock !== false);
+    }, [products, inStockOnly]);
 
     const activeFilterCount = [selectedCategory, priceMin, priceMax, inStockOnly].filter(Boolean).length;
     const totalPages = pagination?.totalPages || 1;
@@ -283,7 +260,7 @@ const SearchResults = () => {
                         </h1>
                         {!loading && (
                             <p className="text-sm text-gray-500 mt-1">
-                                {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
+                                {displayProducts.length} {displayProducts.length === 1 ? 'product' : 'products'} found
                                 {pagination?.count ? ` (of ${pagination.count} total)` : ''}
                             </p>
                         )}
@@ -293,11 +270,10 @@ const SearchResults = () => {
                         {/* Filter toggle */}
                         <button
                             onClick={() => setFiltersOpen(!filtersOpen)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
-                                filtersOpen
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${filtersOpen
                                     ? 'bg-cyan-50 border-cyan-500 text-cyan-700'
                                     : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                            }`}
+                                }`}
                         >
                             <HiAdjustmentsHorizontal className="text-lg" />
                             Filters
@@ -413,16 +389,16 @@ const SearchResults = () => {
                 {loading && <ResultsSkeleton count={8} />}
 
                 {/* ─── Products Grid ─── */}
-                {!loading && filteredProducts.length > 0 && (
+                {!loading && displayProducts.length > 0 && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                        {filteredProducts.map((product, idx) => (
+                        {displayProducts.map((product, idx) => (
                             <ProductCard key={product.id} product={product} eager={idx < 8} />
                         ))}
                     </div>
                 )}
 
                 {/* ─── Empty State ─── */}
-                {!loading && filteredProducts.length === 0 && (
+                {!loading && displayProducts.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                         <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                             <IoSearchOutline className="text-4xl text-gray-300" />
@@ -496,11 +472,10 @@ const SearchResults = () => {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${
-                                        currentPage === page
+                                    className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all ${currentPage === page
                                             ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30'
                                             : 'bg-white border border-gray-200 text-gray-600 hover:border-cyan-500 hover:text-cyan-600'
-                                    }`}
+                                        }`}
                                 >
                                     {page}
                                 </button>

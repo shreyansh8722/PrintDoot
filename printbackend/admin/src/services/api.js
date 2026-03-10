@@ -89,6 +89,15 @@ export const adminCatalogAPI = {
     getProductStats: () => api.get('/admin/products/stats/'),
 };
 
+// Admin Offers Management APIs
+export const adminOffersAPI = {
+    getOffers: (params) => api.get('/admin/offers/', { params }),
+    getOffer: (id) => api.get(`/admin/offers/${id}/`),
+    createOffer: (data) => api.post('/admin/offers/', data),
+    updateOffer: (id, data) => api.patch(`/admin/offers/${id}/`, data),
+    deleteOffer: (id) => api.delete(`/admin/offers/${id}/`),
+};
+
 // Auth API
 export const authAPI = {
     login: (username, password) => {

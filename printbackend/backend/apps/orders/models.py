@@ -7,6 +7,14 @@ from apps.users.models import Address
 import uuid
 
 
+def _get_private_storage():
+    """Return PrivateMediaStorage if S3 is enabled, else default local storage."""
+    if getattr(settings, 'USE_S3', False):
+        from shop_project.storage_backends import PrivateMediaStorage
+        return PrivateMediaStorage()
+    return None  # Django uses default storage
+
+
 class Order(models.Model):
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
@@ -141,7 +149,7 @@ class OrderItem(models.Model):
                                         help_text="Zakeke design ID for this item")
 
     # Production Output
-    print_file_url = models.FileField(upload_to='print_files/', null=True, blank=True)
+    print_file_url = models.FileField(upload_to='print_files/', storage=_get_private_storage(), null=True, blank=True)
     high_res_design_url = models.URLField(blank=True,
                                           help_text="High-resolution print file URL from Zakeke")
     render_status = models.CharField(max_length=20, default='pending') # pending, processing, completed, failed
@@ -242,7 +250,7 @@ class Invoice(models.Model):
     """Auto-generated invoice for an order once it moves to Paid."""
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='invoice')
     invoice_number = models.CharField(max_length=50, unique=True)
-    pdf_file = models.FileField(upload_to='invoices/', null=True, blank=True)
+    pdf_file = models.FileField(upload_to='invoices/', storage=_get_private_storage(), null=True, blank=True)
     issued_at = models.DateTimeField(auto_now_add=True)
     due_date = models.DateField(null=True, blank=True)
 

@@ -139,14 +139,14 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
             {/* Section header */}
             <div className="px-10 mb-8 flex items-end justify-between">
                 <div>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-dark tracking-tight font-serif">
                         {title}
                     </h2>
-                    <div className="mt-2.5 h-1 w-14 bg-blue-600 rounded-full" />
+                    <div className="mt-2.5 h-1 w-14 bg-brand rounded-full" />
                 </div>
                 <Link
                     to="/view-all"
-                    className="text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-1 pb-1"
+                    className="text-sm font-semibold text-gray-500 hover:text-brand transition-colors flex items-center gap-1 pb-1"
                 >
                     View All
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -159,7 +159,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                 {/* Navigation Buttons */}
                 <button
                     onClick={() => scroll("left")}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white border border-gray-200 text-gray-700 w-10 h-10 rounded-full shadow-lg z-20 opacity-0 group-hover/carousel:opacity-100 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 flex items-center justify-center"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white border border-gray-200 text-gray-700 w-10 h-10 rounded-full shadow-lg z-20 opacity-0 group-hover/carousel:opacity-100 hover:bg-brand hover:text-white hover:border-brand transition-all duration-300 flex items-center justify-center"
                     aria-label="Scroll left"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                     className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-44 sm:w-52"
                                 >
                                     {/* Circular image with hover ring */}
-                                    <div className="relative overflow-hidden w-36 h-36 sm:w-40 sm:h-40 rounded-full border-[3px] border-gray-100 group-hover:border-blue-500 shadow-sm group-hover:shadow-lg transition-all duration-400">
+                                    <div className="relative overflow-hidden w-36 h-36 sm:w-40 sm:h-40 rounded-full border-[3px] border-gray-100 group-hover:border-brand shadow-sm group-hover:shadow-lg transition-all duration-400">
                                         {isInternal ? (
                                             <Link to={href} className="block h-full">
                                                 <CarouselImage
@@ -215,7 +215,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                     <div className="mt-3">
                                         {isInternal ? (
                                             <Link to={href} className="block">
-                                                <h3 className="font-semibold text-sm text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                                <h3 className="font-semibold text-sm text-gray-800 group-hover:text-brand transition-colors line-clamp-2">
                                                     {item.title}
                                                 </h3>
                                             </Link>
@@ -239,7 +239,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                 className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-52 sm:w-56"
                             >
                                 {/* Card wrapper */}
-                                <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 group-hover:border-gray-200 shadow-sm group-hover:shadow-md transition-all duration-300">
+                                <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 group-hover:border-brand-200 shadow-sm group-hover:shadow-md transition-all duration-300">
                                     {/* Image */}
                                     <div className="relative overflow-hidden aspect-square bg-gray-50">
                                         {isInternal ? (
@@ -267,7 +267,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                         )}
 
                                         {item.discount && (
-                                            <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] uppercase font-bold px-2.5 py-1 rounded-full z-10">
+                                            <div className="absolute top-3 left-3 bg-brand text-white text-[10px] uppercase font-bold px-2.5 py-1 rounded-full z-10">
                                                 {item.discount}
                                             </div>
                                         )}
@@ -291,7 +291,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                         {(item.productId || item.id) && (
                                             <button
                                                 onClick={(e) => handleQuickAddToCart(e, item)}
-                                                className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:bg-gray-800 hover:scale-110"
+                                                className="absolute bottom-3 right-3 z-10 w-9 h-9 rounded-full bg-brand text-white flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:bg-brand-500 hover:scale-110"
                                                 aria-label="Add to cart"
                                             >
                                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -307,7 +307,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                     <div className="p-4">
                                         {isInternal ? (
                                             <Link to={href} className="block">
-                                                <h3 className="font-medium text-sm text-gray-800 line-clamp-2 h-10 group-hover:text-gray-600 transition-colors">
+                                                <h3 className="font-medium text-sm text-gray-800 line-clamp-2 h-10 group-hover:text-brand-600 transition-colors">
                                                     {item.title}
                                                 </h3>
                                             </Link>
@@ -318,7 +318,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                         )}
 
                                         <div className="mt-2 flex items-baseline gap-2">
-                                            <span className="text-lg font-bold text-gray-900">{item.price}</span>
+                                            <span className="text-lg font-bold text-dark">{item.price}</span>
                                             {item.originalPrice && (
                                                 <span className="text-xs text-gray-400 line-through">{item.originalPrice}</span>
                                             )}
@@ -332,7 +332,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
 
                 <button
                     onClick={() => scroll("right")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white border border-gray-200 text-gray-700 w-10 h-10 rounded-full shadow-lg z-20 opacity-0 group-hover/carousel:opacity-100 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 flex items-center justify-center"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white border border-gray-200 text-gray-700 w-10 h-10 rounded-full shadow-lg z-20 opacity-0 group-hover/carousel:opacity-100 hover:bg-brand hover:text-white hover:border-brand transition-all duration-300 flex items-center justify-center"
                     aria-label="Scroll right"
                 >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -341,13 +341,13 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                 </button>
 
                 {/* Edge Fade — right side only */}
-                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
+                <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-surface to-transparent pointer-events-none z-10" />
             </div>
 
             {/* Toast notification */}
             {toast && (
                 <div
-                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-gray-900 text-white text-sm font-semibold shadow-xl flex items-center gap-2"
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-dark text-white text-sm font-semibold shadow-xl flex items-center gap-2"
                     style={{ animation: 'slideUp 0.3s ease-out forwards' }}
                 >
                     {toast.type === 'added' && <span>✓</span>}

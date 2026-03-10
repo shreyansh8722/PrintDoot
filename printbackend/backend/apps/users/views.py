@@ -85,17 +85,24 @@ class UserViewSet(mixins.RetrieveModelMixin,
         Upload or update user avatar.
         Endpoint: POST /api/v1/users/upload-avatar/
         Content-Type: multipart/form-data
+        Works with both local storage and S3.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # Delete old avatar file if it exists
+        # Delete old avatar file if it exists (works for both local & S3)
         if request.user.avatar:
             request.user.avatar.delete(save=False)
         request.user.avatar = serializer.validated_data['avatar']
         request.user.save(update_fields=['avatar'])
+
+        # Build the correct URL regardless of storage backend
+        avatar_url = request.user.avatar.url
+        if not avatar_url.startswith('http'):
+            avatar_url = request.build_absolute_uri(avatar_url)
+
         return Response({
             'message': 'Avatar uploaded successfully.',
-            'avatar': request.build_absolute_uri(request.user.avatar.url),
+            'avatar': avatar_url,
         })
 
     @action(

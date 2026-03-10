@@ -9,6 +9,7 @@ import Reviews from './pages/Reviews';
 import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
+import Offers from './pages/Offers';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="customers" element={<Customers />} />
             <Route path="products" element={<Products />} />
             <Route path="categories" element={<Categories />} />
+            <Route path="offers" element={<Offers />} />
             <Route path="*" element={<div className="p-4">Page Not Found</div>} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />

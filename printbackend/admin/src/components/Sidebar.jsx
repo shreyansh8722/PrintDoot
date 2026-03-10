@@ -12,7 +12,8 @@ import {
   Box,
   Truck,
   BarChart2,
-  Settings
+  Settings,
+  Gift
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -22,6 +23,7 @@ const Sidebar = () => {
     { icon: Users, label: 'Customers', path: '/customers' },
     { icon: Tag, label: 'Categories', path: '/categories' },
     { icon: Package, label: 'Products', path: '/products' },
+    { icon: Gift, label: 'Offers', path: '/offers' },
     { icon: ShoppingCart, label: 'Orders', path: '/orders' },
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: Megaphone, label: 'Marketing', path: '/marketing' },

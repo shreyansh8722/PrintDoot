@@ -41,7 +41,7 @@ const DynamicLegalPage = ({ pageType, title, icon, children }) => {
             <div className="legal-page">
                 <div className="legal-container">
                     <div className="flex justify-center items-center py-32">
-                        <div className="w-8 h-8 border-3 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-3 border-gray-200 border-t-brand rounded-full animate-spin" />
                     </div>
                 </div>
             </div>

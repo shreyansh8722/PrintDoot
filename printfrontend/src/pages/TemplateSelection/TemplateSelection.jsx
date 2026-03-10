@@ -89,7 +89,7 @@ export default function TemplateSelection() {
                                         <p className="text-gray-500 text-sm line-clamp-2 mb-4">{template.description || "Fully customizable layout."}</p>
                                     </div>
                                     <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                                        <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">{template.surface} Side</span>
+                                        <span className="text-xs font-bold text-brand uppercase tracking-widest">{template.surface} Side</span>
                                         <Link to={`/editor/${template.id}`} className="text-black font-bold text-sm hover:underline">Customize →</Link>
                                     </div>
                                 </div>

@@ -160,7 +160,7 @@ const CheckoutShipping = () => {
                                         {addressData.city}, {addressData.zip_code}
                                     </span>
                                     {zone && (
-                                        <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                                        <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-brand px-2 py-0.5 rounded-full">
                                             {zone}
                                         </span>
                                     )}

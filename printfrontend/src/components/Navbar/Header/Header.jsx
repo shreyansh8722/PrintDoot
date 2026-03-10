@@ -5,6 +5,7 @@ import SignInDropdown from "./SignInDropdown";
 import AccountDropdown from "./AccountDropdown";
 import NavBar from "./NavBar";
 import userService from "../../../services/userService";
+import logoImg from "../../../assets/logo.jpeg";
 import { BsFolder2 } from "react-icons/bs";
 import { FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingBag } from "react-icons/md";
@@ -88,20 +89,20 @@ export default function Header() {
   return (
     <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
       {/* Top utility bar */}
-      <div className="hidden lg:block bg-gray-900 text-gray-300">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-8 text-[11px] font-medium">
+      <div className="hidden lg:block bg-dark text-gray-300">
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-9 text-[11px] font-medium">
           <div className="flex items-center gap-6">
-            <a href="tel:02522669393" className="hover:text-white transition-colors flex items-center gap-1.5">
+            <a href="tel:02522669393" className="hover:text-brand transition-colors flex items-center gap-1.5">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
               02522-669393
             </a>
-            <Link to="/help" className="hover:text-white transition-colors">Help & Support</Link>
+            <Link to="/help" className="hover:text-brand transition-colors">Help & Support</Link>
           </div>
           <div className="flex items-center gap-6">
-            <Link to="/track-order" className="hover:text-white transition-colors">Track Order</Link>
-            <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
+            <Link to="/track-order" className="hover:text-brand transition-colors">Track Order</Link>
+            <Link to="/faq" className="hover:text-brand transition-colors">FAQ</Link>
           </div>
         </div>
       </div>
@@ -110,9 +111,12 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-[68px] flex items-center justify-between gap-6">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-          <div className="w-8 h-8 bg-blue-600 rotate-45 rounded-sm group-hover:rotate-[405deg] transition-transform duration-500" />
-          <span className="text-2xl sm:text-[28px] font-extrabold text-gray-900 tracking-tight">printdoot</span>
+        <Link to="/" className="flex items-center flex-shrink-0 group">
+          <img
+            src={logoImg}
+            alt="PrintDoot.com"
+            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+          />
         </Link>
 
         {/* Search — Desktop */}
@@ -139,7 +143,7 @@ export default function Header() {
                   onChange={(e) => setDesktopQuery(e.target.value)}
                   placeholder="Search products, categories…"
                   onFocus={() => setShowSearch(true)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand transition-all placeholder:text-gray-400"
                 />
               </div>
             </form>
@@ -165,7 +169,7 @@ export default function Header() {
               onMouseLeave={() => setShowAccount(false)}
             >
               <Link to="/account" className="flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900 group">
-                <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-7 h-7 bg-brand rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {username.charAt(0).toUpperCase()}
                 </div>
                 <span className="text-[10px] font-medium tracking-wide">{username.length > 8 ? username.slice(0, 8) + '…' : username}</span>
@@ -196,17 +200,17 @@ export default function Header() {
         <div className="flex lg:hidden items-center gap-1">
           <button
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all"
+            className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Search"
           >
             <IoSearchOutline className="text-xl" />
           </button>
-          <Link to="/cart" className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all relative">
+          <Link to="/cart" className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all relative">
             <MdOutlineShoppingBag className="text-xl" />
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2.5 text-gray-600 hover:text-black rounded-lg hover:bg-gray-50 transition-all"
+            className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Open menu"
           >
             <HiOutlineMenuAlt3 className="text-2xl" />
@@ -236,7 +240,7 @@ export default function Header() {
               name="mobile-search"
               placeholder="Search products…"
               autoFocus
-              className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              className="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-11 pr-5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/20 focus:border-brand"
             />
           </form>
         </div>
@@ -257,7 +261,7 @@ export default function Header() {
       >
         {/* Close header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <span className="font-bold text-lg text-gray-900">Menu</span>
+          <span className="font-bold text-lg text-dark">Menu</span>
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -268,15 +272,15 @@ export default function Header() {
         </div>
 
         {/* User greeting */}
-        <div className="px-5 py-4 bg-gradient-to-br from-gray-50 to-blue-50/40 border-b border-gray-100">
+        <div className="px-5 py-4 bg-gradient-to-br from-brand-50/60 to-gray-50 border-b border-gray-100">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
+              <div className="w-11 h-11 bg-brand rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
                 {username.charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Hi, {username}</p>
-                <Link to="/account" onClick={() => setMobileMenuOpen(false)} className="text-xs text-blue-600 hover:underline font-medium">View Account</Link>
+                <p className="font-semibold text-dark">Hi, {username}</p>
+                <Link to="/account" onClick={() => setMobileMenuOpen(false)} className="text-xs text-brand hover:underline font-medium">View Account</Link>
               </div>
             </div>
           ) : (
@@ -289,7 +293,7 @@ export default function Header() {
                 <LuUserRound className="text-xl text-gray-500" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Sign in</p>
+                <p className="font-semibold text-dark">Sign in</p>
                 <p className="text-xs text-gray-400">Access your account</p>
               </div>
             </Link>
@@ -333,7 +337,7 @@ export default function Header() {
 /* ── Helper: Desktop nav icon button ── */
 function NavIconLink({ to, icon, label }) {
   return (
-    <Link to={to} className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-gray-900">
+    <Link to={to} className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark">
       {icon}
       <span className="text-[11px] font-semibold tracking-wide">{label}</span>
     </Link>
@@ -346,7 +350,7 @@ function MobileNavLink({ to, icon, label, onClose }) {
     <Link
       to={to}
       onClick={onClose}
-      className="flex items-center gap-3 px-5 py-3.5 text-gray-700 hover:bg-gray-50 hover:text-black transition-colors text-sm font-medium"
+      className="flex items-center gap-3 px-5 py-3.5 text-gray-700 hover:bg-brand-50/40 hover:text-dark transition-colors text-sm font-medium"
     >
       {icon && <span className="w-5 text-gray-400">{icon}</span>}
       {!icon && <span className="w-5" />}

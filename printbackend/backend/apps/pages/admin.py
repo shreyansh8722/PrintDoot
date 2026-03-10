@@ -1,5 +1,15 @@
 from django.contrib import admin
-from .models import LegalPage
+from .models import LegalPage, Offer
+
+
+@admin.register(Offer)
+class OfferAdmin(admin.ModelAdmin):
+    list_display = ['text', 'icon', 'is_active', 'display_order', 'updated_at']
+    list_filter = ['is_active']
+    search_fields = ['text']
+    list_editable = ['is_active', 'display_order']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['display_order', '-created_at']
 
 
 @admin.register(LegalPage)

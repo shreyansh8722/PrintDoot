@@ -336,47 +336,42 @@ STORE_PINCODE = os.getenv('STORE_PINCODE', '413512')
 # --------------------------------------------------
 # File Storage (S3 or Local)
 # --------------------------------------------------
-# Set USE_S3=True in .env to enable S3 storage for media files (avatars, etc.)
+# Set USE_S3=True in .env to enable S3 storage for ALL media files
+# (avatars, category images, design assets, invoices, print files, etc.)
 USE_S3 = os.getenv('USE_S3', 'False') == 'True'
 
 if USE_S3:
-    # AWS S3 Configuration
+    # ── AWS S3 Core Configuration ──
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
     AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'ap-south-1')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
     AWS_S3_FILE_OVERWRITE = False
-    AWS_DEFAULT_ACL = None
+    AWS_DEFAULT_ACL = None      # ACLs disabled — bucket policy controls access
 
-    # Signed URLs for secure private media access
-    AWS_QUERYSTRING_AUTH = True
-    AWS_QUERYSTRING_EXPIRE = int(os.getenv('AWS_QUERYSTRING_EXPIRE', '3600'))  # 1 hour default
+    # Public media — no signed URLs (faster, cacheable)
+    AWS_QUERYSTRING_AUTH = False
 
-    # S3 object parameters (cache control, etc.)
+    # Cache headers for S3 objects (1 year — files are hashed)
     AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
+        'CacheControl': 'max-age=31536000, public',
     }
 
-    # Use S3 for media files
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-
-    # ── Storage backends for different use cases ──
-    # Public media (product images, thumbnails) — unsigned URLs
+    # ── Django STORAGES dict (Django 4.2+) ──
+    # Default storage = public media (avatars, categories, designs, etc.)
+    # Uses our custom MediaStorage with 'media/' prefix
     STORAGES = {
         "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": {
-                "bucket_name": AWS_STORAGE_BUCKET_NAME,
-                "querystring_auth": True,
-                "default_acl": None,
-            },
+            "BACKEND": "shop_project.storage_backends.MediaStorage",
         },
         "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
+
+    # Media URL points to S3
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 # --------------------------------------------------
 # Security Logging

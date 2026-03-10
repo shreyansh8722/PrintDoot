@@ -111,7 +111,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
         {item.designId && (
           <Link
             to={`/zakeke-editor/${item.slug}?designId=${item.designId}`}
-            className="inline-flex items-center gap-1 mt-2 text-sm text-blue-600 hover:underline"
+            className="inline-flex items-center gap-1 mt-2 text-sm text-brand hover:underline"
           >
             <FaEdit className="text-xs" /> Edit Design
           </Link>

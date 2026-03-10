@@ -37,7 +37,7 @@ const NavBar = () => {
           <li>
             <Link
               to="/view-all"
-              className="block py-3 px-3 text-gray-700 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50/50 whitespace-nowrap"
+              className="block py-3 px-3 text-gray-700 hover:text-brand transition-colors rounded-lg hover:bg-brand-50/50 whitespace-nowrap"
             >
               View All
             </Link>
@@ -51,13 +51,13 @@ const NavBar = () => {
               className="static flex items-center"
             >
               {/* Dot separator */}
-              <span className="text-gray-300 text-[6px] select-none">●</span>
+              <span className="text-brand-200 text-[6px] select-none">●</span>
 
               <Link
                 to={`/categories/${item.id}`}
                 className={`flex items-center gap-1.5 py-3 px-3 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
-                  ? 'text-blue-600 border-blue-600'
-                  : 'text-gray-700 border-transparent hover:text-gray-900'
+                  ? 'text-brand border-brand'
+                  : 'text-gray-700 border-transparent hover:text-dark'
                   }`}
                 onClick={() => setActiveId(null)}
               >

@@ -78,6 +78,7 @@ class AddressSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     role = RoleSerializer(read_only=True)
     addresses = AddressSerializer(many=True, read_only=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -88,6 +89,18 @@ class UserSerializer(serializers.ModelSerializer):
             'is_verified', 'date_joined', 'last_login'
         ]
         read_only_fields = ['id', 'username', 'email', 'role', 'is_verified', 'date_joined', 'last_login']
+
+    def get_avatar(self, obj):
+        """Return absolute URL for avatar — works with both local storage and S3."""
+        if not obj.avatar:
+            return None
+        url = obj.avatar.url
+        if url.startswith('http'):
+            return url  # Already absolute (S3)
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(url)
+        return url
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

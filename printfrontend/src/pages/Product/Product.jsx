@@ -85,7 +85,7 @@ function ReviewForm({ productId, onReviewSubmitted }) {
   if (!isLoggedIn) {
     return (
       <div className="bg-white rounded-2xl p-8 border border-gray-100 text-center">
-        <p className="text-gray-500"><Link to="/login" className="text-blue-600 font-semibold hover:underline">Sign in</Link> to write a review.</p>
+        <p className="text-gray-500"><Link to="/login" className="text-brand font-semibold hover:underline">Sign in</Link> to write a review.</p>
       </div>
     );
   }
@@ -94,7 +94,7 @@ function ReviewForm({ productId, onReviewSubmitted }) {
       <div className="bg-emerald-50 rounded-2xl p-8 border border-emerald-200 text-center">
         <FaCheckCircle className="text-emerald-500 text-3xl mx-auto mb-3" />
         <p className="text-emerald-700 font-semibold text-lg">Thank you for your review!</p>
-        <button onClick={() => setSuccess(false)} className="mt-4 text-sm text-blue-600 hover:underline">Write another</button>
+        <button onClick={() => setSuccess(false)} className="mt-4 text-sm text-brand hover:underline">Write another</button>
       </div>
     );
   }
@@ -272,7 +272,7 @@ export default function Product() {
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl">🔍</div>
         <p className="text-xl font-semibold text-gray-700">Product not found</p>
-        <Link to="/view-all" className="text-blue-600 hover:underline font-medium">← Browse all products</Link>
+        <Link to="/view-all" className="text-brand hover:underline font-medium">← Browse all products</Link>
       </div>
     );
   }
@@ -324,13 +324,13 @@ export default function Product() {
       {/* ═══════════ BREADCRUMB ═══════════ */}
       <div className="bg-gray-50/80 border-b border-gray-100">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3.5 flex items-center gap-2 text-sm text-gray-500 flex-wrap">
-          <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <Link to="/" className="hover:text-brand transition-colors">Home</Link>
           <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-          <Link to="/view-all" className="hover:text-blue-600 transition-colors">Products</Link>
+          <Link to="/view-all" className="hover:text-brand transition-colors">Products</Link>
           {product.subcategory_name && (
             <>
               <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-              <Link to="/view-all" className="hover:text-blue-600 transition-colors">{product.subcategory_name}</Link>
+              <Link to="/view-all" className="hover:text-brand transition-colors">{product.subcategory_name}</Link>
             </>
           )}
           <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -399,7 +399,7 @@ export default function Product() {
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
                 {imageList.map((img, idx) => (
                   <button key={idx} onClick={() => setActiveImage(img)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? "border-blue-600 ring-2 ring-blue-600/20 shadow-md" : "border-gray-200 hover:border-gray-400"
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 overflow-hidden transition-all ${activeImage === img ? "border-brand ring-2 ring-brand/20 shadow-md" : "border-gray-200 hover:border-gray-400"
                       }`}>
                     <SkeletonImage src={img} alt="" className="w-full h-full object-cover" containerClassName="w-full h-full" loading="eager" />
                   </button>
@@ -412,7 +412,7 @@ export default function Product() {
           <div className="flex flex-col">
             {/* Category badge */}
             {product.subcategory_name && (
-              <span className="inline-block w-fit text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-3 bg-blue-50 px-3 py-1 rounded-full">{product.subcategory_name}</span>
+              <span className="inline-block w-fit text-[11px] font-bold text-brand uppercase tracking-widest mb-3 bg-brand-50 px-3 py-1 rounded-full">{product.subcategory_name}</span>
             )}
 
             {/* Title */}
@@ -424,7 +424,7 @@ export default function Product() {
             <div className="flex items-center gap-3 mb-6">
               <StarRating value={avgRating} size="text-lg" />
               <span className="text-sm font-bold text-gray-700">{avgRating.toFixed(1)}</span>
-              <a href="#reviews-section" className="text-sm text-blue-600 hover:underline">
+              <a href="#reviews-section" className="text-sm text-brand hover:underline">
                 {reviewCount > 0 ? `${reviewCount} review${reviewCount > 1 ? "s" : ""}` : "Be the first to review"}
               </a>
             </div>
@@ -459,7 +459,7 @@ export default function Product() {
                     <div className="flex flex-wrap gap-2">
                       {(attr.values || []).map((val, vIdx) => (
                         <button key={vIdx}
-                          className="px-4 py-2 text-sm border-2 border-gray-200 rounded-xl hover:border-blue-600 hover:bg-blue-50 focus:border-blue-600 focus:bg-blue-50 transition-all text-gray-700 font-medium">
+                          className="px-4 py-2 text-sm border-2 border-gray-200 rounded-xl hover:border-brand hover:bg-brand-50 focus:border-brand focus:bg-brand-50 transition-all text-gray-700 font-medium">
                           {val.display_value || val.value}
                         </button>
                       ))}
@@ -479,12 +479,12 @@ export default function Product() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {product.zakeke_product_id ? (
                   <Link to={`/zakeke-editor/${product.slug}`}
-                    className="flex-1 bg-blue-600 text-white text-base font-bold py-4 px-8 rounded-2xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20 text-center">
+                    className="flex-1 bg-brand text-white text-base font-bold py-4 px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-lg shadow-brand/20 text-center">
                     ✏️ Personalize Design
                   </Link>
                 ) : (
                   <Link to={`/product/${product.slug}/templates`}
-                    className="flex-1 bg-blue-600 text-white text-base font-bold py-4 px-8 rounded-2xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20 text-center">
+                    className="flex-1 bg-brand text-white text-base font-bold py-4 px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-lg shadow-brand/20 text-center">
                     🎨 Browse Designs
                   </Link>
                 )}
@@ -498,7 +498,7 @@ export default function Product() {
             {/* Trust Badges */}
             <div className="grid grid-cols-2 gap-3 mt-8 pt-6 border-t border-gray-100">
               {[
-                { icon: <FaShippingFast />, label: "Free Shipping", sub: "Over ₹999", color: "text-blue-500 bg-blue-50" },
+                { icon: <FaShippingFast />, label: "Free Shipping", sub: "Over ₹999", color: "text-blue-500 bg-brand-50" },
                 { icon: <FaShieldAlt />, label: "Quality Assured", sub: "100% Satisfaction", color: "text-emerald-500 bg-emerald-50" },
                 { icon: <FaUndo />, label: "Easy Returns", sub: "7-Day Policy", color: "text-amber-500 bg-amber-50" },
                 { icon: <FaPhoneAlt />, label: "Support", sub: "24/7 Help", color: "text-purple-500 bg-purple-50" },
@@ -525,7 +525,7 @@ export default function Product() {
             <div className="space-y-4">
               {product.aboutItems.map((item, idx) => (
                 <div key={idx} className="flex gap-4 items-start">
-                  <div className="mt-1.5 w-2 h-2 rounded-full bg-blue-500 flex-shrink-0" />
+                  <div className="mt-1.5 w-2 h-2 rounded-full bg-brand-500 flex-shrink-0" />
                   <p className="text-gray-600 leading-relaxed text-[15px]">{item}</p>
                 </div>
               ))}
@@ -682,7 +682,7 @@ export default function Product() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 font-medium">{rev.user_name || "Customer"}</span>
                     <button onClick={() => handleMarkHelpful(rev.id)}
-                      className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-blue-600 transition-colors">
+                      className="inline-flex items-center gap-1 text-xs text-gray-400 hover:text-brand transition-colors">
                       <FaThumbsUp /> {rev.helpful_count > 0 ? `${rev.helpful_count} helpful` : "Helpful?"}
                     </button>
                   </div>
@@ -727,7 +727,7 @@ export default function Product() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         containerClassName="w-full h-full" loading="lazy" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 text-sm mb-1">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-brand transition-colors line-clamp-2 text-sm mb-1">
                       {rel.title}
                     </h3>
                     <span className="text-sm font-bold text-gray-900">{rel.price}</span>

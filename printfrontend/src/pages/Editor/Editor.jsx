@@ -55,7 +55,7 @@ export default function Editor() {
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium">Save Draft</button>
-                    <button className="bg-blue-600 hover:bg-blue-500 px-6 py-2 rounded-lg text-sm font-bold">Review & Buy</button>
+                    <button className="bg-brand hover:bg-blue-500 px-6 py-2 rounded-lg text-sm font-bold">Review & Buy</button>
                 </div>
             </div>
 
