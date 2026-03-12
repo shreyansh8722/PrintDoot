@@ -103,7 +103,7 @@ export default function Header() {
           <img
             src={logoImg}
             alt="PrintDoot.com"
-            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-10 sm:h-12 lg:h-[50px] w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </Link>
 
