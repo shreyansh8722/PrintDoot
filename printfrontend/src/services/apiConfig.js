@@ -42,7 +42,12 @@ apiHook.interceptors.response.use(
                 // Handle unauthorized access — clear auth data
                 localStorage.removeItem('authCredentials');
                 localStorage.removeItem('username');
-                if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+                // Only redirect to login for protected pages (account, checkout)
+                // Let guests browse products, categories, cart, homepage freely
+                const path = window.location.pathname;
+                const protectedPrefixes = ['/account', '/checkout'];
+                const isProtectedPage = protectedPrefixes.some(prefix => path.startsWith(prefix));
+                if (isProtectedPage) {
                     window.location.href = '/login';
                 }
             }

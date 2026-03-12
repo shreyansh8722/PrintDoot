@@ -3,6 +3,7 @@ import { useShop } from '../../context/ShopContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaTrash, FaEdit, FaPaintBrush, FaTruck, FaShieldAlt, FaTag } from 'react-icons/fa';
 import zakekeService from '../../services/zakekeService';
+import userService from '../../services/userService';
 
 /* ───── Constants ───── */
 const GST_RATE = 0.18; // 18% GST
@@ -268,10 +269,16 @@ const Cart = () => {
 
               {/* Checkout CTA */}
               <button
-                onClick={() => navigate('/checkout/address')}
+                onClick={() => {
+                  if (userService.isAuthenticated()) {
+                    navigate('/checkout/address');
+                  } else {
+                    navigate('/login', { state: { from: { pathname: '/checkout/address' } } });
+                  }
+                }}
                 className="w-full bg-black text-white text-base font-bold py-4 rounded-full hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg"
               >
-                Proceed to Checkout
+                {userService.isAuthenticated() ? 'Proceed to Checkout' : 'Sign in to Checkout'}
               </button>
 
               <Link
