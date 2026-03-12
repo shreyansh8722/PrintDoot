@@ -31,7 +31,7 @@ export default function TemplateSelection() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
             </div>
         );
@@ -42,7 +42,7 @@ export default function TemplateSelection() {
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen pb-20">
+        <div className="bg-white min-h-screen pb-20">
             {/* Header Section */}
             <div className="bg-white border-b border-gray-200 py-12">
                 <div className="max-w-7xl mx-auto px-4 text-center">

@@ -25,6 +25,7 @@ import CheckoutPayment from './pages/Checkout/CheckoutPayment';
 import CheckoutReview from './pages/Checkout/CheckoutReview';
 import CheckoutSuccess from './pages/Checkout/CheckoutSuccess';
 import CheckoutFailed from './pages/Checkout/CheckoutFailed';
+import InstamojoCallback from './pages/Checkout/InstamojoCallback';
 import AccountDashboard from './pages/Account/AccountDashboard';
 import Profile from './pages/Account/Profile';
 import Addresses from './pages/Account/Addresses';
@@ -88,6 +89,7 @@ function App() {
                     <Route path="/checkout/review" element={<ProtectedRoute><CheckoutReview /></ProtectedRoute>} />
                     <Route path="/checkout/success/:orderId" element={<CheckoutSuccess />} />
                     <Route path="/checkout/failed" element={<CheckoutFailed />} />
+                    <Route path="/checkout/instamojo-callback" element={<ProtectedRoute><InstamojoCallback /></ProtectedRoute>} />
 
                     {/* Account Routes */}
                     <Route path="/account" element={<ProtectedRoute><AccountDashboard /></ProtectedRoute>} />

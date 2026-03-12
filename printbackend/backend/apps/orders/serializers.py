@@ -4,7 +4,7 @@ from .models import (
     Order, OrderItem, PrintJob, Shipment, ShipmentTrackingEvent,
     OrderStatusHistory,
     Invoice, ReturnRequest, Refund,
-    RazorpayTransaction, PaymentLog,
+    InstamojoTransaction, PaymentLog,
     ShippingZone, ShippingRate, PincodeServiceability,
 )
 from apps.users.serializers import AddressSerializer
@@ -356,8 +356,8 @@ class OrderStatusTransitionSerializer(serializers.Serializer):
 # MODULE 4: PAYMENT SERIALIZERS
 # =============================================================================
 
-class CreateRazorpayOrderSerializer(serializers.Serializer):
-    """Input for creating a Razorpay order from an existing Order."""
+class CreateInstamojoPaymentSerializer(serializers.Serializer):
+    """Input for creating an Instamojo payment from an existing Order."""
     order_id = serializers.IntegerField()
 
     def validate_order_id(self, value):
@@ -372,23 +372,21 @@ class CreateRazorpayOrderSerializer(serializers.Serializer):
 
 
 class VerifyPaymentSerializer(serializers.Serializer):
-    """Input for verifying a Razorpay payment after checkout."""
-    razorpay_order_id = serializers.CharField(max_length=100)
-    razorpay_payment_id = serializers.CharField(max_length=100)
-    razorpay_signature = serializers.CharField(max_length=255)
+    """Input for verifying an Instamojo payment after redirect."""
+    payment_request_id = serializers.CharField(max_length=100)
+    payment_id = serializers.CharField(max_length=100)
 
 
-class RazorpayTransactionSerializer(serializers.ModelSerializer):
-    amount_rupees = serializers.ReadOnlyField()
-
+class InstamojoTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RazorpayTransaction
+        model = InstamojoTransaction
         fields = [
-            'id', 'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature',
-            'amount_paisa', 'amount_rupees', 'currency', 'status', 'method',
-            'bank', 'wallet', 'vpa', 'email', 'contact',
-            'error_code', 'error_description', 'error_reason',
-            'amount_refunded_paisa',
+            'id', 'instamojo_payment_request_id', 'instamojo_payment_id',
+            'amount', 'currency', 'status', 'method',
+            'purpose', 'longurl',
+            'email', 'contact',
+            'error_code', 'error_description',
+            'amount_refunded',
             'created_at', 'updated_at',
         ]
         read_only_fields = fields
@@ -398,7 +396,7 @@ class PaymentLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentLog
         fields = [
-            'id', 'order', 'event_type', 'razorpay_order_id', 'razorpay_payment_id',
+            'id', 'order', 'event_type', 'instamojo_payment_request_id', 'instamojo_payment_id',
             'is_success', 'error_message', 'created_at',
         ]
         read_only_fields = fields

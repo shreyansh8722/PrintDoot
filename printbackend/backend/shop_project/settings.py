@@ -294,11 +294,14 @@ REST_FRAMEWORK = {
 }
 
 # --------------------------------------------------
-# Razorpay Configuration
+# Instamojo Configuration
 # --------------------------------------------------
-RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', '')
-RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', '')
-RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', '')
+# SECURITY: Never hardcode credentials. Set these in your .env file.
+INSTAMOJO_API_KEY = os.getenv('INSTAMOJO_API_KEY', '')
+INSTAMOJO_AUTH_TOKEN = os.getenv('INSTAMOJO_AUTH_TOKEN', '')
+INSTAMOJO_PRIVATE_SALT = os.getenv('INSTAMOJO_PRIVATE_SALT', '')
+# Set to 'https://www.instamojo.com' for production, 'https://test.instamojo.com' for sandbox
+INSTAMOJO_BASE_URL = os.getenv('INSTAMOJO_BASE_URL', 'https://www.instamojo.com')
 
 # --------------------------------------------------
 # Frontend URL (for email links)

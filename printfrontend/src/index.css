@@ -60,9 +60,9 @@ html {
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     color: #1a2332;
-    background-color: #faf9f7;
+    background-color: #ffffff;
 }
 
 /* ── Better selection color ── */

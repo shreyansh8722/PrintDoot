@@ -3,7 +3,7 @@ from .models import (
     Order, OrderItem, PrintJob, Shipment, ShipmentTrackingEvent,
     OrderStatusHistory, Invoice,
     ReturnRequest, Refund,
-    RazorpayTransaction, PaymentLog,
+    InstamojoTransaction, PaymentLog,
     ShippingZone, ShippingRate, PincodeServiceability,
 )
 
@@ -132,7 +132,7 @@ class PaymentLogInline(admin.TabularInline):
     model = PaymentLog
     extra = 0
     readonly_fields = (
-        'event_type', 'razorpay_order_id', 'razorpay_payment_id',
+        'event_type', 'instamojo_payment_request_id', 'instamojo_payment_id',
         'is_success', 'error_message', 'ip_address', 'created_at',
     )
     fields = readonly_fields
@@ -143,35 +143,35 @@ class PaymentLogInline(admin.TabularInline):
         return False
 
 
-@admin.register(RazorpayTransaction)
-class RazorpayTransactionAdmin(admin.ModelAdmin):
+@admin.register(InstamojoTransaction)
+class InstamojoTransactionAdmin(admin.ModelAdmin):
     list_display = (
-        'razorpay_order_id', 'order', 'user', 'amount_rupees_display',
+        'instamojo_payment_request_id', 'order', 'user', 'amount_display',
         'status', 'method', 'created_at',
     )
     list_filter = ('status', 'method', 'currency', 'created_at')
-    search_fields = ('razorpay_order_id', 'razorpay_payment_id', 'order__id', 'user__email')
+    search_fields = ('instamojo_payment_request_id', 'instamojo_payment_id', 'order__id', 'user__email')
     readonly_fields = (
-        'order', 'user', 'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature',
-        'amount_paisa', 'currency', 'status', 'method', 'bank', 'wallet', 'vpa',
-        'email', 'contact', 'error_code', 'error_description', 'error_reason',
-        'amount_refunded_paisa', 'raw_response', 'created_at', 'updated_at',
+        'order', 'user', 'instamojo_payment_request_id', 'instamojo_payment_id',
+        'amount', 'currency', 'status', 'method', 'purpose', 'longurl',
+        'email', 'contact', 'error_code', 'error_description',
+        'amount_refunded', 'raw_response', 'created_at', 'updated_at',
     )
     inlines = [PaymentLogInline]
 
-    def amount_rupees_display(self, obj):
-        return f"₹{obj.amount_paisa / 100:.2f}"
-    amount_rupees_display.short_description = 'Amount (₹)'
+    def amount_display(self, obj):
+        return f"₹{obj.amount}"
+    amount_display.short_description = 'Amount (₹)'
 
 
 @admin.register(PaymentLog)
 class PaymentLogAdmin(admin.ModelAdmin):
-    list_display = ('id', 'order', 'event_type', 'is_success', 'razorpay_order_id', 'created_at')
+    list_display = ('id', 'order', 'event_type', 'is_success', 'instamojo_payment_request_id', 'created_at')
     list_filter = ('event_type', 'is_success', 'created_at')
-    search_fields = ('razorpay_order_id', 'razorpay_payment_id', 'order__id')
+    search_fields = ('instamojo_payment_request_id', 'instamojo_payment_id', 'order__id')
     readonly_fields = (
-        'order', 'razorpay_transaction', 'user', 'event_type',
-        'razorpay_order_id', 'razorpay_payment_id',
+        'order', 'instamojo_transaction', 'user', 'event_type',
+        'instamojo_payment_request_id', 'instamojo_payment_id',
         'request_payload', 'response_payload',
         'is_success', 'error_message', 'ip_address', 'user_agent', 'created_at',
     )

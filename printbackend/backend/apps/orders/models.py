@@ -361,60 +361,56 @@ class Refund(models.Model):
 
 
 # =============================================================================
-# MODULE 4: PAYMENTS — Razorpay Integration & Transaction Logs
+# MODULE 4: PAYMENTS — Instamojo Integration & Transaction Logs
 # =============================================================================
 
-class RazorpayTransaction(models.Model):
+class InstamojoTransaction(models.Model):
     """
-    Tracks a Razorpay payment lifecycle:
-    1. Order created (razorpay_order_id populated)
-    2. Payment attempted by user
-    3. Signature verified -> payment_id + signature stored
+    Tracks an Instamojo payment lifecycle:
+    1. Payment request created (instamojo_payment_request_id populated)
+    2. User redirected to Instamojo for payment
+    3. Payment completed -> payment_id stored
     4. Webhook confirms final status
     """
     STATUS_CHOICES = (
-        ('created', 'Created'),        # Razorpay order created, awaiting payment
-        ('authorized', 'Authorized'),  # Payment authorized but not captured
+        ('created', 'Created'),        # Payment request created, awaiting payment
         ('captured', 'Captured'),      # Payment captured successfully
         ('failed', 'Failed'),          # Payment failed
         ('refunded', 'Refunded'),      # Payment refunded (partial or full)
     )
 
     order = models.OneToOneField(
-        Order, on_delete=models.CASCADE, related_name='razorpay_transaction'
+        Order, on_delete=models.CASCADE, related_name='instamojo_transaction'
     )
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='razorpay_transactions'
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='instamojo_transactions'
     )
 
-    # Razorpay identifiers
-    razorpay_order_id = models.CharField(max_length=100, unique=True, db_index=True)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True, db_index=True)
-    razorpay_signature = models.CharField(max_length=255, blank=True)
+    # Instamojo identifiers
+    instamojo_payment_request_id = models.CharField(max_length=100, unique=True, db_index=True)
+    instamojo_payment_id = models.CharField(max_length=100, blank=True, db_index=True)
 
-    # Amount in paisa (Razorpay uses smallest currency unit)
-    amount_paisa = models.PositiveBigIntegerField(help_text="Amount in paisa (₹1 = 100 paisa)")
+    # Amount in rupees
+    amount = models.DecimalField(max_digits=12, decimal_places=2, help_text="Amount in ₹")
     currency = models.CharField(max_length=3, default='INR')
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='created')
 
-    # Metadata from Razorpay
+    # Instamojo details
+    purpose = models.CharField(max_length=255, blank=True)
+    longurl = models.URLField(blank=True, help_text="Instamojo payment URL")
     method = models.CharField(max_length=30, blank=True, help_text="card, upi, netbanking, wallet, etc.")
-    bank = models.CharField(max_length=100, blank=True)
-    wallet = models.CharField(max_length=50, blank=True)
-    vpa = models.CharField(max_length=100, blank=True, help_text="UPI VPA e.g. user@upi")
     email = models.EmailField(blank=True)
     contact = models.CharField(max_length=20, blank=True)
 
     # Error tracking
     error_code = models.CharField(max_length=100, blank=True)
     error_description = models.TextField(blank=True)
-    error_reason = models.CharField(max_length=100, blank=True)
 
     # Refund tracking
-    amount_refunded_paisa = models.PositiveBigIntegerField(default=0)
+    amount_refunded = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    # Razorpay raw payload (for debugging)
+    # Instamojo raw payload (for debugging)
     raw_response = models.JSONField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -424,11 +420,7 @@ class RazorpayTransaction(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"Razorpay {self.razorpay_order_id} — ₹{self.amount_paisa / 100:.2f} ({self.status})"
-
-    @property
-    def amount_rupees(self):
-        return self.amount_paisa / 100
+        return f"Instamojo {self.instamojo_payment_request_id} — ₹{self.amount} ({self.status})"
 
 
 class PaymentLog(models.Model):
@@ -437,12 +429,12 @@ class PaymentLog(models.Model):
     Stores success/failure logs, webhook events, retries, etc.
     """
     EVENT_TYPES = (
-        ('order_created', 'Razorpay Order Created'),
+        ('order_created', 'Payment Request Created'),
         ('payment_initiated', 'Payment Initiated'),
         ('payment_success', 'Payment Success'),
         ('payment_failed', 'Payment Failed'),
-        ('signature_verified', 'Signature Verified'),
-        ('signature_failed', 'Signature Verification Failed'),
+        ('signature_verified', 'Payment Verified'),
+        ('signature_failed', 'Payment Verification Failed'),
         ('webhook_received', 'Webhook Received'),
         ('webhook_payment_captured', 'Webhook: Payment Captured'),
         ('webhook_payment_failed', 'Webhook: Payment Failed'),
@@ -454,8 +446,8 @@ class PaymentLog(models.Model):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name='payment_logs', null=True, blank=True
     )
-    razorpay_transaction = models.ForeignKey(
-        RazorpayTransaction, on_delete=models.SET_NULL,
+    instamojo_transaction = models.ForeignKey(
+        InstamojoTransaction, on_delete=models.SET_NULL,
         null=True, blank=True, related_name='logs'
     )
     user = models.ForeignKey(
@@ -464,12 +456,12 @@ class PaymentLog(models.Model):
     )
 
     event_type = models.CharField(max_length=30, choices=EVENT_TYPES, db_index=True)
-    razorpay_order_id = models.CharField(max_length=100, blank=True)
-    razorpay_payment_id = models.CharField(max_length=100, blank=True)
+    instamojo_payment_request_id = models.CharField(max_length=100, blank=True)
+    instamojo_payment_id = models.CharField(max_length=100, blank=True)
 
     # Payload
-    request_payload = models.JSONField(null=True, blank=True, help_text="Data sent to Razorpay")
-    response_payload = models.JSONField(null=True, blank=True, help_text="Data received from Razorpay")
+    request_payload = models.JSONField(null=True, blank=True, help_text="Data sent to Instamojo")
+    response_payload = models.JSONField(null=True, blank=True, help_text="Data received from Instamojo")
 
     # Result
     is_success = models.BooleanField(default=True)

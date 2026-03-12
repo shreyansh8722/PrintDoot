@@ -87,14 +87,14 @@ const CheckoutSuccess = () => {
 
     if (loading) {
         return (
-            <div className="bg-gray-50 min-h-screen flex items-center justify-center">
+            <div className="bg-white min-h-screen flex items-center justify-center">
                 <div className="animate-spin w-10 h-10 border-4 border-gray-200 border-t-black rounded-full" />
             </div>
         );
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen py-8 sm:py-12">
+        <div className="bg-white min-h-screen py-8 sm:py-12">
             <div className="max-w-3xl mx-auto px-4">
                 {/* ── Hero banner ── */}
                 <div className="text-center mb-10">

@@ -7,8 +7,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['"DM Sans"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
       colors: {
         brand: {
@@ -24,7 +23,7 @@ export default {
           900: '#053238',
           DEFAULT: '#2bbcc4',
         },
-        surface: '#faf9f7',
+        surface: '#ffffff',
         dark: '#1a2332',
       },
     },

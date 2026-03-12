@@ -9,7 +9,7 @@ const CheckoutFailed = () => {
     const orderId = location.state?.orderId;
 
     return (
-        <div className="bg-gray-50 min-h-screen py-8 sm:py-12">
+        <div className="bg-white min-h-screen py-8 sm:py-12">
             <div className="max-w-xl mx-auto px-4">
                 {/* ── Hero banner ── */}
                 <div className="text-center mb-10">

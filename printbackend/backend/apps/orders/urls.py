@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     OrderViewSet, ReturnRequestViewSet, RefundViewSet,
-    CreateRazorpayOrderView, VerifyPaymentView, RazorpayWebhookView, TransactionLogsView,
+    CreateInstamojoPaymentView, VerifyPaymentView, InstamojoWebhookView, TransactionLogsView,
     CheckServiceabilityView, CalculateShippingView,
     CreateShipmentView, TrackShipmentView, ShiprocketWebhookView,
 )
@@ -16,9 +16,9 @@ urlpatterns = [
     path('', include(router.urls)),
 
     # ── Module 4: Payments ──
-    path('payments/create-order/', CreateRazorpayOrderView.as_view(), name='payment-create-order'),
+    path('payments/create-order/', CreateInstamojoPaymentView.as_view(), name='payment-create-order'),
     path('payments/verify/', VerifyPaymentView.as_view(), name='payment-verify'),
-    path('payments/webhook/', RazorpayWebhookView.as_view(), name='payment-webhook'),
+    path('payments/webhook/', InstamojoWebhookView.as_view(), name='payment-webhook'),
     path('payments/transactions/', TransactionLogsView.as_view(), name='payment-transactions'),
     path('payments/transactions/<int:order_id>/', TransactionLogsView.as_view(), name='payment-transaction-detail'),
 

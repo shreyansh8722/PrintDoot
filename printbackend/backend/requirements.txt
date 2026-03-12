@@ -11,6 +11,6 @@ python-dotenv
 drf-nested-routers
 requests
 reportlab
-razorpay
+requests
 boto3
 django-storages

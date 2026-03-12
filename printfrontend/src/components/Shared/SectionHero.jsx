@@ -39,7 +39,7 @@ function HeroCard({ item, isFullWidth = false }) {
                 <div className={`absolute bottom-0 left-0 top-0 flex items-center transition-all duration-700 ${imgLoaded ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                     }`}>
                     <div className="px-5 sm:px-8 md:px-12 lg:px-16 max-w-[85%] sm:max-w-lg">
-                        <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight font-serif">
+                        <h2 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight tracking-tight">
                             {item.title}
                         </h2>
 
@@ -106,7 +106,7 @@ function HeroCard({ item, isFullWidth = false }) {
             {/* Content overlay — bottom */}
             <div className={`absolute bottom-0 left-0 right-0 p-4 sm:p-6 transition-all duration-500 ${imgLoaded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
                 }`}>
-                <h2 className="text-lg sm:text-2xl font-bold text-white mb-1 leading-tight font-serif">
+                <h2 className="text-lg sm:text-2xl font-bold text-white mb-1 leading-tight">
                     {item.title}
                 </h2>
 
@@ -166,7 +166,7 @@ const SectionHero = ({ data, variant = "grid", className = "" }) => {
 
     if (variant === 'slider') {
         return (
-            <section className={`w-full bg-surface overflow-hidden relative ${className}`}>
+            <section className={`w-full bg-white overflow-hidden relative ${className}`}>
                 {/* Slides */}
                 <div className="relative">
                     {data.map((item, index) => (
@@ -202,7 +202,7 @@ const SectionHero = ({ data, variant = "grid", className = "" }) => {
 
     // Grid variant (for secondary hero)
     return (
-        <section className={`w-full py-4 bg-surface overflow-hidden ${className}`}>
+        <section className={`w-full py-4 bg-white overflow-hidden ${className}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {data.map((item) => (

@@ -3,7 +3,6 @@ import { useLocation, Link } from "react-router-dom";
 import { fetchMenuData } from "../services/menuApi.js";
 import MegaMenu from "./MegaMenu";
 import { NavBarSkeleton } from "../../Skeleton";
-import { FaChevronDown } from "react-icons/fa";
 
 const NavBar = () => {
   const [menu, setMenu] = useState([]);
@@ -30,14 +29,14 @@ const NavBar = () => {
   }
 
   return (
-    <nav className="w-full border-t border-gray-100">
+    <nav className="w-full border-t border-gray-100/80 bg-white">
       <div className="max-w-7xl mx-auto relative">
-        <ul className="lg:flex hidden justify-center items-center px-4 font-semibold text-[14px]">
+        <ul className="lg:flex hidden justify-center items-center px-4 text-[13px] font-medium tracking-wide">
           {/* View All */}
           <li>
             <Link
               to="/view-all"
-              className="block py-3 px-3 text-gray-700 hover:text-brand transition-colors rounded-lg hover:bg-brand-50/50 whitespace-nowrap"
+              className="block py-3 px-4 text-gray-600 hover:text-brand transition-colors whitespace-nowrap"
             >
               View All
             </Link>
@@ -50,20 +49,20 @@ const NavBar = () => {
               onMouseLeave={() => setActiveId(null)}
               className="static flex items-center"
             >
-              {/* Dot separator */}
-              <span className="text-brand-200 text-[6px] select-none">●</span>
+              {/* Subtle separator */}
+              <span className="text-gray-200 text-[4px] select-none mx-0.5">•</span>
 
               <Link
                 to={`/categories/${item.id}`}
-                className={`flex items-center gap-1.5 py-3 px-3 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
-                  ? 'text-brand border-brand'
-                  : 'text-gray-700 border-transparent hover:text-dark'
+                className={`flex items-center gap-1 py-3 px-3.5 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
+                  ? 'text-brand border-brand font-semibold'
+                  : 'text-gray-600 border-transparent hover:text-dark'
                   }`}
                 onClick={() => setActiveId(null)}
               >
                 {item.label}
                 {item.sections && item.sections.length > 0 && (
-                  <FaChevronDown className={`text-[8px] transition-transform duration-200 ${activeId === item.id ? 'rotate-180' : ''}`} />
+                  <svg className={`w-2.5 h-2.5 ml-0.5 transition-transform duration-200 ${activeId === item.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                 )}
               </Link>
 

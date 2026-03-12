@@ -242,7 +242,7 @@ function Categories() {
 
   if (loading) {
     return (
-      <div className="flex flex-col justify-center items-center h-[60vh] bg-gray-50 gap-4">
+      <div className="flex flex-col justify-center items-center h-[60vh] bg-white gap-4">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-black" />
         <p className="text-sm text-gray-400 font-medium">Loading products…</p>
       </div>
@@ -250,7 +250,7 @@ function Categories() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       <Breadcrumb />
       <CategoryHero />
 

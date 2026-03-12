@@ -1,23 +1,35 @@
+import hero1 from '../assets/hero-1.png';
+import hero2 from '../assets/hero-2.png';
+import hero3 from '../assets/hero-3.png';
+
 export const heroData = [
     {
         id: 1,
-        title: "Calendars, Notebooks and Diaries",
-        subtitle: "Starting at ₹ 160.00",
-        image: "https://cms.cloudinary.vpsvc.com/image/upload/c_scale,dpr_auto,f_auto,w_1920/India%20LOB/NVHP/New%20Home%20Page/Big%20Marquee/IN_Calendar_-Notebooks-and-Diaries_SunlightCoffee_Marquee_01_1",
+        title: "Personalized Gifts & Custom Prints",
+        subtitle: "Turn memories into masterpieces",
+        image: hero1,
         buttons: [
-            { label: "Calendars", link: "/search?q=calendars" },
-            { label: "Notebooks", link: "/search?q=notebooks" },
-            { label: "Diaries", link: "/search?q=diaries" }
-        ],
-        footer: "Calendars, Notebooks and Diaries > Bottom Banner > 2026"
+            { label: "Shop Now", link: "/view-all", primary: true },
+            { label: "Explore Categories", link: "/view-all" }
+        ]
     },
     {
         id: 2,
-        title: "Custom Winter Wear",
-        subtitle: "Starting at Rs.850",
-        image: "https://cms.cloudinary.vpsvc.com/image/upload/c_scale,dpr_auto,f_auto,w_1920/India%20LOB/NVHP/New%20Home%20Page/Big%20Marquee/IN_Winterwear_Marquee_01_4",
+        title: "Celebrate Every Occasion",
+        subtitle: "Curated gift hampers for your loved ones",
+        image: hero2,
         buttons: [
-            { label: "Shop Now", link: "/search?q=winter+wear", primary: true }
+            { label: "Send Gifts", link: "/view-all", primary: true }
+        ]
+    },
+    {
+        id: 3,
+        title: "Brand Your Business",
+        subtitle: "Custom merchandise for teams & events",
+        image: hero3,
+        buttons: [
+            { label: "Get Started", link: "/view-all", primary: true },
+            { label: "View Products", link: "/view-all" }
         ]
     }
 ];

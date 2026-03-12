@@ -322,7 +322,7 @@ export default function Product() {
     <div className="bg-white min-h-screen">
 
       {/* ═══════════ BREADCRUMB ═══════════ */}
-      <div className="bg-gray-50/80 border-b border-gray-100">
+      <div className="bg-white border-b border-gray-100">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3.5 flex items-center gap-2 text-sm text-gray-500 flex-wrap">
           <Link to="/" className="hover:text-brand transition-colors">Home</Link>
           <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
@@ -703,7 +703,7 @@ export default function Product() {
       {relatedProducts.length > 0 && (
         <>
           <SectionDivider />
-          <div className="bg-gray-50/50 py-12 sm:py-16">
+          <div className="bg-white py-12 sm:py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900">You May Also Like</h2>

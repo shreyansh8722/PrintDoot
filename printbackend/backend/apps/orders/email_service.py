@@ -100,7 +100,7 @@ def send_payment_confirmation_email(order, transaction=None):
 
     Args:
         order: Order model instance
-        transaction: RazorpayTransaction instance (optional)
+        transaction: InstamojoTransaction instance (optional)
     """
     user = order.user
     items = order.items.select_related('product').all()

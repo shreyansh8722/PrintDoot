@@ -19,7 +19,7 @@ import {
 const GST_RATE = 0.18;
 
 const PAYMENT_LABELS = {
-    razorpay: 'Credit / Debit Card',
+    instamojo: 'Credit / Debit Card',
     upi: 'UPI',
     netbanking: 'Net Banking',
     cod: 'Cash on Delivery',
@@ -109,66 +109,16 @@ const CheckoutReview = () => {
                 return;
             }
 
-            // ─── Step 2B: Online — Create Razorpay order ───
+            // ─── Step 2B: Online — Create Instamojo payment request ───
             setPaymentStage('initiating_payment');
-            const razorpayData = await paymentService.createRazorpayOrder(order.id);
+            const paymentData = await paymentService.createPaymentRequest(order.id);
 
-            // ─── Step 3: Open Razorpay checkout ───
-            await paymentService.openCheckout({
-                razorpay_key_id: razorpayData.razorpay_key_id,
-                razorpay_order_id: razorpayData.razorpay_order_id,
-                amount: razorpayData.amount,
-                currency: razorpayData.currency,
-                user_name: razorpayData.user_name,
-                user_email: razorpayData.user_email,
-                onSuccess: async (paymentResponse) => {
-                    try {
-                        // ─── Step 4: Verify payment on server ───
-                        setPaymentStage('verifying');
-                        const verification = await paymentService.verifyPayment({
-                            razorpay_order_id: paymentResponse.razorpay_order_id,
-                            razorpay_payment_id: paymentResponse.razorpay_payment_id,
-                            razorpay_signature: paymentResponse.razorpay_signature,
-                        });
+            // Store order info in sessionStorage for when user returns from Instamojo
+            sessionStorage.setItem('instamojo_order_id', order.id);
+            sessionStorage.setItem('instamojo_payment_request_id', paymentData.payment_request_id);
 
-                        if (verification.success) {
-                            clearCart();
-                            navigate(`/checkout/success/${order.id}`);
-                        } else {
-                            navigate('/checkout/failed', {
-                                state: {
-                                    orderId: order.id,
-                                    error: verification.error || 'Payment verification failed.',
-                                },
-                            });
-                        }
-                    } catch (verifyErr) {
-                        console.error('Verification error:', verifyErr);
-                        navigate('/checkout/failed', {
-                            state: {
-                                orderId: order.id,
-                                error: 'Payment was processed but verification failed. Please contact support.',
-                            },
-                        });
-                    }
-                },
-                onFailure: (rzpError) => {
-                    console.error('Razorpay payment failed:', rzpError);
-                    navigate('/checkout/failed', {
-                        state: {
-                            orderId: order.id,
-                            error: rzpError?.description || rzpError?.message || 'Payment failed. Please try again.',
-                            errorCode: rzpError?.code,
-                        },
-                    });
-                },
-                onDismiss: () => {
-                    // User closed the modal without completing payment
-                    setLoading(false);
-                    setPaymentStage('');
-                    setError('Payment was cancelled. You can try again when ready.');
-                },
-            });
+            // ─── Step 3: Redirect to Instamojo payment page ───
+            paymentService.redirectToPayment(paymentData.payment_url);
         } catch (err) {
             console.error('Order/payment error:', err);
             const errMsg =
@@ -212,7 +162,7 @@ const CheckoutReview = () => {
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen py-8">
+        <div className="bg-white min-h-screen py-8">
             <div className="max-w-6xl mx-auto px-4">
                 <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Review Your Order</h1>
                 <CheckoutSteps currentStep="review" />

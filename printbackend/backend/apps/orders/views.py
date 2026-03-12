@@ -11,13 +11,13 @@ from django.conf import settings as django_settings
 from shop_project.throttles import OrderCreateThrottle, PaymentThrottle, ShippingThrottle
 from .models import (
     Order, OrderItem, Invoice, ReturnRequest, Refund,
-    RazorpayTransaction, PaymentLog, Shipment, ShipmentTrackingEvent,
+    InstamojoTransaction, PaymentLog, Shipment, ShipmentTrackingEvent,
 )
 from .serializers import (
     OrderSerializer, OrderItemSerializer, OrderStatusTransitionSerializer,
     InvoiceSerializer, ReturnRequestSerializer, RefundSerializer,
-    CreateRazorpayOrderSerializer, VerifyPaymentSerializer,
-    RazorpayTransactionSerializer, PaymentLogSerializer,
+    CreateInstamojoPaymentSerializer, VerifyPaymentSerializer,
+    InstamojoTransactionSerializer, PaymentLogSerializer,
     CheckServiceabilitySerializer, CalculateShippingSerializer,
     ShippingOptionResultSerializer,
     ShipmentSerializer, ShipmentTrackingEventSerializer, CreateShipmentSerializer,
@@ -105,7 +105,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             # Send payment confirmation email
             try:
                 from .email_service import send_payment_confirmation_email
-                transaction = getattr(order, 'razorpay_transaction', None)
+                transaction = getattr(order, 'instamojo_transaction', None)
                 send_payment_confirmation_email(order, transaction)
             except Exception as email_err:
                 logger.warning(f"Failed to send payment confirmation email: {email_err}")
@@ -210,52 +210,58 @@ class RefundViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # =============================================================================
-# MODULE 4: PAYMENT VIEWS — Razorpay Integration
+# MODULE 4: PAYMENT VIEWS — Instamojo Integration
 # =============================================================================
 
-class CreateRazorpayOrderView(APIView):
+class CreateInstamojoPaymentView(APIView):
     """
     POST /payments/create-order/
     Body: { "order_id": 123 }
 
-    Creates a Razorpay order and returns the razorpay_order_id + key_id
-    needed for the frontend Razorpay checkout widget.
+    Creates an Instamojo payment request and returns the payment URL
+    for the frontend to redirect the user.
     """
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [PaymentThrottle]
 
     def post(self, request):
-        serializer = CreateRazorpayOrderSerializer(data=request.data, context={'request': request})
+        serializer = CreateInstamojoPaymentSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         order_id = serializer.validated_data['order_id']
         order = Order.objects.get(id=order_id, user=request.user)
 
-        from .razorpay_service import create_razorpay_order
+        from .instamojo_service import create_instamojo_payment
         from django.conf import settings
 
         ip = self._get_client_ip(request)
         ua = request.META.get('HTTP_USER_AGENT', '')
 
+        # Build redirect and webhook URLs
+        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173')
+        redirect_url = f"{frontend_url}/checkout/instamojo-callback"
+        
+        # Build webhook URL from the backend
+        backend_base = request.build_absolute_uri('/').rstrip('/')
+        webhook_url = f"{backend_base}/api/v1/orders/payments/webhook/"
+
         try:
-            transaction, rz_order = create_razorpay_order(
+            transaction, payment_request = create_instamojo_payment(
                 order=order, user=request.user,
+                redirect_url=redirect_url,
+                webhook_url=webhook_url,
                 ip_address=ip, user_agent=ua,
             )
         except Exception as e:
             return Response(
-                {'error': f'Failed to create Razorpay order: {str(e)}'},
+                {'error': f'Failed to create Instamojo payment: {str(e)}'},
                 status=status.HTTP_502_BAD_GATEWAY
             )
 
         return Response({
-            'razorpay_order_id': rz_order['id'],
-            'razorpay_key_id': getattr(settings, 'RAZORPAY_KEY_ID', ''),
-            'amount': rz_order['amount'],          # paisa
-            'currency': rz_order['currency'],
+            'payment_request_id': payment_request['id'],
+            'payment_url': payment_request['longurl'],
             'order_id': order.id,
-            'user_email': request.user.email or '',
-            'user_name': request.user.get_full_name() or request.user.username,
         })
 
     @staticmethod
@@ -267,9 +273,9 @@ class CreateRazorpayOrderView(APIView):
 class VerifyPaymentView(APIView):
     """
     POST /payments/verify/
-    Body: { "razorpay_order_id": "...", "razorpay_payment_id": "...", "razorpay_signature": "..." }
+    Body: { "payment_request_id": "...", "payment_id": "..." }
 
-    Verifies the Razorpay payment signature client-side.
+    Verifies the Instamojo payment after redirect.
     """
     permission_classes = [permissions.IsAuthenticated]
     throttle_classes = [PaymentThrottle]
@@ -278,15 +284,14 @@ class VerifyPaymentView(APIView):
         serializer = VerifyPaymentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        from .razorpay_service import verify_payment
+        from .instamojo_service import verify_payment
 
         ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
         ua = request.META.get('HTTP_USER_AGENT', '')
 
         transaction, success, error_msg = verify_payment(
-            razorpay_order_id=serializer.validated_data['razorpay_order_id'],
-            razorpay_payment_id=serializer.validated_data['razorpay_payment_id'],
-            razorpay_signature=serializer.validated_data['razorpay_signature'],
+            payment_request_id=serializer.validated_data['payment_request_id'],
+            payment_id=serializer.validated_data['payment_id'],
             user=request.user,
             ip_address=ip,
             user_agent=ua,
@@ -358,7 +363,7 @@ class VerifyPaymentView(APIView):
                 'success': True,
                 'message': 'Payment verified successfully.',
                 'order_id': transaction.order_id,
-                'transaction': RazorpayTransactionSerializer(transaction).data,
+                'transaction': InstamojoTransactionSerializer(transaction).data,
                 'shipmozo': shipmozo_result,
             })
         else:
@@ -369,41 +374,38 @@ class VerifyPaymentView(APIView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class RazorpayWebhookView(APIView):
+class InstamojoWebhookView(APIView):
     """
     POST /payments/webhook/
-    Razorpay sends webhook events here.
-    No authentication — verified via webhook signature.
+    Instamojo sends webhook events here.
+    No authentication — verified via MAC signature.
     """
     permission_classes = [permissions.AllowAny]
     authentication_classes = []  # No auth for webhooks
 
     def post(self, request):
-        from .razorpay_service import verify_webhook_signature, handle_webhook_event
+        from .instamojo_service import verify_webhook_signature, handle_webhook_event
 
-        signature = request.META.get('HTTP_X_RAZORPAY_SIGNATURE', '')
-        body = request.body
+        # Instamojo sends form-encoded data
+        payload = request.POST.dict() if request.POST else {}
+        if not payload:
+            try:
+                payload = json.loads(request.body)
+            except json.JSONDecodeError:
+                return Response({'error': 'Invalid payload'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not verify_webhook_signature(body, signature):
-            logger.warning("Razorpay webhook: Invalid signature")
+        if not verify_webhook_signature(payload):
+            logger.warning("Instamojo webhook: Invalid MAC signature")
             return Response({'error': 'Invalid signature'}, status=status.HTTP_403_FORBIDDEN)
 
-        try:
-            payload = json.loads(body)
-        except json.JSONDecodeError:
-            return Response({'error': 'Invalid JSON'}, status=status.HTTP_400_BAD_REQUEST)
-
-        event_type = payload.get('event', '')
-        event_payload = payload.get('payload', {})
-
-        result = handle_webhook_event(event_type, event_payload)
+        result = handle_webhook_event(payload)
         return Response(result, status=status.HTTP_200_OK)
 
 
 class TransactionLogsView(APIView):
     """
     GET /payments/transactions/
-    Returns all Razorpay transactions for the authenticated user.
+    Returns all Instamojo transactions for the authenticated user.
 
     GET /payments/transactions/{order_id}/
     Returns transaction + payment logs for a specific order.
@@ -418,18 +420,18 @@ class TransactionLogsView(APIView):
             except Order.DoesNotExist:
                 return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            transaction = getattr(order, 'razorpay_transaction', None)
+            transaction = getattr(order, 'instamojo_transaction', None)
             logs = PaymentLog.objects.filter(order=order).order_by('-created_at')
 
             return Response({
-                'transaction': RazorpayTransactionSerializer(transaction).data if transaction else None,
+                'transaction': InstamojoTransactionSerializer(transaction).data if transaction else None,
                 'logs': PaymentLogSerializer(logs, many=True).data,
             })
         else:
             # All transactions
-            transactions = RazorpayTransaction.objects.filter(user=request.user)
+            transactions = InstamojoTransaction.objects.filter(user=request.user)
             return Response({
-                'transactions': RazorpayTransactionSerializer(transactions, many=True).data,
+                'transactions': InstamojoTransactionSerializer(transactions, many=True).data,
             })
 
 

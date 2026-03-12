@@ -16,9 +16,9 @@ import {
 
 const PAYMENT_METHODS = [
     {
-        id: 'razorpay',
+        id: 'instamojo',
         name: 'Credit / Debit Card',
-        description: 'Pay securely with Razorpay',
+        description: 'Pay securely with Instamojo',
         icon: FaCreditCard,
         badges: ['Visa', 'Mastercard', 'Rupay'],
     },
@@ -50,7 +50,7 @@ const CheckoutPayment = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { cartItems } = useShop();
-    const [paymentMethod, setPaymentMethod] = useState('razorpay');
+    const [paymentMethod, setPaymentMethod] = useState('instamojo');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -105,7 +105,7 @@ const CheckoutPayment = () => {
     }
 
     return (
-        <div className="bg-gray-50 min-h-screen py-8">
+        <div className="bg-white min-h-screen py-8">
             <div className="max-w-6xl mx-auto px-4">
                 <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Checkout</h1>
                 <CheckoutSteps currentStep="payment" />

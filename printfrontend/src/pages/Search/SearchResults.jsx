@@ -220,7 +220,7 @@ const SearchResults = () => {
     const totalPages = pagination?.totalPages || 1;
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-white">
             {/* ─── Search Header — scrolls normally with page ─── */}
             <div className="bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">

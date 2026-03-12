@@ -139,7 +139,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
             {/* Section header */}
             <div className="px-10 mb-8 flex items-end justify-between">
                 <div>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-dark tracking-tight font-serif">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-dark tracking-tight">
                         {title}
                     </h2>
                     <div className="mt-2.5 h-1 w-14 bg-brand rounded-full" />
