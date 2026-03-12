@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const steps = [
     {
@@ -39,13 +39,41 @@ const steps = [
     },
 ];
 
+const AUTO_CYCLE_MS = 3000;
+
 const OurProcess = () => {
     const [activeStep, setActiveStep] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const timerRef = useRef(null);
+
+    // Auto-cycle through steps
+    useEffect(() => {
+        if (isPaused) return;
+        timerRef.current = setInterval(() => {
+            setActiveStep((prev) => (prev + 1) % steps.length);
+        }, AUTO_CYCLE_MS);
+        return () => clearInterval(timerRef.current);
+    }, [isPaused]);
+
+    const handleStepClick = (index) => {
+        setActiveStep(index);
+        // Reset timer on manual click
+        clearInterval(timerRef.current);
+        if (!isPaused) {
+            timerRef.current = setInterval(() => {
+                setActiveStep((prev) => (prev + 1) % steps.length);
+            }, AUTO_CYCLE_MS);
+        }
+    };
 
     return (
         <section className="w-full px-4 sm:px-6 py-8 sm:py-14">
             <div className="max-w-6xl mx-auto">
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+                <div
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
+                >
                     <div className="flex flex-col lg:flex-row">
 
                         {/* Left: Illustration panel */}
@@ -75,7 +103,7 @@ const OurProcess = () => {
                                     <div key={step.number} className="flex items-center flex-shrink-0">
                                         {/* Step circle */}
                                         <button
-                                            onClick={() => setActiveStep(index)}
+                                            onClick={() => handleStepClick(index)}
                                             className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-sm sm:text-base font-bold transition-all duration-300 cursor-pointer ${index === activeStep
                                                     ? 'bg-brand text-white shadow-md shadow-brand/25 scale-110'
                                                     : index < activeStep

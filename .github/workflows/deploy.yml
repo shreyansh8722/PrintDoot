@@ -1,0 +1,179 @@
+name: 🚀 Deploy PrintDoot
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  SERVER_IP: 43.205.177.226
+  SERVER_USER: ubuntu
+  APP_HOME: /home/printdoot
+
+jobs:
+  # ═══════════════════════════════════════════════════════════
+  # DETECT what changed to skip unnecessary deploys
+  # ═══════════════════════════════════════════════════════════
+  changes:
+    name: 🔍 Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      admin: ${{ steps.filter.outputs.admin }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'printfrontend/**'
+            backend:
+              - 'printbackend/backend/**'
+            admin:
+              - 'printbackend/admin/**'
+
+  # ═══════════════════════════════════════════════════════════
+  # DEPLOY FRONTEND
+  # ═══════════════════════════════════════════════════════════
+  deploy-frontend:
+    name: 🎨 Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: printfrontend/package-lock.json
+
+      - name: 📥 Install dependencies
+        working-directory: printfrontend
+        run: npm ci
+
+      - name: 🔨 Build
+        working-directory: printfrontend
+        run: npm run build
+        env:
+          VITE_API_URL: /api/v1
+
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.SERVER_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🚀 Deploy to server
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            printfrontend/dist/ \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_HOME }}/printfrontend/dist/
+
+      - name: 🔄 Reload Nginx
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} \
+            "sudo systemctl reload nginx"
+
+  # ═══════════════════════════════════════════════════════════
+  # DEPLOY BACKEND
+  # ═══════════════════════════════════════════════════════════
+  deploy-backend:
+    name: ⚙️ Deploy Backend
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.SERVER_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🚀 Sync backend code
+        run: |
+          rsync -avz --delete \
+            --exclude 'venv/' \
+            --exclude '.env' \
+            --exclude '__pycache__/' \
+            --exclude '*.pyc' \
+            --exclude 'staticfiles/' \
+            --exclude 'media/' \
+            --exclude 'logs/' \
+            --exclude 'db.sqlite3' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            printbackend/backend/ \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_HOME }}/printbackend/backend/
+
+      - name: 🔧 Run migrations & collect static
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} << 'DEPLOY'
+            cd /home/printdoot/printbackend/backend
+            source venv/bin/activate
+            pip install -r requirements.txt --quiet
+            python manage.py migrate --noinput
+            python manage.py collectstatic --noinput
+          DEPLOY
+
+      - name: 🔄 Restart Gunicorn
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} \
+            "sudo systemctl restart printdoot-backend"
+
+  # ═══════════════════════════════════════════════════════════
+  # DEPLOY ADMIN PANEL
+  # ═══════════════════════════════════════════════════════════
+  deploy-admin:
+    name: 🛡️ Deploy Admin
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.admin == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: printbackend/admin/package-lock.json
+
+      - name: 📥 Install dependencies
+        working-directory: printbackend/admin
+        run: npm ci
+
+      - name: 🔨 Build
+        working-directory: printbackend/admin
+        run: npm run build
+
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.SERVER_IP }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: 🚀 Deploy to server
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            printbackend/admin/dist/ \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }}:${{ env.APP_HOME }}/printbackend/admin/dist/
+
+      - name: 🔄 Reload Nginx
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ env.SERVER_USER }}@${{ env.SERVER_IP }} \
+            "sudo systemctl reload nginx"

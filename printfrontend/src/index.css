@@ -42,7 +42,7 @@
 
 /* ── Focus Visible — accessible keyboard focus rings ── */
 *:focus-visible {
-    outline: 2px solid #2bbcc4;
+    outline: 2px solid #52B0D8;
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -67,7 +67,7 @@ body {
 
 /* ── Better selection color ── */
 ::selection {
-    background-color: #2bbcc4;
+    background-color: #52B0D8;
     color: #ffffff;
 }
 

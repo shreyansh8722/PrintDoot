@@ -93,7 +93,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #2bbcc4;
+    background: #52B0D8;
     flex-shrink: 0;
 }
 
@@ -154,13 +154,13 @@
 
 .auth-forgot {
     font-size: 0.8125rem;
-    color: #2bbcc4;
+    color: #52B0D8;
     text-decoration: none;
     font-weight: 500;
 }
 
 .auth-forgot:hover {
-    color: #1a9ba3;
+    color: #3d9ac4;
     text-decoration: underline;
 }
 
@@ -191,7 +191,7 @@
 
 .auth-input-wrap input:focus {
     outline: none;
-    border-color: #2bbcc4;
+    border-color: #52B0D8;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(43, 188, 196, 0.08);
 }
@@ -233,7 +233,7 @@
     width: 1rem;
     height: 1rem;
     cursor: pointer;
-    accent-color: #2bbcc4;
+    accent-color: #52B0D8;
 }
 
 /* --- Submit Button --- */
@@ -332,7 +332,7 @@
 }
 
 .auth-switch a {
-    color: #2bbcc4;
+    color: #52B0D8;
     text-decoration: none;
     font-weight: 600;
 }
@@ -432,7 +432,7 @@
 
 .form-group input:focus {
     outline: none;
-    border-color: #2bbcc4;
+    border-color: #52B0D8;
     box-shadow: 0 0 0 3px rgba(43, 188, 196, 0.1);
 }
 
@@ -471,21 +471,21 @@
 }
 
 .forgot-password {
-    color: #2bbcc4;
+    color: #52B0D8;
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
 .forgot-password:hover {
-    color: #1a9ba3;
+    color: #3d9ac4;
     text-decoration: underline;
 }
 
 .auth-button {
     width: 100%;
     padding: 0.875rem 1.5rem;
-    background: #2bbcc4;
+    background: #52B0D8;
     color: white;
     border: none;
     border-radius: 8px;
@@ -497,7 +497,7 @@
 }
 
 .auth-button:hover:not(:disabled) {
-    background: #1a9ba3;
+    background: #3d9ac4;
     transform: translateY(-1px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
@@ -530,13 +530,13 @@
 }
 
 .auth-footer a {
-    color: #2bbcc4;
+    color: #52B0D8;
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s;
 }
 
 .auth-footer a:hover {
-    color: #1a9ba3;
+    color: #3d9ac4;
     text-decoration: underline;
 }

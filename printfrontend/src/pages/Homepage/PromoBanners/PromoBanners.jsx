@@ -20,7 +20,7 @@ const banners = [
         subtitle: "Celebrate every occasion with love",
         cta: "Explore",
         link: "/view-all",
-        gradient: "from-teal-900/80 via-teal-800/50 to-transparent",
+        gradient: "from-sky-900/80 via-sky-800/50 to-transparent",
         image: promoGifts,
     },
     {

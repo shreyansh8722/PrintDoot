@@ -51,11 +51,6 @@ const ZakekeEditor = () => {
                 if (!token) {
                     throw new Error('Failed to get Zakeke authentication token. Please try again.');
                 }
-                console.log('Zakeke Config:', {
-                    tokenPreview: token ? `${token.substring(0, 20)}...` : 'null',
-                    productId: prod.zakeke_product_id,
-                    productName: prod.title
-                });
 
                 // 4. Setup Config
                 // Handle selectedAttributes from URL params (if re-editing)
@@ -82,14 +77,12 @@ const ZakekeEditor = () => {
 
                     // Callbacks
                     getProductInfo: (zakekeData) => {
-                        console.log('Zakeke: getProductInfo', zakekeData);
                         return {
                             price: prod.basePrice || 0,
                             isOutOfStock: false
                         };
                     },
                     getProductPrice: (zakekeData) => {
-                        console.log('Zakeke: getProductPrice', zakekeData);
                         const markupPrice = Number(zakekeData.price || 0);
                         const finalPrice = Number(prod.basePrice || 0) + markupPrice;
                         return {
@@ -98,11 +91,9 @@ const ZakekeEditor = () => {
                         };
                     },
                     getProductAttribute: () => {
-                        console.log('Zakeke: getProductAttribute');
                         return { attributes: [], variants: [] };
                     },
                     addToCart: (zakekeData) => {
-                        console.log('Zakeke: addToCart', zakekeData);
                         const { designId, quantity } = zakekeData;
                         addToCart(prod, quantity || 1, designId);
                         window.location.href = '/cart';
@@ -119,12 +110,6 @@ const ZakekeEditor = () => {
                 if (!config.productId) {
                     throw new Error('Zakeke product ID is missing.');
                 }
-
-                console.log('Initializing Zakeke customizer with config:', {
-                    hasToken: !!config.tokenOauth,
-                    productId: config.productId,
-                    productName: config.productName
-                });
 
                 const customizer = new window.ZakekeDesigner();
 

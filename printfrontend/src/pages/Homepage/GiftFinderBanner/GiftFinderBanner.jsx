@@ -5,7 +5,7 @@ const GiftFinderBanner = () => {
     return (
         <section className="w-full px-4 sm:px-6 py-6 sm:py-10">
             <div className="max-w-6xl mx-auto">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand via-brand-400 to-teal-400 shadow-lg shadow-brand/10">
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-brand via-brand-400 to-blue-400 shadow-lg shadow-brand/10">
                     {/* Decorative shapes */}
                     <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-28 h-28 sm:w-40 sm:h-40 bg-white/10 rounded-full blur-xl" />
                     <div className="absolute right-20 -top-10 w-32 h-32 bg-white/5 rounded-full" />

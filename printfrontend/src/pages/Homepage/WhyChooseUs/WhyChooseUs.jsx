@@ -47,7 +47,7 @@ const WhyChooseUs = () => {
                     <div className="flex flex-col lg:flex-row">
 
                         {/* Left: Brand Panel */}
-                        <div className="relative lg:w-72 xl:w-80 bg-gradient-to-br from-brand via-brand-400 to-teal-500 px-8 py-10 lg:py-14 flex items-center overflow-hidden">
+                        <div className="relative lg:w-72 xl:w-80 bg-gradient-to-br from-brand via-brand-400 to-blue-400 px-8 py-10 lg:py-14 flex items-center overflow-hidden">
                             {/* Decorative circles */}
                             <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full" />
                             <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-white/10 rounded-full" />

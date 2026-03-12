@@ -28,7 +28,6 @@ const DynamicLegalPage = ({ pageType, title, icon, children }) => {
                 }
             } catch (err) {
                 // API unavailable or page not found — use fallback
-                console.log(`No API content for "${pageType}", using fallback.`);
             } finally {
                 setLoading(false);
             }

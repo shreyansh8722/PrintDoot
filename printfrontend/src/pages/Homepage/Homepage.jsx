@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import './Homepage.css';
 import SectionHero from '../../components/Shared/SectionHero';
 import ProductCarousel from '../../components/Shared/ProductCarousel';
 import OffersMarquee from '../../components/Shared/OffersMarquee';

@@ -12,7 +12,6 @@ const zakekeService = {
                 console.error('Token response:', response.data);
                 throw new Error('Token not found in response');
             }
-            console.log('Zakeke token fetched successfully');
             return token;
         } catch (error) {
             console.error('Error fetching Zakeke token:', error);

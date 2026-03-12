@@ -1,62 +1,70 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-// Layout Components
+// Layout Components (loaded eagerly — always needed)
 import MainLayout from './components/Layouts/MainLayout';
 import AuthLayout from './components/Layouts/AuthLayout';
 
-// Page Components
-import Homepage from './pages/Homepage/Homepage';
-import Categories from './pages/Categories/Categories';
-import Product from './pages/Product/Product';
-import TemplateSelection from './pages/TemplateSelection/TemplateSelection';
-import Editor from './pages/Editor/Editor';
-import ZakekeEditor from './pages/Editor/ZakekeEditor';
-import Cart from './pages/Cart/Cart';
-import Login from './pages/Auth/Login';
-import Register from './pages/Auth/Register';
-import ForgotPassword from './pages/Auth/ForgotPassword';
-import ResetPassword from './pages/Auth/ResetPassword';
-import VerifyEmail from './pages/Auth/VerifyEmail';
-import CheckoutAddress from './pages/Checkout/CheckoutAddress';
-import CheckoutShipping from './pages/Checkout/CheckoutShipping';
-import CheckoutPayment from './pages/Checkout/CheckoutPayment';
-import CheckoutReview from './pages/Checkout/CheckoutReview';
-import CheckoutSuccess from './pages/Checkout/CheckoutSuccess';
-import CheckoutFailed from './pages/Checkout/CheckoutFailed';
-import InstamojoCallback from './pages/Checkout/InstamojoCallback';
-import AccountDashboard from './pages/Account/AccountDashboard';
-import Profile from './pages/Account/Profile';
-import Addresses from './pages/Account/Addresses';
-import Settings from './pages/Account/Settings';
-import Orders from './pages/Account/Orders';
-import OrderDetail from './pages/Account/OrderDetail';
-import OrderTracking from './pages/Account/OrderTracking';
-import SearchResults from './pages/Search/SearchResults';
-import Contact from './pages/Help/Contact';
-import FAQ from './pages/Help/FAQ';
-import Returns from './pages/Help/Returns';
-import Shipping from './pages/Help/Shipping';
-import Terms from './pages/Legal/Terms';
-import Privacy from './pages/Legal/Privacy';
-import Cookies from './pages/Legal/Cookies';
-import RefundPolicy from './pages/Legal/RefundPolicy';
-import MyDesigns from './pages/Account/MyDesigns';
-import MyAssets from './pages/Account/MyAssets';
-import Favorites from './pages/Favorites/Favorites';
-import NotFound from './pages/NotFound/NotFound';
-
-// Components
+// Components (loaded eagerly — always visible)
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
+
+// Page Components (lazy loaded — only fetched when navigated to)
+const Homepage = lazy(() => import('./pages/Homepage/Homepage'));
+const Categories = lazy(() => import('./pages/Categories/Categories'));
+const Product = lazy(() => import('./pages/Product/Product'));
+const TemplateSelection = lazy(() => import('./pages/TemplateSelection/TemplateSelection'));
+const Editor = lazy(() => import('./pages/Editor/Editor'));
+const ZakekeEditor = lazy(() => import('./pages/Editor/ZakekeEditor'));
+const Cart = lazy(() => import('./pages/Cart/Cart'));
+const Login = lazy(() => import('./pages/Auth/Login'));
+const Register = lazy(() => import('./pages/Auth/Register'));
+const ForgotPassword = lazy(() => import('./pages/Auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/Auth/ResetPassword'));
+const VerifyEmail = lazy(() => import('./pages/Auth/VerifyEmail'));
+const CheckoutAddress = lazy(() => import('./pages/Checkout/CheckoutAddress'));
+const CheckoutShipping = lazy(() => import('./pages/Checkout/CheckoutShipping'));
+const CheckoutPayment = lazy(() => import('./pages/Checkout/CheckoutPayment'));
+const CheckoutReview = lazy(() => import('./pages/Checkout/CheckoutReview'));
+const CheckoutSuccess = lazy(() => import('./pages/Checkout/CheckoutSuccess'));
+const CheckoutFailed = lazy(() => import('./pages/Checkout/CheckoutFailed'));
+const InstamojoCallback = lazy(() => import('./pages/Checkout/InstamojoCallback'));
+const AccountDashboard = lazy(() => import('./pages/Account/AccountDashboard'));
+const Profile = lazy(() => import('./pages/Account/Profile'));
+const Addresses = lazy(() => import('./pages/Account/Addresses'));
+const Settings = lazy(() => import('./pages/Account/Settings'));
+const Orders = lazy(() => import('./pages/Account/Orders'));
+const OrderDetail = lazy(() => import('./pages/Account/OrderDetail'));
+const OrderTracking = lazy(() => import('./pages/Account/OrderTracking'));
+const SearchResults = lazy(() => import('./pages/Search/SearchResults'));
+const Contact = lazy(() => import('./pages/Help/Contact'));
+const FAQ = lazy(() => import('./pages/Help/FAQ'));
+const Returns = lazy(() => import('./pages/Help/Returns'));
+const Shipping = lazy(() => import('./pages/Help/Shipping'));
+const Terms = lazy(() => import('./pages/Legal/Terms'));
+const Privacy = lazy(() => import('./pages/Legal/Privacy'));
+const Cookies = lazy(() => import('./pages/Legal/Cookies'));
+const RefundPolicy = lazy(() => import('./pages/Legal/RefundPolicy'));
+const MyDesigns = lazy(() => import('./pages/Account/MyDesigns'));
+const MyAssets = lazy(() => import('./pages/Account/MyAssets'));
+const Favorites = lazy(() => import('./pages/Favorites/Favorites'));
+const NotFound = lazy(() => import('./pages/NotFound/NotFound'));
+
+// Minimal loading fallback
+const PageLoader = () => (
+    <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 border-3 border-gray-200 border-t-brand rounded-full animate-spin" />
+    </div>
+);
 
 function App() {
     return (
         <BrowserRouter>
             <ScrollToTop />
             <WhatsAppButton />
+            <Suspense fallback={<PageLoader />}>
             <Routes>
                 {/* Authentication Routes - No Header/Footer */}
                 <Route element={<AuthLayout />}>
@@ -125,6 +133,7 @@ function App() {
                     <Route path="*" element={<NotFound />} />
                 </Route>
             </Routes>
+            </Suspense>
         </BrowserRouter>
     );
 }

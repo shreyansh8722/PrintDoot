@@ -85,9 +85,9 @@ const Footer = () => {
       {/* ═══════ TRUST BADGES BAR ═══════ */}
       <div className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4 place-items-center">
             {trustBadges.map((badge) => (
-              <div key={badge.title} className="flex items-center gap-3 justify-center md:justify-start">
+              <div key={badge.title} className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
                   <badge.icon className="text-brand text-lg" />
                 </div>
@@ -168,20 +168,22 @@ const Footer = () => {
               {/* Social Icons */}
               <div className="flex gap-2.5 pt-3">
                 {[
-                  { Icon: FaFacebookF, label: 'Facebook', href: '#' },
-                  { Icon: FaInstagram, label: 'Instagram', href: '#' },
-                  { Icon: RiTwitterXFill, label: 'Twitter', href: '#' },
-                  { Icon: FaYoutube, label: 'YouTube', href: '#' },
-                  { Icon: FaPinterestP, label: 'Pinterest', href: '#' },
-                  { Icon: FaLinkedinIn, label: 'LinkedIn', href: '#' },
-                ].map(({ Icon, label, href }) => (
+                  { Icon: FaFacebookF, label: 'Facebook', href: 'https://www.facebook.com/share/17F8cyKAQo/?mibextid=wwXIfr', color: '#1877F2' },
+                  { Icon: FaInstagram, label: 'Instagram', href: 'https://www.instagram.com/printdoot?igsh=czltNGNvaHNsMm4z', color: '#E4405F' },
+                  { Icon: RiTwitterXFill, label: 'Twitter', href: '#', color: '#ffffff' },
+                  { Icon: FaYoutube, label: 'YouTube', href: '#', color: '#FF0000' },
+                  { Icon: FaPinterestP, label: 'Pinterest', href: '#', color: '#E60023' },
+                  { Icon: FaLinkedinIn, label: 'LinkedIn', href: '#', color: '#0A66C2' },
+                ].map(({ Icon, label, href, color }) => (
                   <a
                     key={label}
                     href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={label}
-                    className="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:bg-brand hover:text-white transition-all duration-300"
+                    className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center transition-all duration-300 hover:scale-110 hover:bg-white/20"
                   >
-                    <Icon className="text-sm" />
+                    <Icon className="text-sm" style={{ color }} />
                   </a>
                 ))}
               </div>
