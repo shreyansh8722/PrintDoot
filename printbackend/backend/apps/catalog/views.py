@@ -150,6 +150,67 @@ class ProductViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+    @action(detail=False, methods=['get'], url_path='new-arrivals')
+    def new_arrivals(self, request):
+        """
+        GET /api/v1/products/new-arrivals/?limit=10
+        Returns the most recently created active products.
+        """
+        limit = min(int(request.query_params.get('limit', 10)), 30)
+        products = Product.objects.filter(is_active=True).order_by('-created_at')[:limit]
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='trending')
+    def trending(self, request):
+        """
+        GET /api/v1/products/trending/?limit=10
+        Returns the most popular products based on view_count + order_count.
+        """
+        limit = min(int(request.query_params.get('limit', 10)), 30)
+        products = Product.objects.filter(is_active=True).annotate(
+            popularity=models.F('view_count') + models.F('order_count') * 3
+        ).order_by('-popularity', '-created_at')[:limit]
+        serializer = self.get_serializer(products, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'], url_path='track-view', permission_classes=[permissions.AllowAny])
+    def track_view(self, request, pk=None):
+        """
+        POST /api/v1/products/{id}/track-view/
+        Atomically increment the view_count of a product.
+        """
+        try:
+            Product.objects.filter(pk=pk, is_active=True).update(
+                view_count=models.F('view_count') + 1
+            )
+            return Response({'status': 'ok'})
+        except Exception:
+            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['get'], url_path='by-ids')
+    def by_ids(self, request):
+        """
+        GET /api/v1/products/by-ids/?ids=1,2,3
+        Returns products matching the given IDs (for recently-viewed, etc.).
+        Preserves the order of the provided IDs.
+        """
+        ids_param = request.query_params.get('ids', '')
+        if not ids_param:
+            return Response([])
+        try:
+            ids = [int(i) for i in ids_param.split(',') if i.strip().isdigit()]
+        except (ValueError, TypeError):
+            return Response([])
+        if not ids:
+            return Response([])
+        products = Product.objects.filter(id__in=ids, is_active=True)
+        # Preserve the order of the requested IDs
+        product_map = {p.id: p for p in products}
+        ordered = [product_map[pid] for pid in ids if pid in product_map]
+        serializer = self.get_serializer(ordered, many=True)
+        return Response(serializer.data)
+
 
 # ========================================
 # Reviews ViewSet

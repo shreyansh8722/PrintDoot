@@ -58,10 +58,10 @@ const Privacy = () => {
                     <h2>Grievance Officer</h2>
                     <p>
                         Company: PrintDoot<br />
-                        Address: 15 B HSIIDC SECTOR 31 FARIDABAD, Pin 121003, HARYANA<br />
-                        Contact us: support@printdoot.com<br />
-                        Phone: +91 97172-22125<br />
-                        Time: Monday - Friday (9:00 AM - 6:00 PM IST)
+                        Address: Plot No 15 B, HSIIDC, Sector 31, Faridabad, Haryana - 121003<br />
+                        Contact us: printdootweb@gmail.com<br />
+                        Phone: +91 78273-03575<br />
+                        Time: Monday - Friday (9:00 AM - 7:00 PM IST)
                     </p>
                 </div>
             </div>

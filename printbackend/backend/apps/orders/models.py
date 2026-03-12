@@ -95,6 +95,13 @@ class Order(models.Model):
             self.paid_at = timezone.now()
             self.is_paid = True
 
+            # Increment order_count on each product in this order (for trending)
+            from apps.catalog.models import Product
+            from django.db.models import F
+            product_ids = list(self.items.values_list('product_id', flat=True))
+            if product_ids:
+                Product.objects.filter(id__in=product_ids).update(order_count=F('order_count') + 1)
+
         self.save()
 
         # Create status history record

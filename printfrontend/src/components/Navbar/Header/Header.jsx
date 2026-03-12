@@ -34,7 +34,8 @@ export default function Header() {
     setIsAuthenticated(isAuth);
     if (isAuth) {
       const storedUser = localStorage.getItem('username');
-      setUsername(storedUser || 'Account');
+      const firstName = storedUser ? storedUser.split(' ')[0] : 'Account';
+      setUsername(firstName);
     }
   };
 
@@ -73,15 +74,15 @@ export default function Header() {
   };
 
   return (
-    <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
+    <header className={`bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
 
       {/* ─── Top Utility Bar ─── */}
       <div className="hidden lg:block bg-dark">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-8 text-[11px] tracking-wide text-white">
           <div className="flex items-center gap-5">
-            <a href="tel:02522669393" className="hover:text-white/70 transition-colors flex items-center gap-1.5">
+            <a href="tel:+917827303575" className="hover:text-white/70 transition-colors flex items-center gap-1.5">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
-              02522-669393
+              +91 78273-03575
             </a>
             <span className="w-px h-3 bg-gray-600" />
             <Link to="/help" className="hover:text-white/70 transition-colors">Help & Support</Link>
@@ -95,14 +96,14 @@ export default function Header() {
       </div>
 
       {/* ─── Main Header Bar ─── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[62px] sm:h-[70px] gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[64px] sm:h-[74px] gap-4">
 
         {/* Logo */}
         <Link to="/" className="flex items-center flex-shrink-0 group">
           <img
             src={logoImg}
             alt="PrintDoot.com"
-            className="h-9 sm:h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
           />
         </Link>
 
@@ -146,11 +147,11 @@ export default function Header() {
         {/* Right Nav — Desktop */}
         <nav className="hidden lg:flex items-center gap-1 flex-shrink-0">
           <HeaderIconBtn to="/account/designs" label="Projects">
-            <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
           </HeaderIconBtn>
 
           <HeaderIconBtn to="/favorites" label="Wishlist">
-            <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
           </HeaderIconBtn>
 
           {/* Account / Sign in */}
@@ -161,10 +162,10 @@ export default function Header() {
               onMouseLeave={() => setShowAccount(false)}
             >
               <Link to="/account" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark group">
-                <div className="w-7 h-7 bg-brand rounded-full flex items-center justify-center text-white text-[11px] font-semibold">
+                <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white text-[12px] font-semibold">
                   {username.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-[12px] font-medium hidden xl:block">{username.length > 10 ? username.slice(0, 10) + '…' : username}</span>
+                <span className="text-[13px] font-medium hidden xl:block">{username}</span>
               </Link>
               {showAccount && <AccountDropdown onLogout={handleLogout} />}
             </div>
@@ -175,16 +176,16 @@ export default function Header() {
               className="relative"
             >
               <Link to="/login" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark">
-                <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                <span className="text-[12px] font-medium">Sign In</span>
+                <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                <span className="text-[13px] font-medium">Sign In</span>
               </Link>
               {showSignIn && <SignInDropdown />}
             </div>
           )}
 
           <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark relative ml-1">
-            <svg className="w-[19px] h-[19px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-            <span className="text-[12px] font-medium">Cart</span>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            <span className="text-[13px] font-medium">Cart</span>
           </Link>
         </nav>
 
@@ -195,17 +196,17 @@ export default function Header() {
             className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Search"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
           </button>
           <Link to="/cart" className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all relative">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
             className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Open menu"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+            <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
           </button>
         </div>
       </div>
@@ -336,7 +337,7 @@ function HeaderIconBtn({ to, label, children }) {
   return (
     <Link to={to} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-dark group">
       <span className="group-hover:text-brand transition-colors">{children}</span>
-      <span className="text-[12px] font-medium hidden xl:block">{label}</span>
+      <span className="text-[13px] font-medium hidden xl:block">{label}</span>
     </Link>
   );
 }

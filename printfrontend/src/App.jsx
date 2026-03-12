@@ -50,13 +50,13 @@ import NotFound from './pages/NotFound/NotFound';
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
-import BackToTop from './components/BackToTop';
+import WhatsAppButton from './components/WhatsAppButton';
 
 function App() {
     return (
         <BrowserRouter>
             <ScrollToTop />
-            <BackToTop />
+            <WhatsAppButton />
             <Routes>
                 {/* Authentication Routes - No Header/Footer */}
                 <Route element={<AuthLayout />}>
@@ -101,6 +101,7 @@ function App() {
                     <Route path="/account/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                     <Route path="/account/orders/:orderId" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
                     <Route path="/track-order/:trackingNumber" element={<OrderTracking />} />
+                    <Route path="/track-order" element={<OrderTracking />} />
 
                     {/* Search Routes */}
                     <Route path="/search" element={<SearchResults />} />
@@ -110,7 +111,7 @@ function App() {
                     <Route path="/faq" element={<FAQ />} />
                     <Route path="/returns" element={<Returns />} />
                     <Route path="/shipping" element={<Shipping />} />
-                    <Route path="/help" element={<FAQ />} />
+                    <Route path="/help" element={<Contact />} />
 
                     {/* Legal Routes */}
                     <Route path="/terms" element={<Terms />} />

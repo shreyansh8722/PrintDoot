@@ -239,6 +239,68 @@ const catalogService = {
             throw error;
         }
     },
+
+    // ========================================
+    // New Arrivals / Trending / Recently Viewed
+    // ========================================
+
+    /**
+     * Get newly added products (sorted by created_at descending).
+     * GET /api/v1/products/new-arrivals/?limit=10
+     */
+    getNewArrivals: async (limit = 10) => {
+        try {
+            const response = await apiHook.get('/products/new-arrivals/', { params: { limit } });
+            const products = Array.isArray(response.data) ? response.data : (response.data.results || []);
+            return products.map(transformProduct);
+        } catch (error) {
+            console.error('Error fetching new arrivals:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Get trending / most popular products.
+     * GET /api/v1/products/trending/?limit=10
+     */
+    getTrending: async (limit = 10) => {
+        try {
+            const response = await apiHook.get('/products/trending/', { params: { limit } });
+            const products = Array.isArray(response.data) ? response.data : (response.data.results || []);
+            return products.map(transformProduct);
+        } catch (error) {
+            console.error('Error fetching trending products:', error);
+            return [];
+        }
+    },
+
+    /**
+     * Track a product view (fire-and-forget).
+     * POST /api/v1/products/{id}/track-view/
+     */
+    trackProductView: async (productId) => {
+        try {
+            await apiHook.post(`/products/${productId}/track-view/`);
+        } catch {
+            // silent — analytics shouldn't break UX
+        }
+    },
+
+    /**
+     * Get products by a list of IDs (for recently viewed, etc.).
+     * GET /api/v1/products/by-ids/?ids=1,2,3
+     */
+    getProductsByIds: async (ids) => {
+        if (!ids || ids.length === 0) return [];
+        try {
+            const response = await apiHook.get('/products/by-ids/', { params: { ids: ids.join(',') } });
+            const products = Array.isArray(response.data) ? response.data : (response.data.results || []);
+            return products.map(transformProduct);
+        } catch (error) {
+            console.error('Error fetching products by IDs:', error);
+            return [];
+        }
+    },
 };
 
 // Helper: Transform Backend Product -> Frontend Format

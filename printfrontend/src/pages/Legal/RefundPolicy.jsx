@@ -60,7 +60,7 @@ const RefundPolicy = () => {
                     </p>
 
                     <p>
-                        If you have any questions about our refund and return policy, please contact us at <a href="mailto:support@printdoot.com">support@printdoot.com</a> or call <a href="tel:+919717222125">+91 97172-22125</a> (Monday – Friday, 9:00 AM – 6:00 PM IST).
+                        If you have any questions about our refund and return policy, please contact us at <a href="mailto:printdootweb@gmail.com">printdootweb@gmail.com</a> or call <a href="tel:+917827303575">+91 78273-03575</a> (Monday – Friday, 9:00 AM – 7:00 PM IST).
                     </p>
                 </div>
             </div>

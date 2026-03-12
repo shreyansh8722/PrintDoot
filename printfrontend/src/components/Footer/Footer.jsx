@@ -145,17 +145,17 @@ const Footer = () => {
 
               {/* Contact Info */}
               <div className="space-y-3 pt-2">
-                <a href="tel:02522669393" className="flex items-center gap-3 text-sm text-gray-300 hover:text-brand transition-colors group">
+                <a href="tel:+917827303575" className="flex items-center gap-3 text-sm text-gray-300 hover:text-brand transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-brand/20 flex items-center justify-center transition-colors">
                     <FaPhoneAlt className="text-xs text-brand" />
                   </div>
-                  02522-669393
+                  +91 78273-03575
                 </a>
-                <a href="mailto:support@printdoot.com" className="flex items-center gap-3 text-sm text-gray-300 hover:text-brand transition-colors group">
+                <a href="mailto:printdootweb@gmail.com" className="flex items-center gap-3 text-sm text-gray-300 hover:text-brand transition-colors group">
                   <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-brand/20 flex items-center justify-center transition-colors">
                     <FaEnvelope className="text-xs text-brand" />
                   </div>
-                  support@printdoot.com
+                  printdootweb@gmail.com
                 </a>
                 <div className="flex items-center gap-3 text-sm text-gray-400">
                   <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">

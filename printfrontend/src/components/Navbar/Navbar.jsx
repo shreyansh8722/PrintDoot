@@ -4,8 +4,8 @@ import Header from './Header/Header'
 
 const Navbar = () => {
     return (
-        <div className='navbar'>
-           <Header></Header>
+        <div className='navbar sticky top-0 z-50'>
+            <Header />
         </div>
     )
 }

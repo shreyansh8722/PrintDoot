@@ -19,7 +19,7 @@ class ProductImageInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'sku', 'subcategory', 'base_price', 'stock_quantity', 'is_on_sale', 'is_active')
+    list_display = ('name', 'sku', 'subcategory', 'base_price', 'stock_quantity', 'is_on_sale', 'is_active', 'view_count', 'order_count')
     list_filter = ('subcategory', 'is_on_sale', 'is_active')
     search_fields = ('name', 'sku', 'description')
     prepopulated_fields = {'slug': ('name',)}

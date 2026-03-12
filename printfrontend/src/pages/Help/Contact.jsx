@@ -88,10 +88,10 @@ const Contact = () => {
                                         </div>
                                         <h3>Phone</h3>
                                         <p>Call us for immediate assistance</p>
-                                        <a href="tel:+912522669393" className="contact-link">
-                                            +91 2522-669393
+                                        <a href="tel:+917827303575" className="contact-link">
+                                            +91 78273-03575
                                         </a>
-                                        <span className="contact-hours">Mon - Sat, 9 AM - 6 PM IST</span>
+                                        <span className="contact-hours">Mon - Sat, 9 AM - 7 PM IST</span>
                                     </div>
                                 </ScrollReveal>
 
@@ -102,8 +102,8 @@ const Contact = () => {
                                         </div>
                                         <h3>Email</h3>
                                         <p>Send us an email anytime</p>
-                                        <a href="mailto:support@printdoot.com" className="contact-link">
-                                            support@printdoot.com
+                                        <a href="mailto:printdootweb@gmail.com" className="contact-link">
+                                            printdootweb@gmail.com
                                         </a>
                                         <span className="contact-hours">We respond within 24 hours</span>
                                     </div>
@@ -117,11 +117,12 @@ const Contact = () => {
                                         <h3>Office</h3>
                                         <p>Visit us at our office</p>
                                         <address className="contact-address">
-                                            PrintDoot Office<br />
-                                            Business Address<br />
-                                            City, State - PIN Code
+                                            PrintDoot<br />
+                                            Plot No 15 B, HSIIDC<br />
+                                            Sector 31, Faridabad<br />
+                                            Haryana - 121003
                                         </address>
-                                        <span className="contact-hours">Mon - Sat, 9 AM - 6 PM</span>
+                                        <span className="contact-hours">Mon - Sat, 9 AM - 7 PM</span>
                                     </div>
                                 </ScrollReveal>
                             </div>
@@ -136,11 +137,11 @@ const Contact = () => {
                                         <div className="hours-list">
                                             <div className="hours-item">
                                                 <span>Monday - Friday</span>
-                                                <span>9:00 AM - 6:00 PM IST</span>
+                                                <span>9:00 AM - 7:00 PM IST</span>
                                             </div>
                                             <div className="hours-item">
                                                 <span>Saturday</span>
-                                                <span>9:00 AM - 4:00 PM IST</span>
+                                                <span>9:00 AM - 5:00 PM IST</span>
                                             </div>
                                             <div className="hours-item">
                                                 <span>Sunday</span>

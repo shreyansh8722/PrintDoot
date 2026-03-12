@@ -92,7 +92,7 @@ const Cookies = () => {
                     </p>
 
                     <p>
-                        If you have any questions about our use of cookies, please contact us at <a href="mailto:support@printdoot.com">support@printdoot.com</a>.
+                        If you have any questions about our use of cookies, please contact us at <a href="mailto:printdootweb@gmail.com">printdootweb@gmail.com</a>.
                     </p>
                 </div>
             </div>

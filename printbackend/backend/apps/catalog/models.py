@@ -71,6 +71,10 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Popularity / Analytics
+    view_count = models.PositiveIntegerField(default=0, help_text="Number of times this product page was viewed")
+    order_count = models.PositiveIntegerField(default=0, help_text="Number of times this product was ordered")
+
     @property
     def final_price(self):
         """Calculate final price after discount"""
