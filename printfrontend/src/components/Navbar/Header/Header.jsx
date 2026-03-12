@@ -161,7 +161,7 @@ export default function Header() {
               onMouseEnter={() => setShowAccount(true)}
               onMouseLeave={() => setShowAccount(false)}
             >
-              <Link to="/account" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark group">
+              <Link to="/account" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand group">
                 <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white text-[12px] font-semibold">
                   {username.charAt(0).toUpperCase()}
                 </div>
@@ -175,7 +175,7 @@ export default function Header() {
               onMouseLeave={() => setShowSignIn(false)}
               className="relative"
             >
-              <Link to="/login" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark">
+              <Link to="/login" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand">
                 <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
                 <span className="text-[13px] font-medium">Sign In</span>
               </Link>
@@ -183,7 +183,7 @@ export default function Header() {
             </div>
           )}
 
-          <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-600 hover:text-dark relative ml-1">
+          <Link to="/cart" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand relative ml-1">
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
             <span className="text-[13px] font-medium">Cart</span>
           </Link>
@@ -193,17 +193,17 @@ export default function Header() {
         <div className="flex lg:hidden items-center gap-0.5">
           <button
             onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
-            className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
+            className="p-2.5 text-black hover:text-brand rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Search"
           >
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
           </button>
-          <Link to="/cart" className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all relative">
+          <Link to="/cart" className="p-2.5 text-black hover:text-brand rounded-lg hover:bg-gray-50 transition-all relative">
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2.5 text-gray-600 hover:text-dark rounded-lg hover:bg-gray-50 transition-all"
+            className="p-2.5 text-black hover:text-brand rounded-lg hover:bg-gray-50 transition-all"
             aria-label="Open menu"
           >
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
@@ -335,7 +335,7 @@ export default function Header() {
 /* ── Desktop icon + label button ── */
 function HeaderIconBtn({ to, label, children }) {
   return (
-    <Link to={to} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-dark group">
+    <Link to={to} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand group">
       <span className="group-hover:text-brand transition-colors">{children}</span>
       <span className="text-[13px] font-medium hidden xl:block">{label}</span>
     </Link>

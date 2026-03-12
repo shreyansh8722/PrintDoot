@@ -92,6 +92,14 @@ def create_instamojo_payment(order: Order, user, redirect_url='', webhook_url=''
             timeout=30,
         )
         response_data = response.json()
+
+        # Log the HTTP status for debugging permission errors
+        if response.status_code == 403 or response.status_code == 401:
+            logger.error(
+                f"Instamojo auth error (HTTP {response.status_code}): {response_data}. "
+                f"Check INSTAMOJO_API_KEY/AUTH_TOKEN and ensure your Instamojo account "
+                f"has completed KYC. For testing, use https://test.instamojo.com with test credentials."
+            )
     except Exception as e:
         _log_event(
             order=order, user=user,
@@ -106,6 +114,13 @@ def create_instamojo_payment(order: Order, user, redirect_url='', webhook_url=''
 
     if not response_data.get('success'):
         error_msg = str(response_data.get('message', 'Unknown Instamojo error'))
+        # Provide actionable hint for "permission" errors
+        if 'permission' in error_msg.lower():
+            error_msg = (
+                "Instamojo account does not have permission to create payments. "
+                "Please complete KYC on your Instamojo account, or switch to "
+                "the test environment (https://test.instamojo.com) with test credentials."
+            )
         _log_event(
             order=order, user=user,
             event_type='order_created',

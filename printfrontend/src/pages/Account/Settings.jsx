@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { HiOutlineCog6Tooth, HiOutlineUser, HiOutlineMapPin, HiOutlineLockClosed, HiOutlineArrowRightOnRectangle, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineCalendar, HiOutlineEnvelope, HiOutlineShieldCheck } from 'react-icons/hi2';
 import userService from '../../services/userService';
-import './Account.css';
-import './Orders.css';
 
 const Settings = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [user, setUser] = useState(null);
@@ -111,100 +109,173 @@ const Settings = () => {
         setPasswordSuccess('');
     };
 
+    // Skeleton loader
     if (loading) {
         return (
-            <div className="account-page">
-                <div className="account-container">
-                    <div className="loading-spinner">Loading settings...</div>
+            <div className="min-h-screen bg-white">
+                <div className="max-w-3xl mx-auto px-4 py-10">
+                    <div className="animate-pulse space-y-6">
+                        <div className="h-8 bg-gray-200 rounded w-56" />
+                        <div className="h-4 bg-gray-100 rounded w-80" />
+                        <div className="space-y-4">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="bg-gray-50 rounded-xl p-6 space-y-3">
+                                    <div className="h-5 bg-gray-200 rounded w-40" />
+                                    <div className="h-4 bg-gray-100 rounded w-64" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="account-page">
-            <div className="account-container">
-                <div className="account-header">
-                    <div>
-                        <h1>Account Settings</h1>
-                        <p>Manage your account preferences and security</p>
+        <div className="min-h-screen bg-white">
+            <div className="max-w-3xl mx-auto px-4 py-10">
+                {/* Page Header */}
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-[#2bbcc4]/10 flex items-center justify-center">
+                            <HiOutlineCog6Tooth className="w-5 h-5 text-[#2bbcc4]" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-[#1a2332]">Account Settings</h1>
                     </div>
+                    <p className="text-gray-500 ml-[52px]">Manage your account preferences and security</p>
                 </div>
 
-                <div className="account-content">
-                    {error && (
-                        <div className="alert alert-error">{error}</div>
-                    )}
-
-                    {success && (
-                        <div className="alert alert-success">{success}</div>
-                    )}
-
-                    <div className="form-section">
-                        <h2>Account Information</h2>
-                        <div className="info-item">
-                            <label>Username</label>
-                            <div className="info-value">{user?.username}</div>
-                            <span className="field-note">Username cannot be changed</span>
-                        </div>
-                        <div className="info-item">
-                            <label>Email</label>
-                            <div className="info-value">{user?.email}</div>
-                            <span className="field-note">Email cannot be changed</span>
-                        </div>
-                        <div className="info-item">
-                            <label>Account Created</label>
-                            <div className="info-value">
-                                {user?.date_joined 
-                                    ? new Date(user.date_joined).toLocaleDateString('en-IN', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })
-                                    : 'N/A'}
-                            </div>
-                        </div>
+                {/* Alerts */}
+                {error && (
+                    <div className="mb-6 flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 text-red-700 text-sm">
+                        <HiOutlineXCircle className="w-5 h-5 shrink-0" />
+                        {error}
                     </div>
-
-                    <div className="form-section">
-                        <h2>Account Actions</h2>
-                        <div className="settings-actions">
-                            <button onClick={() => navigate('/account/profile')} className="btn-secondary">
-                                Edit Profile
-                            </button>
-                            <button onClick={() => navigate('/account/addresses')} className="btn-secondary">
-                                Manage Addresses
-                            </button>
-                        </div>
+                )}
+                {success && (
+                    <div className="mb-6 flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 text-green-700 text-sm">
+                        <HiOutlineCheckCircle className="w-5 h-5 shrink-0" />
+                        {success}
                     </div>
+                )}
 
-                    <div className="form-section">
-                        <h2>Security</h2>
-                        <div className="security-actions">
-                            <div className="security-item">
-                                <div>
-                                    <h3>Password</h3>
-                                    <p>Change your account password</p>
+                <div className="space-y-6">
+                    {/* Account Information */}
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-[#1a2332] mb-5">Account Information</h2>
+                        <div className="space-y-5">
+                            <div className="flex items-start gap-4">
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineUser className="w-4 h-4 text-[#2bbcc4]" />
                                 </div>
-                                <button className="btn-secondary" onClick={() => setShowPasswordModal(true)}>
-                                    Change Password
-                                </button>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Username</p>
+                                    <p className="text-[#1a2332] font-medium">{user?.username}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Username cannot be changed</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineEnvelope className="w-4 h-4 text-[#2bbcc4]" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Email</p>
+                                    <p className="text-[#1a2332] font-medium">{user?.email}</p>
+                                    <p className="text-xs text-gray-400 mt-0.5">Email cannot be changed</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineCalendar className="w-4 h-4 text-[#2bbcc4]" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Account Created</p>
+                                    <p className="text-[#1a2332] font-medium">
+                                        {user?.date_joined 
+                                            ? new Date(user.date_joined).toLocaleDateString('en-IN', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })
+                                            : 'N/A'}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="form-section danger-zone">
-                        <h2>Danger Zone</h2>
-                        <div className="danger-actions">
-                            <div className="danger-item">
-                                <div>
-                                    <h3>Sign Out</h3>
-                                    <p>Sign out from your account</p>
+                    {/* Quick Actions */}
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-[#1a2332] mb-5">Quick Actions</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <button
+                                onClick={() => navigate('/account/profile')}
+                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#2bbcc4] hover:bg-[#2bbcc4]/5 transition-all duration-200 group text-left"
+                            >
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center shrink-0 group-hover:bg-[#2bbcc4]/20 transition-colors">
+                                    <HiOutlineUser className="w-4 h-4 text-[#2bbcc4]" />
                                 </div>
-                                <button onClick={handleLogout} className="btn-danger">
-                                    Sign Out
-                                </button>
+                                <div>
+                                    <p className="text-sm font-medium text-[#1a2332]">Edit Profile</p>
+                                    <p className="text-xs text-gray-400">Update your personal info</p>
+                                </div>
+                            </button>
+                            <button
+                                onClick={() => navigate('/account/addresses')}
+                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#2bbcc4] hover:bg-[#2bbcc4]/5 transition-all duration-200 group text-left"
+                            >
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center shrink-0 group-hover:bg-[#2bbcc4]/20 transition-colors">
+                                    <HiOutlineMapPin className="w-4 h-4 text-[#2bbcc4]" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-[#1a2332]">Manage Addresses</p>
+                                    <p className="text-xs text-gray-400">Edit shipping & billing</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Security */}
+                    <div className="bg-white border border-gray-200 rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-[#1a2332] mb-5">Security</h2>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center shrink-0">
+                                    <HiOutlineShieldCheck className="w-4 h-4 text-[#2bbcc4]" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-[#1a2332]">Password</p>
+                                    <p className="text-xs text-gray-400">Change your account password</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => setShowPasswordModal(true)}
+                                className="px-4 py-2 text-sm font-medium text-[#2bbcc4] border border-[#2bbcc4] rounded-lg hover:bg-[#2bbcc4] hover:text-white transition-all duration-200"
+                            >
+                                Change
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Danger Zone */}
+                    <div className="bg-white border border-red-200 rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-red-600 mb-5">Danger Zone</h2>
+                        <div className="flex items-center justify-between p-4 rounded-xl bg-red-50/50">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                                    <HiOutlineArrowRightOnRectangle className="w-4 h-4 text-red-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-[#1a2332]">Sign Out</p>
+                                    <p className="text-xs text-gray-400">Sign out from your account</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all duration-200"
+                            >
+                                Sign Out
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -212,69 +283,102 @@ const Settings = () => {
 
             {/* Change Password Modal */}
             {showPasswordModal && (
-                <div className="od-modal-overlay" onClick={closePasswordModal}>
-                    <div className="od-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="od-modal-header">
-                            <h2>Change Password</h2>
-                            <button onClick={closePasswordModal} className="od-modal-close">&times;</button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closePasswordModal} />
+
+                    {/* Modal */}
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-[#2bbcc4]/10 flex items-center justify-center">
+                                    <HiOutlineLockClosed className="w-4 h-4 text-[#2bbcc4]" />
+                                </div>
+                                <h2 className="text-lg font-semibold text-[#1a2332]">Change Password</h2>
+                            </div>
+                            <button
+                                onClick={closePasswordModal}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                            >
+                                &times;
+                            </button>
                         </div>
+
                         <form onSubmit={handlePasswordChange}>
-                            <div className="od-modal-body">
+                            <div className="px-6 py-5 space-y-4">
+                                {/* Alerts */}
                                 {passwordError && (
-                                    <div className="od-alert od-alert-error">
-                                        <FaTimesCircle /> {passwordError}
+                                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-red-50 text-red-700 text-sm">
+                                        <HiOutlineXCircle className="w-4 h-4 shrink-0" />
+                                        <span>{passwordError}</span>
                                     </div>
                                 )}
                                 {passwordSuccess && (
-                                    <div className="od-alert od-alert-success">
-                                        <FaCheckCircle /> {passwordSuccess}
+                                    <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-green-50 text-green-700 text-sm">
+                                        <HiOutlineCheckCircle className="w-4 h-4 shrink-0" />
+                                        <span>{passwordSuccess}</span>
                                     </div>
                                 )}
 
-                                <div className="od-form-group">
-                                    <label>Current Password *</label>
-                                    <div className="password-input-wrapper">
+                                {/* Current Password */}
+                                <div>
+                                    <label className="block text-sm font-medium text-[#1a2332] mb-1.5">
+                                        Current Password <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="relative">
                                         <input
                                             type={showOldPassword ? 'text' : 'password'}
                                             value={passwordForm.oldPassword}
                                             onChange={(e) => setPasswordForm(prev => ({ ...prev, oldPassword: e.target.value }))}
                                             placeholder="Enter current password"
                                             required
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2bbcc4]/30 focus:border-[#2bbcc4] transition-all"
                                         />
                                         <button
                                             type="button"
-                                            className="password-toggle-btn"
                                             onClick={() => setShowOldPassword(!showOldPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                         >
-                                            {showOldPassword ? <FaEyeSlash /> : <FaEye />}
+                                            {showOldPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
                                         </button>
                                     </div>
                                 </div>
 
-                                <div className="od-form-group">
-                                    <label>New Password *</label>
-                                    <div className="password-input-wrapper">
+                                {/* New Password */}
+                                <div>
+                                    <label className="block text-sm font-medium text-[#1a2332] mb-1.5">
+                                        New Password <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="relative">
                                         <input
                                             type={showNewPassword ? 'text' : 'password'}
                                             value={passwordForm.newPassword}
                                             onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                                            placeholder="Enter new password (min 8 characters)"
+                                            placeholder="Min 8 characters"
                                             required
                                             minLength={8}
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2bbcc4]/30 focus:border-[#2bbcc4] transition-all"
                                         />
                                         <button
                                             type="button"
-                                            className="password-toggle-btn"
                                             onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                         >
-                                            {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                                            {showNewPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
                                         </button>
                                     </div>
+                                    {passwordForm.newPassword && passwordForm.newPassword.length < 8 && (
+                                        <p className="mt-1 text-xs text-amber-500">Must be at least 8 characters</p>
+                                    )}
                                 </div>
 
-                                <div className="od-form-group">
-                                    <label>Confirm New Password *</label>
-                                    <div className="password-input-wrapper">
+                                {/* Confirm New Password */}
+                                <div>
+                                    <label className="block text-sm font-medium text-[#1a2332] mb-1.5">
+                                        Confirm New Password <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="relative">
                                         <input
                                             type={showConfirmPassword ? 'text' : 'password'}
                                             value={passwordForm.newPasswordConfirm}
@@ -282,28 +386,50 @@ const Settings = () => {
                                             placeholder="Re-enter new password"
                                             required
                                             minLength={8}
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2bbcc4]/30 focus:border-[#2bbcc4] transition-all"
                                         />
                                         <button
                                             type="button"
-                                            className="password-toggle-btn"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                         >
-                                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                            {showConfirmPassword ? <FaEyeSlash className="w-4 h-4" /> : <FaEye className="w-4 h-4" />}
                                         </button>
                                     </div>
                                     {passwordForm.newPassword && passwordForm.newPasswordConfirm && (
-                                        <span className={`field-note ${passwordForm.newPassword === passwordForm.newPasswordConfirm ? 'text-green' : 'text-red'}`}>
-                                            {passwordForm.newPassword === passwordForm.newPasswordConfirm ? '✓ Passwords match' : '✗ Passwords do not match'}
-                                        </span>
+                                        <p className={`mt-1 text-xs flex items-center gap-1 ${passwordForm.newPassword === passwordForm.newPasswordConfirm ? 'text-green-600' : 'text-red-500'}`}>
+                                            {passwordForm.newPassword === passwordForm.newPasswordConfirm
+                                                ? <><HiOutlineCheckCircle className="w-3.5 h-3.5" /> Passwords match</>
+                                                : <><HiOutlineXCircle className="w-3.5 h-3.5" /> Passwords do not match</>
+                                            }
+                                        </p>
                                     )}
                                 </div>
                             </div>
-                            <div className="od-modal-footer">
-                                <button type="button" onClick={closePasswordModal} className="od-btn od-btn-secondary">
+
+                            {/* Footer */}
+                            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+                                <button
+                                    type="button"
+                                    onClick={closePasswordModal}
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
                                     Cancel
                                 </button>
-                                <button type="submit" disabled={passwordLoading} className="od-btn od-btn-primary">
-                                    {passwordLoading ? 'Changing...' : 'Change Password'}
+                                <button
+                                    type="submit"
+                                    disabled={passwordLoading}
+                                    className="px-5 py-2 text-sm font-medium text-white bg-[#2bbcc4] rounded-lg hover:bg-[#25a8b0] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                                >
+                                    {passwordLoading ? (
+                                        <span className="flex items-center gap-2">
+                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                            </svg>
+                                            Changing...
+                                        </span>
+                                    ) : 'Change Password'}
                                 </button>
                             </div>
                         </form>

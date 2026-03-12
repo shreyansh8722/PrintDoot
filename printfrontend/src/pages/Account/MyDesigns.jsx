@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaSearch, FaImage, FaPlus, FaTags } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaPlus, FaChevronRight } from 'react-icons/fa';
+import { HiOutlinePaintBrush } from 'react-icons/hi2';
 import designService from '../../services/designService';
-import ScrollReveal from '../../components/ScrollReveal';
-import LottieAnimation from '../../components/LottieAnimation';
-import './MyDesigns.css';
 
 const MyDesigns = () => {
     const navigate = useNavigate();
@@ -14,17 +12,14 @@ const MyDesigns = () => {
     const [selectedTag, setSelectedTag] = useState('all');
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadDesigns();
-    }, []);
+    useEffect(() => { loadDesigns(); }, []);
 
     const loadDesigns = async () => {
         try {
             setLoading(true);
             const data = await designService.getMyDesigns();
             setDesigns(data);
-        } catch (err) {
-            console.error('Error loading designs:', err);
+        } catch {
             setError('Failed to load designs');
         } finally {
             setLoading(false);
@@ -32,21 +27,16 @@ const MyDesigns = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this design?')) {
-            return;
-        }
-
+        if (!window.confirm('Are you sure you want to delete this design?')) return;
         try {
             await designService.deleteDesign(id);
             await loadDesigns();
-        } catch (err) {
-            console.error('Error deleting design:', err);
+        } catch {
             alert('Failed to delete design');
         }
     };
 
     const handleEdit = (design) => {
-        // Navigate to editor with design data
         if (design.product?.zakeke_product_id) {
             navigate(`/zakeke-editor/${design.product.zakeke_product_id}?designId=${design.id}`);
         } else {
@@ -54,24 +44,35 @@ const MyDesigns = () => {
         }
     };
 
-    // Get unique tags from all designs
+    // Get unique tags
     const allTags = ['all', ...new Set(designs.flatMap(d => d.tags || []))];
 
-    // Filter designs
+    // Filter
     const filteredDesigns = designs.filter(design => {
-        const matchesSearch = !searchTerm || 
+        const matchesSearch = !searchTerm ||
             design.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             design.product?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesTag = selectedTag === 'all' || (design.tags || []).includes(selectedTag);
         return matchesSearch && matchesTag;
     });
 
+    /* ── Loading skeleton ── */
     if (loading) {
         return (
-            <div className="my-designs-page">
-                <div className="max-w-7xl mx-auto px-6 py-8">
-                    <div className="flex justify-center items-center h-96">
-                        <LottieAnimation type="loading" width={150} height={150} />
+            <div className="bg-white min-h-screen">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+                    <div className="h-8 w-48 bg-gray-100 rounded-lg skeleton-shimmer mb-2" />
+                    <div className="h-4 w-64 bg-gray-100 rounded skeleton-shimmer mb-8" />
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="rounded-2xl overflow-hidden">
+                                <div className="aspect-square bg-gray-50 skeleton-shimmer" />
+                                <div className="p-4 space-y-2">
+                                    <div className="h-4 w-3/4 bg-gray-100 rounded skeleton-shimmer" />
+                                    <div className="h-4 w-1/2 bg-gray-100 rounded skeleton-shimmer" />
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -79,99 +80,96 @@ const MyDesigns = () => {
     }
 
     return (
-        <div className="my-designs-page bg-white min-h-screen">
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                {/* Header */}
-                <ScrollReveal direction="down" delay={0.1}>
-                    <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">My Designs</h1>
-                        <p className="text-gray-600">Manage and organize your saved designs</p>
-                    </div>
-                </ScrollReveal>
+        <div className="bg-white min-h-screen">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
-                {/* Search and Filters */}
-                <ScrollReveal direction="up" delay={0.2}>
-                    <div className="mb-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                        <div className="relative flex-1 max-w-md">
-                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search designs..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-600 focus:border-transparent"
-                            />
+                {/* ── Header ── */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+                            <HiOutlinePaintBrush className="text-brand text-lg" />
                         </div>
-                        <Link
-                            to="/view-all"
-                            className="bg-cyan-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cyan-700 transition-colors flex items-center gap-2"
-                        >
-                            <FaPlus />
-                            Create New Design
-                        </Link>
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">My Designs</h1>
+                            <p className="text-sm text-gray-500">Manage and organize your saved designs</p>
+                        </div>
                     </div>
-                </ScrollReveal>
+                    <Link
+                        to="/view-all"
+                        className="inline-flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors w-fit"
+                    >
+                        <FaPlus className="text-xs" /> Create New
+                    </Link>
+                </div>
 
-                {/* Tags Filter */}
+                {/* ── Search ── */}
+                <div className="mb-5">
+                    <div className="relative max-w-md">
+                        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                        <input
+                            type="text"
+                            placeholder="Search designs…"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand/40 transition-all placeholder:text-gray-400"
+                        />
+                    </div>
+                </div>
+
+                {/* ── Tag pills ── */}
                 {allTags.length > 1 && (
-                    <ScrollReveal direction="up" delay={0.3}>
-                        <div className="mb-6 flex flex-wrap gap-2">
-                            {allTags.map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => setSelectedTag(tag)}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                                        selectedTag === tag
-                                            ? 'bg-cyan-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {tag === 'all' ? 'All Designs' : tag}
-                                </button>
-                            ))}
-                        </div>
-                    </ScrollReveal>
-                )}
-
-                {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-                        {error}
+                    <div className="flex gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
+                        {allTags.map(tag => (
+                            <button
+                                key={tag}
+                                onClick={() => setSelectedTag(tag)}
+                                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                                    selectedTag === tag
+                                        ? 'bg-brand text-white shadow-sm'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                            >
+                                {tag === 'all' ? 'All Designs' : tag}
+                            </button>
+                        ))}
                     </div>
                 )}
 
-                {/* Designs Grid */}
+                {/* ── Error ── */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 font-medium">{error}</div>
+                )}
+
+                {/* ── Empty state ── */}
                 {filteredDesigns.length === 0 ? (
-                    <ScrollReveal direction="fade" delay={0.3}>
-                        <div className="text-center py-16">
-                            <LottieAnimation type="empty" width={200} height={200} />
-                            <h3 className="text-2xl font-semibold text-gray-900 mt-6 mb-2">
-                                {searchTerm || selectedTag !== 'all' ? 'No designs found' : 'No designs yet'}
-                            </h3>
-                            <p className="text-gray-600 mb-6">
-                                {searchTerm || selectedTag !== 'all' 
-                                    ? 'Try adjusting your search or filters'
-                                    : 'Start creating your first design'}
-                            </p>
-                            {!searchTerm && selectedTag === 'all' && (
-                                <Link
-                                    to="/view-all"
-                                    className="inline-block bg-cyan-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-cyan-700 transition-colors"
-                                >
-                                    Browse Products
-                                </Link>
-                            )}
+                    <div className="text-center py-20">
+                        <div className="w-20 h-20 mx-auto rounded-full bg-gray-50 flex items-center justify-center mb-5">
+                            <HiOutlinePaintBrush className="text-3xl text-gray-300" />
                         </div>
-                    </ScrollReveal>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                            {searchTerm || selectedTag !== 'all' ? 'No designs found' : 'No designs yet'}
+                        </h2>
+                        <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                            {searchTerm || selectedTag !== 'all'
+                                ? 'Try adjusting your search or filters.'
+                                : 'Start creating your first design!'}
+                        </p>
+                        {!searchTerm && selectedTag === 'all' && (
+                            <Link to="/view-all" className="inline-flex items-center gap-2 bg-brand text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-brand/90 transition-colors">
+                                Browse Products <FaChevronRight className="text-xs" />
+                            </Link>
+                        )}
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {filteredDesigns.map((design, index) => (
-                            <ScrollReveal key={design.id} direction="up" delay={0.05 * index}>
-                                <DesignCard
-                                    design={design}
-                                    onEdit={handleEdit}
-                                    onDelete={handleDelete}
-                                />
-                            </ScrollReveal>
+                    /* ── Designs grid ── */
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        {filteredDesigns.map((design) => (
+                            <DesignCard
+                                key={design.id}
+                                design={design}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                            />
                         ))}
                     </div>
                 )}
@@ -180,51 +178,50 @@ const MyDesigns = () => {
     );
 };
 
+
+/* ══════════════════════════════════════════════════
+   DESIGN CARD
+   ══════════════════════════════════════════════════ */
 const DesignCard = ({ design, onEdit, onDelete }) => {
     const previewImage = design.preview_image || design.product?.primary_image || 'https://placehold.co/300x300';
     const productName = design.product?.name || 'Unknown Product';
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow group">
-            {/* Image */}
+        <div className="group rounded-2xl border border-gray-100 bg-white overflow-hidden hover:border-brand/20 hover:shadow-lg transition-all duration-300">
+            {/* Image with hover overlay */}
             <div className="aspect-square bg-gray-50 relative overflow-hidden">
                 <img
                     src={previewImage}
                     alt={design.name}
-                    className="w-full h-full object-contain p-2"
+                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                 />
-                {/* Hover Actions */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+                {/* Hover actions */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
                     <button
                         onClick={() => onEdit(design)}
-                        className="bg-white text-gray-900 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors flex items-center gap-2"
+                        className="bg-white text-gray-900 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-lg cursor-pointer"
                     >
-                        <FaEdit />
-                        Edit
+                        <FaEdit className="text-brand" /> Edit
                     </button>
                     <button
                         onClick={() => onDelete(design.id)}
-                        className="bg-white text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors flex items-center gap-2"
+                        className="bg-white text-red-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-red-50 transition-colors flex items-center gap-2 shadow-lg cursor-pointer"
                     >
-                        <FaTrash />
-                        Delete
+                        <FaTrash /> Delete
                     </button>
                 </div>
             </div>
 
             {/* Info */}
             <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{design.name}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-1">{productName}</p>
-                
+                <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 mb-1">{design.name}</h3>
+                <p className="text-xs text-gray-500 line-clamp-1 mb-3">{productName}</p>
+
                 {/* Tags */}
                 {design.tags && design.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                         {design.tags.slice(0, 3).map((tag, idx) => (
-                            <span
-                                key={idx}
-                                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
-                            >
+                            <span key={idx} className="text-[10px] bg-brand/10 text-brand font-medium px-2 py-0.5 rounded-full">
                                 {tag}
                             </span>
                         ))}
@@ -232,15 +229,13 @@ const DesignCard = ({ design, onEdit, onDelete }) => {
                 )}
 
                 {/* Metadata */}
-                <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                <div className="flex items-center justify-between text-[11px] text-gray-400 pt-3 border-t border-gray-100">
                     <span>
-                        Updated {new Date(design.updated_at).toLocaleDateString('en-IN', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
+                        {new Date(design.updated_at).toLocaleDateString('en-IN', {
+                            month: 'short', day: 'numeric', year: 'numeric'
                         })}
                     </span>
-                    <span>v{design.version || 1}</span>
+                    <span className="bg-gray-100 px-2 py-0.5 rounded-full font-medium">v{design.version || 1}</span>
                 </div>
             </div>
         </div>

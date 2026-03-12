@@ -36,7 +36,7 @@ const NavBar = () => {
           <li>
             <Link
               to="/view-all"
-              className="block py-3 px-4 text-gray-600 hover:text-brand transition-colors whitespace-nowrap"
+              className="block py-3 px-4 text-black hover:text-brand transition-colors whitespace-nowrap"
             >
               View All
             </Link>
@@ -56,7 +56,7 @@ const NavBar = () => {
                 to={`/categories/${item.id}`}
                 className={`flex items-center gap-1 py-3 px-3.5 transition-all border-b-2 whitespace-nowrap ${activeId === item.id
                   ? 'text-brand border-brand font-semibold'
-                  : 'text-gray-600 border-transparent hover:text-dark'
+                  : 'text-black border-transparent hover:text-brand'
                   }`}
                 onClick={() => setActiveId(null)}
               >

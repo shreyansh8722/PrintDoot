@@ -1,0 +1,41 @@
+# ─── PrintDoot Gunicorn Service ───
+# Place in /etc/systemd/system/printdoot-backend.service
+
+[Unit]
+Description=PrintDoot Django Backend (Gunicorn)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+User=printdoot
+Group=www-data
+WorkingDirectory=/home/printdoot/printbackend/backend
+EnvironmentFile=/home/printdoot/printbackend/backend/.env
+
+ExecStart=/home/printdoot/printbackend/backend/venv/bin/gunicorn \
+    shop_project.wsgi:application \
+    --bind 127.0.0.1:8000 \
+    --workers 3 \
+    --timeout 120 \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --access-logfile /var/log/printdoot/gunicorn-access.log \
+    --error-logfile /var/log/printdoot/gunicorn-error.log \
+    --log-level info
+
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=printdoot-backend
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/home/printdoot/printbackend/backend/media
+ReadWritePaths=/home/printdoot/printbackend/backend/logs
+ReadWritePaths=/var/log/printdoot
+
+[Install]
+WantedBy=multi-user.target
