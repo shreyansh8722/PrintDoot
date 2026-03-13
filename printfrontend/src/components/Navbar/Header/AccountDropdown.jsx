@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 
 export default function AccountDropdown({ onLogout }) {
     return (
-        <div className="absolute right-0 top-full mt-3 w-60 bg-white shadow-xl rounded-xl p-2 z-50 border border-gray-100">
+        <div className="absolute right-0 top-full pt-3 z-50">
+          <div className="w-60 bg-white shadow-xl rounded-xl p-2 border border-gray-100 relative">
 
             {/* Arrow */}
             <div className="absolute -top-2 right-6 w-4 h-4 bg-white rotate-45 shadow-sm border-l border-t border-gray-100" />
@@ -36,6 +37,7 @@ export default function AccountDropdown({ onLogout }) {
                     Logout
                 </button>
             </div>
+          </div>
         </div>
     );
 }

@@ -61,24 +61,24 @@ const WhyChooseUs = () => {
                         </div>
 
                         {/* Right: Stats Grid */}
-                        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 divide-x divide-gray-100">
+                        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 sm:divide-x divide-gray-100">
                             {stats.map((stat, index) => (
                                 <div
                                     key={index}
-                                    className="flex flex-col items-center justify-center px-4 py-8 sm:py-10 group hover:bg-brand-50/30 transition-colors duration-300"
+                                    className="flex flex-col items-center justify-center px-3 sm:px-4 py-6 sm:py-10 group hover:bg-brand-50/30 transition-colors duration-300"
                                 >
                                     {/* Circle icon */}
-                                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full border-2 border-brand/20 flex items-center justify-center mb-4 group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
+                                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 border-brand/20 flex items-center justify-center mb-3 sm:mb-4 group-hover:border-brand/40 group-hover:bg-brand-50 transition-all duration-300">
                                         {stat.icon}
                                     </div>
 
                                     {/* Value */}
-                                    <span className="text-2xl sm:text-3xl font-bold text-dark mb-1">
+                                    <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-dark mb-1">
                                         {stat.value}
                                     </span>
 
                                     {/* Label */}
-                                    <span className="text-xs sm:text-sm text-gray-500 font-medium text-center leading-tight">
+                                    <span className="text-[11px] sm:text-xs lg:text-sm text-gray-500 font-medium text-center leading-tight">
                                         {stat.label}
                                     </span>
                                 </div>

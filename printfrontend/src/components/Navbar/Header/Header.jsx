@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import SearchDropdown, { addRecentSearch } from "./SearchDropdown";
-import SignInDropdown from "./SignInDropdown";
 import AccountDropdown from "./AccountDropdown";
+import SignInDropdown from "./SignInDropdown";
 import NavBar from "./NavBar";
 import userService from "../../../services/userService";
 import logoImg from "../../../assets/logo.webp";
@@ -12,8 +12,8 @@ export default function Header() {
   const navigate = useNavigate();
 
   const [showSearch, setShowSearch] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,8 +43,8 @@ export default function Header() {
 
   useEffect(() => {
     setShowSearch(false);
-    setShowSignIn(false);
     setShowAccount(false);
+    setShowSignIn(false);
     setMobileMenuOpen(false);
     setMobileSearchOpen(false);
   }, [location.pathname]);
@@ -171,9 +171,9 @@ export default function Header() {
             </div>
           ) : (
             <div
+              className="relative"
               onMouseEnter={() => setShowSignIn(true)}
               onMouseLeave={() => setShowSignIn(false)}
-              className="relative"
             >
               <Link to="/login" className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand">
                 <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>

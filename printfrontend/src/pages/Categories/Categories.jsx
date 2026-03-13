@@ -275,8 +275,8 @@ function Categories() {
           {/* ── Main Content ── */}
           <main className="lg:w-3/4">
             {/* Results header */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm text-gray-500">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <p className="text-xs sm:text-sm text-gray-500">
                 Showing{' '}
                 <span className="font-semibold text-gray-900">{paginatedProducts.length}</span> of{' '}
                 <span className="font-semibold text-gray-900">{totalCount}</span> products

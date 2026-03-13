@@ -77,9 +77,9 @@ const OurProcess = () => {
                     <div className="flex flex-col lg:flex-row">
 
                         {/* Left: Illustration panel */}
-                        <div className="lg:w-[340px] xl:w-[380px] bg-gradient-to-br from-brand-50/50 to-gray-50 flex flex-col items-center justify-center p-8 sm:p-10 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
-                            <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white rounded-2xl shadow-md flex items-center justify-center mb-5 transition-all duration-500">
-                                <span className="text-6xl sm:text-7xl transition-all duration-300">
+                        <div className="lg:w-[340px] xl:w-[380px] bg-gradient-to-br from-brand-50/50 to-gray-50 flex flex-col items-center justify-center p-6 sm:p-10 rounded-t-2xl lg:rounded-l-2xl lg:rounded-tr-none">
+                            <div className="w-24 h-24 sm:w-40 sm:h-40 bg-white rounded-2xl shadow-md flex items-center justify-center mb-4 sm:mb-5 transition-all duration-500">
+                                <span className="text-5xl sm:text-7xl transition-all duration-300">
                                     {steps[activeStep].icon}
                                 </span>
                             </div>
@@ -98,13 +98,13 @@ const OurProcess = () => {
                             </div>
 
                             {/* Step Timeline */}
-                            <div className="flex items-center justify-between mb-8 sm:mb-10 overflow-x-auto py-3 px-1">
+                            <div className="flex items-center justify-between mb-8 sm:mb-10 overflow-x-auto py-3 px-1 scrollbar-hide">
                                 {steps.map((step, index) => (
                                     <div key={step.number} className="flex items-center flex-shrink-0">
                                         {/* Step circle */}
                                         <button
                                             onClick={() => handleStepClick(index)}
-                                            className={`w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-sm sm:text-base font-bold transition-all duration-300 cursor-pointer ${index === activeStep
+                                            className={`w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-xs sm:text-base font-bold transition-all duration-300 cursor-pointer ${index === activeStep
                                                     ? 'bg-brand text-white shadow-md shadow-brand/25 scale-110'
                                                     : index < activeStep
                                                         ? 'bg-brand-100 text-brand-600 hover:bg-brand-200'
@@ -116,7 +116,7 @@ const OurProcess = () => {
 
                                         {/* Connector line */}
                                         {index < steps.length - 1 && (
-                                            <div className={`w-8 sm:w-12 lg:w-16 h-0.5 mx-1 transition-colors duration-300 ${index < activeStep ? 'bg-brand-200' : 'bg-gray-200'
+                                            <div className={`w-5 sm:w-12 lg:w-16 h-0.5 mx-0.5 sm:mx-1 transition-colors duration-300 ${index < activeStep ? 'bg-brand-200' : 'bg-gray-200'
                                                 }`}>
                                                 <div className="w-full h-full border-t-2 border-dashed border-inherit" />
                                             </div>
@@ -149,6 +149,11 @@ const OurProcess = () => {
                     </div>
                 </div>
             </div>
+
+            <style>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
         </section>
     );
 };

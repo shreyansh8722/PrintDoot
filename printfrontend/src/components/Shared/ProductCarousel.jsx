@@ -140,12 +140,12 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
     return (
         <div className={`relative w-full py-4 ${className}`}>
             {/* Section header */}
-            <div className="px-10 mb-8 flex items-end justify-between">
+            <div className="px-4 sm:px-8 lg:px-10 mb-6 sm:mb-8 flex items-end justify-between">
                 <div>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-dark tracking-tight">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-dark tracking-tight">
                         {title}
                     </h2>
-                    <div className="mt-2.5 h-1 w-14 bg-brand rounded-full" />
+                    <div className="mt-2 sm:mt-2.5 h-1 w-12 sm:w-14 bg-brand rounded-full" />
                 </div>
                 <Link
                     to="/view-all"
@@ -172,7 +172,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
 
                 <div
                     ref={scrollRef}
-                    className="flex overflow-x-auto scroll-smooth w-full px-10 gap-5 pt-2 pb-2 -mt-2"
+                    className="flex overflow-x-auto scroll-smooth w-full px-4 sm:px-8 lg:px-10 gap-3 sm:gap-5 pt-2 pb-2 -mt-2"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', overflow: '-moz-scrollbars-none' }}
                 >
                     {items.map((item, index) => {
@@ -185,10 +185,10 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                             return (
                                 <div
                                     key={item.id || index}
-                                    className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-44 sm:w-52"
+                                    className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-28 sm:w-44 lg:w-52"
                                 >
                                     {/* Circular image with hover ring */}
-                                    <div className="relative overflow-hidden w-36 h-36 sm:w-40 sm:h-40 rounded-full border-[3px] border-gray-100 group-hover:border-brand shadow-sm group-hover:shadow-lg transition-all duration-400">
+                                    <div className="relative overflow-hidden w-24 h-24 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full border-[3px] border-gray-100 group-hover:border-brand shadow-sm group-hover:shadow-lg transition-all duration-400 mx-auto">
                                         {isInternal ? (
                                             <Link to={href} className="block h-full">
                                                 <CarouselImage
@@ -215,15 +215,15 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                     </div>
 
                                     {/* Label */}
-                                    <div className="mt-3">
+                                    <div className="mt-2 sm:mt-3 text-center">
                                         {isInternal ? (
                                             <Link to={href} className="block">
-                                                <h3 className="font-semibold text-sm text-gray-800 group-hover:text-brand transition-colors line-clamp-2">
+                                                <h3 className="font-semibold text-xs sm:text-sm text-gray-800 group-hover:text-brand transition-colors line-clamp-2">
                                                     {item.title}
                                                 </h3>
                                             </Link>
                                         ) : (
-                                            <h3 className="font-semibold text-sm text-gray-800 line-clamp-2">
+                                            <h3 className="font-semibold text-xs sm:text-sm text-gray-800 line-clamp-2 text-center">
                                                 {item.title}
                                             </h3>
                                         )}
@@ -239,7 +239,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                         return (
                             <div
                                 key={item.id || index}
-                                className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-52 sm:w-56"
+                                className="flex-shrink-0 group cursor-pointer transition-all duration-300 hover:-translate-y-1 w-40 sm:w-52 lg:w-56"
                             >
                                 {/* Card wrapper */}
                                 <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 group-hover:border-brand-200 shadow-sm group-hover:shadow-md transition-all duration-300">
@@ -307,21 +307,21 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
                                     </div>
 
                                     {/* Content */}
-                                    <div className="p-4">
+                                    <div className="p-3 sm:p-4">
                                         {isInternal ? (
                                             <Link to={href} className="block">
-                                                <h3 className="font-medium text-sm text-gray-800 line-clamp-2 h-10 group-hover:text-brand-600 transition-colors">
+                                                <h3 className="font-medium text-xs sm:text-sm text-gray-800 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] group-hover:text-brand-600 transition-colors">
                                                     {item.title}
                                                 </h3>
                                             </Link>
                                         ) : (
-                                            <h3 className="font-medium text-sm text-gray-800 line-clamp-2 h-10">
+                                            <h3 className="font-medium text-xs sm:text-sm text-gray-800 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
                                                 {item.title}
                                             </h3>
                                         )}
 
-                                        <div className="mt-2 flex items-baseline gap-2">
-                                            <span className="text-lg font-bold text-dark">{item.price}</span>
+                                        <div className="mt-1.5 sm:mt-2 flex items-baseline gap-2">
+                                            <span className="text-base sm:text-lg font-bold text-dark">{item.price}</span>
                                             {item.originalPrice && (
                                                 <span className="text-xs text-gray-400 line-through">{item.originalPrice}</span>
                                             )}

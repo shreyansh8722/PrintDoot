@@ -257,7 +257,7 @@ SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
 # --------------------------------------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
+        'shop_project.authentication.BasicAuthWithoutPopup',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

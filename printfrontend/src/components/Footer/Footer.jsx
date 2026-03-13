@@ -85,15 +85,15 @@ const Footer = () => {
       {/* ═══════ TRUST BADGES BAR ═══════ */}
       <div className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4 place-items-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-5 sm:gap-y-6 gap-x-3 sm:gap-x-4 place-items-center">
             {trustBadges.map((badge) => (
-              <div key={badge.title} className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
-                  <badge.icon className="text-brand text-lg" />
+              <div key={badge.title} className="flex items-center gap-2 sm:gap-3">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
+                  <badge.icon className="text-brand text-sm sm:text-lg" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-900 leading-tight">{badge.title}</p>
-                  <p className="text-xs text-gray-500">{badge.desc}</p>
+                  <p className="text-xs sm:text-sm font-bold text-gray-900 leading-tight">{badge.title}</p>
+                  <p className="text-[10px] sm:text-xs text-gray-500">{badge.desc}</p>
                 </div>
               </div>
             ))}

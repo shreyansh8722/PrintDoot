@@ -1,18 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FaWhatsapp } from 'react-icons/fa';
 import { IoClose } from 'react-icons/io5';
 
 /**
  * WhatsAppButton — Floating WhatsApp chat button (bottom-right).
  * Opens WhatsApp with a pre-filled message to the business number.
+ * Hidden on editor pages to avoid interfering with Zakeke controls.
  */
 const WhatsAppButton = () => {
     const [visible, setVisible] = useState(false);
     const [tooltip, setTooltip] = useState(true);
+    const location = useLocation();
 
     const PHONE = '917827303575'; // India country code + number
     const MESSAGE = encodeURIComponent('Hi PrintDoot! I have a query regarding your products.');
     const WA_URL = `https://wa.me/${PHONE}?text=${MESSAGE}`;
+
+    // Hide on editor pages
+    const isEditorPage = location.pathname.startsWith('/zakeke-editor') || location.pathname.startsWith('/editor');
 
     useEffect(() => {
         // Show button after a short delay for smooth entrance
@@ -31,7 +37,7 @@ const WhatsAppButton = () => {
     return (
         <div
             className={`fixed bottom-6 right-6 z-50 flex items-end gap-3 transition-all duration-500 ${
-                visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
+                visible && !isEditorPage ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
             }`}
         >
             {/* Tooltip bubble */}

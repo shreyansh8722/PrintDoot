@@ -1,30 +1,47 @@
 .zakeke-editor-page {
     width: 100%;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
     /* Adjust to fit below header */
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    z-index: 40;
     background: #fbfbfc;
 }
+
+@media (min-width: 640px) {
+    .zakeke-editor-page {
+        height: calc(100vh - 82px);
+        height: calc(100dvh - 82px);
+    }
+}
+
+/* Footer is hidden via MainLayout when editor is active */
 
 .zakeke-sdk-target {
     flex: 1;
     width: 100%;
     height: 100%;
     border: none;
+    position: relative;
+    z-index: 41;
 }
 
 #zakeke-container {
     width: 100%;
     height: 100%;
+    position: relative;
+    z-index: 41;
 }
 
 /* Ensure the iframe inside matches the container */
 #zakeke-container iframe {
     width: 100% !important;
     height: 100% !important;
+    position: relative;
+    z-index: 42;
 }
 
 .zakeke-loader-overlay {

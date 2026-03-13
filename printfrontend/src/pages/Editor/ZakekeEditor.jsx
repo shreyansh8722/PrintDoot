@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import catalogService from '../../services/catalogService';
 import zakekeService from '../../services/zakekeService';
 import { useShop } from '../../context/ShopContext';
@@ -8,6 +8,7 @@ import './ZakekeEditor.css';
 const ZakekeEditor = () => {
     const { productId } = useParams();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { addToCart } = useShop();
@@ -96,7 +97,7 @@ const ZakekeEditor = () => {
                     addToCart: (zakekeData) => {
                         const { designId, quantity } = zakekeData;
                         addToCart(prod, quantity || 1, designId);
-                        window.location.href = '/cart';
+                        navigate('/cart');
                     },
                     onBackClicked: () => {
                         window.history.back();

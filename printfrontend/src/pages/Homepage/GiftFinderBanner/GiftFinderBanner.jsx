@@ -11,7 +11,7 @@ const GiftFinderBanner = () => {
                     <div className="absolute right-20 -top-10 w-32 h-32 bg-white/5 rounded-full" />
                     <div className="absolute right-0 bottom-0 w-48 h-48 bg-white/5 rounded-full translate-x-12 translate-y-12" />
 
-                    <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between px-8 sm:px-14 py-8 sm:py-10 gap-6">
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between px-6 sm:px-14 py-6 sm:py-10 gap-5 sm:gap-6">
                         {/* Left: Gift icon */}
                         <div className="flex-shrink-0 hidden sm:block">
                             <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-xl shadow-black/10 rotate-6 hover:rotate-0 transition-transform duration-500">

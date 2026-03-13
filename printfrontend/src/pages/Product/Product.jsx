@@ -344,7 +344,7 @@ export default function Product() {
 
       {/* ═══════════ BREADCRUMB ═══════════ */}
       <div className="border-b border-gray-100">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center gap-1.5 text-[13px] text-gray-400 flex-wrap">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-3 flex items-center gap-1.5 text-[12px] sm:text-[13px] text-gray-400 flex-wrap overflow-hidden">
           <Link to="/" className="hover:text-brand transition-colors">Home</Link>
           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
           <Link to="/view-all" className="hover:text-brand transition-colors">Products</Link>
@@ -434,7 +434,7 @@ export default function Product() {
             )}
 
             {/* Title */}
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight mb-4">
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-gray-900 leading-tight tracking-tight mb-3 sm:mb-4">
               {product.title}
             </h1>
 
@@ -452,7 +452,7 @@ export default function Product() {
             {/* Price block */}
             <div className="rounded-2xl p-5 mb-6 border border-gray-100 bg-gradient-to-r from-gray-50/80 via-white to-blue-50/30">
               <div className="flex items-baseline gap-3 flex-wrap">
-                <span className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">{product.price}</span>
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">{product.price}</span>
                 {product.originalPrice && (
                   <span className="text-base text-gray-400 line-through font-medium">{product.originalPrice}</span>
                 )}
@@ -504,17 +504,17 @@ export default function Product() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {product.zakeke_product_id ? (
                   <Link to={`/zakeke-editor/${product.slug}`}
-                    className="flex-1 bg-brand text-white text-center text-[15px] font-bold py-4 px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-md shadow-brand/20 flex items-center justify-center gap-2">
+                    className="flex-1 bg-brand text-white text-center text-sm sm:text-[15px] font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-md shadow-brand/20 flex items-center justify-center gap-2">
                     <span>✏️</span> Personalize Design
                   </Link>
                 ) : (
                   <Link to={`/product/${product.slug}/templates`}
-                    className="flex-1 bg-brand text-white text-center text-[15px] font-bold py-4 px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-md shadow-brand/20 flex items-center justify-center gap-2">
+                    className="flex-1 bg-brand text-white text-center text-sm sm:text-[15px] font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl hover:bg-brand-500 active:scale-[0.98] transition-all shadow-md shadow-brand/20 flex items-center justify-center gap-2">
                     <span>🎨</span> Browse Designs
                   </Link>
                 )}
                 <button onClick={handleAddToCart}
-                  className="flex-1 bg-gray-900 text-white text-[15px] font-bold py-4 px-8 rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2">
+                  className="flex-1 bg-gray-900 text-white text-sm sm:text-[15px] font-bold py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl hover:bg-gray-800 active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2">
                   <span>🛒</span> Add to Cart
                 </button>
               </div>
@@ -522,20 +522,20 @@ export default function Product() {
 
             {/* Trust Badges — Horizontal strip */}
             <div className="mt-8 pt-6 border-t border-gray-100">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {[
                   { icon: <FaShippingFast />, label: "Free Shipping", sub: "Orders over ₹999", color: "text-blue-500", bg: "bg-blue-50" },
                   { icon: <FaShieldAlt />, label: "Quality Assured", sub: "100% Genuine", color: "text-emerald-500", bg: "bg-emerald-50" },
                   { icon: <FaUndo />, label: "Easy Returns", sub: "7-Day Policy", color: "text-amber-500", bg: "bg-amber-50" },
                   { icon: <FaPhoneAlt />, label: "24/7 Support", sub: "We're here to help", color: "text-violet-500", bg: "bg-violet-50" },
                 ].map((b, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group">
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${b.color} ${b.bg} group-hover:scale-105 transition-transform`}>
+                  <div key={i} className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group">
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-xs sm:text-sm ${b.color} ${b.bg} group-hover:scale-105 transition-transform`}>
                       {b.icon}
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-800 leading-tight">{b.label}</p>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{b.sub}</p>
+                      <p className="text-[11px] sm:text-xs font-bold text-gray-800 leading-tight">{b.label}</p>
+                      <p className="text-[9px] sm:text-[10px] text-gray-400 mt-0.5">{b.sub}</p>
                     </div>
                   </div>
                 ))}

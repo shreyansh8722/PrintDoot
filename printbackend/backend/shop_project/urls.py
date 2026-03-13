@@ -18,6 +18,10 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.conf import settings
+
+admin.site.site_header = "PrintDoot Admin"
+admin.site.site_title = "PrintDoot Admin"
+admin.site.index_title = "PrintDoot Administration"
 from django.conf.urls.static import static
 
 urlpatterns = [

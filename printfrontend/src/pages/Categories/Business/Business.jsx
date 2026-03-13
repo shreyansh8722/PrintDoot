@@ -7,15 +7,15 @@ const BusinessEssentials = ({ title = "Business Essentials", products = [] }) =>
   return (
     <div className="bg-white font-sans">
       {/* Header */}
-      <div className="mb-10 text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+      <div className="mb-6 sm:mb-10 text-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
           {title}
         </h2>
-        <p className="mt-2 text-gray-500">Professional materials for your brand</p>
+        <p className="mt-1.5 sm:mt-2 text-gray-500 text-sm sm:text-base">Professional materials for your brand</p>
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {products.map((product) => (
           <Link
             key={product.id}
@@ -23,7 +23,7 @@ const BusinessEssentials = ({ title = "Business Essentials", products = [] }) =>
             className="group cursor-pointer block"
           >
             {/* Image with Hover Effect */}
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-gray-50 mb-4 shadow-sm group-hover:shadow-md transition-all duration-300">
+            <div className="relative aspect-square rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 mb-3 sm:mb-4 shadow-sm group-hover:shadow-md transition-all duration-300">
               <img
                 src={product.image || product.img}
                 alt={product.title}
@@ -33,12 +33,12 @@ const BusinessEssentials = ({ title = "Business Essentials", products = [] }) =>
             </div>
 
             {/* Product Name */}
-            <h3 className="text-base font-semibold text-gray-800 text-center group-hover:text-black transition-colors">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-800 text-center group-hover:text-black transition-colors line-clamp-2">
               {product.title}
             </h3>
 
             {product.price && (
-              <p className="text-sm font-medium text-gray-500 text-center mt-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-500 text-center mt-1">
                 {product.price}
               </p>
             )}

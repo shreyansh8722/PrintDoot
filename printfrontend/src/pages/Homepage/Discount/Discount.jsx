@@ -18,7 +18,7 @@ const Discount = () => {
       {/* Newsletter Section */}
       <div className="w-full px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark via-[#243041] to-dark px-6 sm:px-14 py-10 sm:py-16">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-dark via-[#243041] to-dark px-5 sm:px-14 py-8 sm:py-16">
             {/* Decorative circles */}
             <div className="absolute -top-20 -right-20 w-48 sm:w-64 h-48 sm:h-64 rounded-full bg-brand/10 blur-3xl" />
             <div className="absolute -bottom-20 -left-20 w-48 sm:w-64 h-48 sm:h-64 rounded-full bg-emerald-500/10 blur-3xl" />
