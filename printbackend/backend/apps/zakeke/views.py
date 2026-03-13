@@ -40,15 +40,25 @@ class ZakekeBasicAuthentication(BasicAuthentication):
 class ZakekeViewSet(viewsets.ViewSet):
     """
     ViewSet for Zakeke integration tasks.
+    
+    The catalog list endpoint serves as the root URL that Zakeke calls.
+    Zakeke expects:
+      GET  <base_url>/              → product list
+      GET  <base_url>/{code}/options → product options
+      POST <base_url>/{code}/customizer → mark customizable
+      DELETE <base_url>/{code}/customizer → unmark customizable
+    See: https://docs.zakeke.com/docs/API/Integration/Connecting-Product/Products_Catalog_API
     """
     # Permission is AllowAny because authenticate_credentials returns an AnonymousUser
     # but the authentication class itself verifies the Basic Auth.
     authentication_classes = [ZakekeBasicAuthentication]
     permission_classes = [permissions.AllowAny] 
 
-    @action(detail=False, methods=['get'])
-    def catalog(self, request):
-        """Endpoint for Zakeke to retrieve the product catalog."""
+    def list(self, request):
+        """
+        Root GET endpoint for Zakeke to retrieve the product catalog.
+        Zakeke calls: GET <base_url>/?page=1&search=...
+        """
         search = request.query_params.get('search', '').strip()
         page = int(request.query_params.get('page', 1))
         page_size = 200  # Zakeke pulls all products; return large pages
@@ -71,13 +81,20 @@ class ZakekeViewSet(viewsets.ViewSet):
         serializer = ZakekeCatalogProductSerializer(products_page, many=True)
         return Response(serializer.data)
 
+    # Keep the old 'catalog' action as an alias for backwards compatibility
+    @action(detail=False, methods=['get'])
+    def catalog(self, request):
+        """Alias: redirect to list for backwards compatibility."""
+        return self.list(request)
+
     @action(detail=True, methods=['get'], url_path='options', authentication_classes=[], permission_classes=[permissions.AllowAny])
     def product_options(self, request, pk=None):
-        """Retrieve options for a specific product."""
-        # DEBUG MODE: Auth disabled to rule out 401/403 causing Zakeke 500 error.
-        
+        """
+        Retrieve options for a specific product.
+        Zakeke expects: [{ "code": "...", "name": "...", "values": [{ "code": "...", "name": "..." }] }]
+        See: https://docs.zakeke.com/docs/API/Integration/Connecting-Product/Products_Catalog_API
+        """
         try:
-            # We need the product ID to generate consistent dynamic IDs for options
             # Try by Zakeke ID first
             zakeke_product = ZakekeProduct.objects.filter(zakeke_product_id=pk).first()
             if zakeke_product:
@@ -87,38 +104,25 @@ class ZakekeViewSet(viewsets.ViewSet):
                 product = Product.objects.filter(sku=pk).first()
                 if not product:
                     # Fallback to local ID lookup
-                    # Handle case where pk might be non-numeric (if it's a UUID/SKU passed here)
                     if str(pk).isdigit():
                         product = Product.objects.get(id=pk)
                     else:
-                        # If we can't find the product, return 404
                         return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
             
-            # Dynamic ID generation to ensure uniqueness across products
-            # We use the product ID as a base.
-            # Base ID: product.id
-            # Option ID: product.id * 100 + 1
-            # Value ID: product.id * 100 + 2
-            
+            # Dynamic code generation to ensure uniqueness across products
             pid = product.id
-            option_id = pid * 100 + 1
-            value_id = pid * 100 + 2
+            option_code = str(pid * 100 + 1)
+            value_code = str(pid * 100 + 2)
             
+            # Zakeke only requires: code, name, values (with code, name)
             return Response([
                 {
-                    "id": option_id,
-                    "code": "standard_config",
+                    "code": option_code,
                     "name": "Standard Configuration",
-                    "option_type": "select",
-                    "is_required": True,
                     "values": [
                         {
-                            "id": value_id,
-                            "code": "standard",
-                            "name": "Standard",
-                            "price": 0.0,
-                            "is_default": True,
-                            "enabled": True
+                            "code": value_code,
+                            "name": "Standard"
                         }
                     ]
                 }
@@ -128,21 +132,37 @@ class ZakekeViewSet(viewsets.ViewSet):
             return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             print(f"Error in product_options: {e}")
-            # Fallback to pure dummy generic IDs if something crashes
+            # Fallback with proper Zakeke format
             return Response([
                 {
-                    "id": 12345,
-                    "code": "standard_config",
+                    "code": "99901",
                     "name": "Standard Configuration", 
-                    "values": [{"id": 67890, "code": "standard", "name": "Standard"}]
+                    "values": [{"code": "99902", "name": "Standard"}]
                 }
             ])
 
     @action(detail=True, methods=['post', 'delete'], url_path='customizer')
     def customizer_status(self, request, pk=None):
-        """Mark a product as customizable or not."""
+        """
+        Mark a product as customizable or not.
+        Zakeke sends the product 'code' as {pk} — same code we return in the catalog.
+        We need to resolve it to a local product.
+        """
         try:
-            product = Product.objects.get(id=pk)
+            # Try by Zakeke product ID first
+            zakeke_product = ZakekeProduct.objects.filter(zakeke_product_id=pk).first()
+            if zakeke_product:
+                product = zakeke_product.product
+            else:
+                # Try by SKU
+                product = Product.objects.filter(sku=pk).first()
+                if not product:
+                    # Fallback to local ID
+                    if str(pk).isdigit():
+                        product = Product.objects.get(id=pk)
+                    else:
+                        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
             if request.method == 'POST':
                 # Create or update ZakekeProduct mapping
                 ZakekeProduct.objects.get_or_create(

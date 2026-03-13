@@ -5,16 +5,17 @@ from apps.catalog.models import Product
 class ZakekeCatalogProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Zakeke's Product Catalog API.
-    Zakeke expects each product to have: modelCode, name, imageUrl
+    Zakeke expects each product to have: code, name, thumbnail
+    See: https://docs.zakeke.com/docs/API/Integration/Connecting-Product/Products_Catalog_API
     """
-    modelCode = serializers.SerializerMethodField()
-    imageUrl = serializers.SerializerMethodField()
+    code = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['modelCode', 'name', 'imageUrl']
+        fields = ['code', 'name', 'thumbnail']
 
-    def get_modelCode(self, obj):
+    def get_code(self, obj):
         """
         Return a unique product code for Zakeke.
         Priority: Zakeke product ID > SKU > local ID.
@@ -33,7 +34,7 @@ class ZakekeCatalogProductSerializer(serializers.ModelSerializer):
         # Fallback: Use local ID as string
         return str(obj.id)
 
-    def get_imageUrl(self, obj):
+    def get_thumbnail(self, obj):
         """Return product image URL."""
         # Try primary_image first
         if obj.primary_image:
