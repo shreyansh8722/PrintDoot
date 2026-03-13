@@ -229,6 +229,56 @@ class ZakekeViewSet(viewsets.ViewSet):
             return Response({"status": "Authorized", "token_preview": f"{token[:10]}..."})
         return Response({"status": "Failed"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @action(detail=False, methods=['get'], authentication_classes=[], permission_classes=[permissions.AllowAny])
+    def debug_credentials(self, request):
+        """
+        Debug endpoint to verify which Zakeke account the credentials authenticate to.
+        Shows the full token response from Zakeke (with seller ID) without exposing the secret key.
+        """
+        import base64
+        client_id = zakeke_client.CLIENT_ID
+        secret_key = zakeke_client.SECRET_KEY
+        
+        auth_str = f"{client_id}:{secret_key}"
+        auth_base64 = base64.b64encode(auth_str.encode()).decode()
+        
+        headers = {
+            "Authorization": f"Basic {auth_base64}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json"
+        }
+        data = {
+            "grant_type": "client_credentials",
+            "access_type": "C2S"
+        }
+        
+        try:
+            response = requests.post("https://api.zakeke.com/token", headers=headers, data=data, timeout=10)
+            raw_response = response.json()
+            
+            # Mask the actual token for safety but show everything else
+            safe_response = {}
+            for key, value in raw_response.items():
+                if 'token' in key.lower():
+                    safe_response[key] = f"{str(value)[:15]}...MASKED"
+                else:
+                    safe_response[key] = value
+            
+            return Response({
+                "status": "success" if response.status_code == 200 else "failed",
+                "http_status": response.status_code,
+                "client_id_used": client_id,
+                "secret_key_preview": f"{secret_key[:5]}...{secret_key[-5:]}",
+                "zakeke_response": safe_response,
+                "note": "Look for 'seller' or 'sellerId' in the response. If it shows 297913, your SECRET KEY belongs to an old account."
+            })
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "error": str(e),
+                "client_id_used": client_id
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # =============================================================================
 # Zakeke Webhook — Print File Ready Callback
