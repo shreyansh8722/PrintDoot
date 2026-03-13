@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-import heroCard1 from '../../../assets/hero-card-1.png';
-import heroCard2 from '../../../assets/hero-card-2.png';
-import heroCard3 from '../../../assets/hero-card-3.png';
-import heroCard4 from '../../../assets/hero-card-4.png';
+import heroCard1 from '../../../assets/hero-card-1.webp';
+import heroCard2 from '../../../assets/hero-card-2.webp';
+import heroCard3 from '../../../assets/hero-card-3.webp';
+import heroCard4 from '../../../assets/hero-card-4.webp';
 
 const heroCards = [
     {
@@ -87,6 +87,11 @@ const HeroCardCarousel = () => {
                                 src={card.image}
                                 alt={card.title}
                                 className="absolute inset-0 w-full h-full object-cover"
+                                loading={idx === 0 ? 'eager' : 'lazy'}
+                                fetchPriority={idx === 0 ? 'high' : 'auto'}
+                                decoding={idx === 0 ? 'sync' : 'async'}
+                                width={800}
+                                height={320}
                             />
 
                             {/* Text overlay on left */}

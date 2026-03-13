@@ -23,6 +23,9 @@ function CarouselImage({ src, alt, className = '' }) {
                 src={src}
                 alt={alt}
                 loading="lazy"
+                decoding="async"
+                width={300}
+                height={300}
                 onLoad={() => setLoaded(true)}
                 onError={() => setError(true)}
                 className={`transition-all duration-500 ${loaded ? 'opacity-100' : 'opacity-0'} ${className}`}

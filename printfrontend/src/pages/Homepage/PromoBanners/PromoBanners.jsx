@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import promoCards from '../../../assets/promo-cards.png';
-import promoGifts from '../../../assets/promo-gifts.png';
-import promoPrints from '../../../assets/promo-prints.png';
+import promoCards from '../../../assets/promo-cards.webp';
+import promoGifts from '../../../assets/promo-gifts.webp';
+import promoPrints from '../../../assets/promo-prints.webp';
 
 const banners = [
     {
@@ -51,6 +51,9 @@ const PromoBanners = () => {
                                 alt={banner.title}
                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 loading="lazy"
+                                decoding="async"
+                                width={400}
+                                height={288}
                             />
 
                             {/* Gradient overlay */}

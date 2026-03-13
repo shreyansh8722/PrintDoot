@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
+    // Enable better minification
+    target: 'es2020',
+    // Inline small assets (< 8KB) as base64
+    assetsInlineLimit: 8192,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -12,6 +16,10 @@ export default defineConfig({
           'vendor-ui': ['framer-motion', 'lottie-react', 'react-icons'],
           'vendor-utils': ['axios'],
         },
+        // Use content hash for long-term caching
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
       },
     },
   },

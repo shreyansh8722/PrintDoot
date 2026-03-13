@@ -1,14 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import catVisitingCards from '../../../assets/cat-visiting-cards.png';
-import catTshirts from '../../../assets/cat-tshirts.png';
-import catMugs from '../../../assets/cat-mugs.png';
-import catPhotoFrames from '../../../assets/cat-photo-frames.png';
-import catStationery from '../../../assets/cat-stationery.png';
-import catStickers from '../../../assets/cat-stickers.png';
-import catCorporate from '../../../assets/cat-corporate.png';
-import catCaps from '../../../assets/cat-caps.png';
+import catVisitingCards from '../../../assets/cat-visiting-cards.webp';
+import catTshirts from '../../../assets/cat-tshirts.webp';
+import catMugs from '../../../assets/cat-mugs.webp';
+import catPhotoFrames from '../../../assets/cat-photo-frames.webp';
+import catStationery from '../../../assets/cat-stationery.webp';
+import catStickers from '../../../assets/cat-stickers.webp';
+import catCorporate from '../../../assets/cat-corporate.webp';
+import catCaps from '../../../assets/cat-caps.webp';
 
 const categories = [
     { title: 'Visiting Cards', image: catVisitingCards, link: '/search?q=visiting+cards' },
@@ -41,6 +41,9 @@ const CategoryGrid = () => {
                                     alt={cat.title}
                                     className="w-full h-full object-cover"
                                     loading="lazy"
+                                    decoding="async"
+                                    width={128}
+                                    height={128}
                                 />
                             </div>
 
