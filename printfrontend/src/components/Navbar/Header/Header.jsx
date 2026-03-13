@@ -5,7 +5,7 @@ import SignInDropdown from "./SignInDropdown";
 import AccountDropdown from "./AccountDropdown";
 import NavBar from "./NavBar";
 import userService from "../../../services/userService";
-import logoImg from "../../../assets/logo.jpeg";
+import logoImg from "../../../assets/logo.webp";
 
 export default function Header() {
   const location = useLocation();

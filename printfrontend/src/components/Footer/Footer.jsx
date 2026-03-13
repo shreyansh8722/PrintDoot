@@ -17,7 +17,7 @@ import {
   FaHeadset,
 } from 'react-icons/fa';
 import { RiTwitterXFill } from 'react-icons/ri';
-import logoImg from '../../assets/logo.jpeg';
+import logoImg from '../../assets/logo.webp';
 
 /* ──────────────── DATA ──────────────── */
 const shopLinks = [
