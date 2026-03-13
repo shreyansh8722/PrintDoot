@@ -56,8 +56,8 @@ const LottieAnimation = ({
             {type === 'search' && (
                 <div className="lottie-search">
                     <svg viewBox="0 0 200 200" className="search-icon">
-                        <circle cx="85" cy="85" r="60" fill="none" stroke="#3b82f6" strokeWidth="8"/>
-                        <line x1="130" y1="130" x2="180" y2="180" stroke="#3b82f6" strokeWidth="8" strokeLinecap="round"/>
+                        <circle cx="85" cy="85" r="60" fill="none" stroke="#00DCE5" strokeWidth="8"/>
+                        <line x1="130" y1="130" x2="180" y2="180" stroke="#00DCE5" strokeWidth="8" strokeLinecap="round"/>
                     </svg>
                 </div>
             )}

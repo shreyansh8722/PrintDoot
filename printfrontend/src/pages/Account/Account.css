@@ -67,7 +67,7 @@
 }
 
 .view-all-link {
-    color: #3b82f6;
+    color: #00DCE5;
     text-decoration: none;
     font-weight: 500;
     font-size: 0.95rem;
@@ -75,7 +75,7 @@
 }
 
 .view-all-link:hover {
-    color: #2563eb;
+    color: #00C4CC;
     text-decoration: underline;
 }
 
@@ -98,8 +98,8 @@
 }
 
 .stat-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 2px 4px rgba(0, 220, 229, 0.1);
     transform: translateY(-2px);
 }
 
@@ -108,7 +108,7 @@
     height: 50px;
     border-radius: 10px;
     background: #dbeafe;
-    color: #3b82f6;
+    color: #00DCE5;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,15 +160,15 @@
 }
 
 .action-card:hover {
-    border-color: #3b82f6;
+    border-color: #00DCE5;
     background: #eff6ff;
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 4px 6px -1px rgba(0, 220, 229, 0.2);
 }
 
 .action-icon {
     font-size: 2rem;
-    color: #3b82f6;
+    color: #00DCE5;
     flex-shrink: 0;
 }
 
@@ -204,8 +204,8 @@
 }
 
 .order-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 2px 4px rgba(0, 220, 229, 0.1);
     transform: translateX(4px);
 }
 
@@ -364,8 +364,8 @@
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 0 0 3px rgba(0, 220, 229, 0.1);
 }
 
 .form-group input.disabled-input {
@@ -426,8 +426,8 @@
 }
 
 .address-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 2px 4px rgba(0, 220, 229, 0.1);
 }
 
 .address-card.default {
@@ -619,14 +619,14 @@
 }
 
 .btn-primary {
-    background: #3b82f6;
+    background: #00DCE5;
     color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: #2563eb;
+    background: #00C4CC;
     transform: translateY(-1px);
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 220, 229, 0.3);
 }
 
 .btn-primary:disabled {

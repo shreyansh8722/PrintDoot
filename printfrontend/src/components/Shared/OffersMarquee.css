@@ -63,7 +63,7 @@
 }
 
 .marquee-offer-link:hover .marquee-offer-text {
-    color: #52B0D8;
+    color: #00DCE5;
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -83,7 +83,7 @@
 }
 
 .marquee-separator {
-    color: #52B0D8;
+    color: #00DCE5;
     opacity: 0.5;
     font-size: 8px;
     margin: 0 18px;

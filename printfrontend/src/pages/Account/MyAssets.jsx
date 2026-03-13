@@ -144,7 +144,7 @@ const MyAssets = () => {
                 </ScrollReveal>
 
                 {uploading && (
-                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700">
+                    <div className="mb-6 p-4 bg-brand-50 border border-brand-200 rounded-lg text-brand-700">
                         Uploading files... Please wait.
                     </div>
                 )}

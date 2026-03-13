@@ -14,9 +14,9 @@ const STATUS_FLOW = ['Pending', 'Paid', 'Processing', 'Printing', 'Shipped', 'De
 const STATUS_CONFIG = {
     Pending:    { color: '#f59e0b', bg: '#fffbeb', icon: FaClock,           label: 'Order Placed' },
     Paid:       { color: '#10b981', bg: '#ecfdf5', icon: FaMoneyBillWave,   label: 'Payment Confirmed' },
-    Processing: { color: '#3b82f6', bg: '#eff6ff', icon: FaBoxOpen,         label: 'Processing' },
+    Processing: { color: '#00DCE5', bg: '#eff6ff', icon: FaBoxOpen,         label: 'Processing' },
     Printing:   { color: '#8b5cf6', bg: '#f5f3ff', icon: FaPrint,           label: 'Printing' },
-    Shipped:    { color: '#06b6d4', bg: '#ecfeff', icon: FaTruck,           label: 'Shipped' },
+    Shipped:    { color: '#00DCE5', bg: '#ecfeff', icon: FaTruck,           label: 'Shipped' },
     Delivered:  { color: '#059669', bg: '#d1fae5', icon: FaCheckCircle,     label: 'Delivered' },
     Cancelled:  { color: '#ef4444', bg: '#fef2f2', icon: FaTimesCircle,     label: 'Cancelled' },
     Refunded:   { color: '#6b7280', bg: '#f3f4f6', icon: FaUndo,           label: 'Refunded' },
@@ -365,7 +365,7 @@ const OrderDetail = () => {
                                                     .map((event, idx) => (
                                                     <div key={event.id || idx} className="od-history-item">
                                                         <div className="od-history-dot" style={{ 
-                                                            backgroundColor: idx === 0 ? '#3b82f6' : '#d1d5db' 
+                                                            backgroundColor: idx === 0 ? '#00DCE5' : '#d1d5db' 
                                                         }}></div>
                                                         <div className="od-history-content">
                                                             <div className="od-history-transition">

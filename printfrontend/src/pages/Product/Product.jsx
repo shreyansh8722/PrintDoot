@@ -450,7 +450,7 @@ export default function Product() {
             </div>
 
             {/* Price block */}
-            <div className="rounded-2xl p-5 mb-6 border border-gray-100 bg-gradient-to-r from-gray-50/80 via-white to-blue-50/30">
+            <div className="rounded-2xl p-5 mb-6 border border-gray-100 bg-gradient-to-r from-gray-50/80 via-white to-brand-50/30">
               <div className="flex items-baseline gap-3 flex-wrap">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">{product.price}</span>
                 {product.originalPrice && (
@@ -524,7 +524,7 @@ export default function Product() {
             <div className="mt-8 pt-6 border-t border-gray-100">
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 {[
-                  { icon: <FaShippingFast />, label: "Free Shipping", sub: "Orders over ₹999", color: "text-blue-500", bg: "bg-blue-50" },
+                  { icon: <FaShippingFast />, label: "Free Shipping", sub: "Orders over ₹999", color: "text-brand", bg: "bg-brand-50" },
                   { icon: <FaShieldAlt />, label: "Quality Assured", sub: "100% Genuine", color: "text-emerald-500", bg: "bg-emerald-50" },
                   { icon: <FaUndo />, label: "Easy Returns", sub: "7-Day Policy", color: "text-amber-500", bg: "bg-amber-50" },
                   { icon: <FaPhoneAlt />, label: "24/7 Support", sub: "We're here to help", color: "text-violet-500", bg: "bg-violet-50" },

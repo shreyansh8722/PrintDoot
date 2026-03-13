@@ -58,7 +58,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
               {item.title || item.name || 'Product'}
             </h3>
             {item.designId && (
-              <span className="inline-flex items-center gap-1 mt-1 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1 mt-1 bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full text-xs font-medium">
                 <FaPaintBrush className="text-[10px]" /> Custom Design
               </span>
             )}
@@ -208,7 +208,7 @@ const Cart = () => {
                 <FaShieldAlt className="text-green-500" /> Secure Checkout
               </span>
               <span className="flex items-center gap-2">
-                <FaTruck className="text-blue-500" /> Free Shipping over ₹999
+                <FaTruck className="text-brand" /> Free Shipping over ₹999
               </span>
               <span className="flex items-center gap-2">
                 <FaTag className="text-orange-500" /> Best Price Guarantee

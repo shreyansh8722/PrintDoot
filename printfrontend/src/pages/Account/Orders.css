@@ -36,13 +36,13 @@
 
 .search-input:focus {
     outline: none;
-    border-color: #06b6d4;
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 0 0 3px rgba(0, 220, 229, 0.1);
 }
 
 .search-btn {
     padding: 0.875rem 1.5rem;
-    background: #06b6d4;
+    background: #00DCE5;
     color: white;
     border: none;
     border-radius: 8px;
@@ -52,7 +52,7 @@
 }
 
 .search-btn:hover {
-    background: #0891b2;
+    background: #00C4CC;
 }
 
 .filters-row {
@@ -86,7 +86,7 @@
 
 .filter-group select:focus {
     outline: none;
-    border-color: #06b6d4;
+    border-color: #00DCE5;
 }
 
 /* Order Cards */
@@ -107,8 +107,8 @@
 }
 
 .order-card-large:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+    border-color: #00DCE5;
+    box-shadow: 0 4px 6px -1px rgba(0, 220, 229, 0.2);
     transform: translateY(-2px);
 }
 
@@ -277,18 +277,18 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #3b82f6;
+    color: #00DCE5;
     font-weight: 500;
 }
 
 .view-details-link {
-    color: #3b82f6;
+    color: #00DCE5;
     font-weight: 600;
     transition: color 0.2s;
 }
 
 .order-card-link:hover .view-details-link {
-    color: #2563eb;
+    color: #00C4CC;
     text-decoration: underline;
 }
 
@@ -556,7 +556,7 @@
     font-family: monospace;
     font-size: 1.125rem;
     font-weight: 600;
-    color: #3b82f6;
+    color: #00DCE5;
 }
 
 .tracking-actions {
@@ -680,13 +680,13 @@
 
 .search-input-large:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 0 0 3px rgba(0, 220, 229, 0.1);
 }
 
 .tracking-header-card {
     padding: 2rem;
-    background: #06b6d4;
+    background: #00DCE5;
     border-radius: 12px;
     color: white;
     margin-bottom: 2rem;
@@ -829,7 +829,7 @@
 }
 
 .order-link {
-    color: #3b82f6;
+    color: #00DCE5;
     text-decoration: none;
     font-weight: 600;
 }
@@ -1186,7 +1186,7 @@
 .od-mono {
     font-family: monospace;
     font-weight: 600;
-    color: #3b82f6 !important;
+    color: #00DCE5 !important;
 }
 
 .od-paid {
@@ -1270,9 +1270,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #06b6d4;
+    background: #00DCE5;
     border: 2px solid white;
-    box-shadow: 0 0 0 2px #06b6d4;
+    box-shadow: 0 0 0 2px #00DCE5;
     z-index: 1;
 }
 
@@ -1381,7 +1381,7 @@
 .od-admin-note {
     padding: 0.5rem 0.75rem;
     background: #eff6ff;
-    border-left: 3px solid #3b82f6;
+    border-left: 3px solid #00DCE5;
     border-radius: 0 4px 4px 0;
     color: #1e40af !important;
     font-style: italic;
@@ -1474,12 +1474,12 @@
 }
 
 .od-btn-primary {
-    background: #06b6d4;
+    background: #00DCE5;
     color: white;
 }
 
 .od-btn-primary:hover:not(:disabled) {
-    background: #0891b2;
+    background: #00C4CC;
 }
 
 .od-btn-secondary {
@@ -1615,8 +1615,8 @@
 .od-form-group select:focus,
 .od-form-group textarea:focus {
     outline: none;
-    border-color: #06b6d4;
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    border-color: #00DCE5;
+    box-shadow: 0 0 0 3px rgba(0, 220, 229, 0.1);
 }
 
 .od-form-group textarea {
@@ -1651,7 +1651,7 @@
 .od-return-item-check input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #06b6d4;
+    accent-color: #00DCE5;
     cursor: pointer;
 }
 
@@ -1827,7 +1827,7 @@
     font-size: 0.8125rem;
     font-weight: 500;
     background: #eff6ff;
-    color: #2563eb;
+    color: #00C4CC;
     border: 1px solid #bfdbfe;
     border-radius: 6px;
     cursor: pointer;

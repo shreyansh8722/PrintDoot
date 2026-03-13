@@ -233,7 +233,7 @@ const OrderTracking = () => {
                                             .map((event, idx) => (
                                             <div key={event.id || idx} className="od-history-item">
                                                 <div className="od-history-dot" style={{ 
-                                                    backgroundColor: idx === 0 ? '#3b82f6' : '#d1d5db' 
+                                                    backgroundColor: idx === 0 ? '#00DCE5' : '#d1d5db' 
                                                 }}></div>
                                                 <div className="od-history-content">
                                                     <div className="od-history-transition">

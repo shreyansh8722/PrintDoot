@@ -137,8 +137,8 @@ const Settings = () => {
                 {/* Page Header */}
                 <div className="mb-8">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-[#52B0D8]/10 flex items-center justify-center">
-                            <HiOutlineCog6Tooth className="w-5 h-5 text-[#52B0D8]" />
+                        <div className="w-10 h-10 rounded-xl bg-[#00DCE5]/10 flex items-center justify-center">
+                            <HiOutlineCog6Tooth className="w-5 h-5 text-[#00DCE5]" />
                         </div>
                         <h1 className="text-2xl font-bold text-[#1a2332]">Account Settings</h1>
                     </div>
@@ -165,8 +165,8 @@ const Settings = () => {
                         <h2 className="text-lg font-semibold text-[#1a2332] mb-5">Account Information</h2>
                         <div className="space-y-5">
                             <div className="flex items-start gap-4">
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center mt-0.5 shrink-0">
-                                    <HiOutlineUser className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineUser className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Username</p>
@@ -175,8 +175,8 @@ const Settings = () => {
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center mt-0.5 shrink-0">
-                                    <HiOutlineEnvelope className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineEnvelope className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Email</p>
@@ -185,8 +185,8 @@ const Settings = () => {
                                 </div>
                             </div>
                             <div className="flex items-start gap-4">
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center mt-0.5 shrink-0">
-                                    <HiOutlineCalendar className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center mt-0.5 shrink-0">
+                                    <HiOutlineCalendar className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Account Created</p>
@@ -210,10 +210,10 @@ const Settings = () => {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <button
                                 onClick={() => navigate('/account/profile')}
-                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#52B0D8] hover:bg-[#52B0D8]/5 transition-all duration-200 group text-left"
+                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#00DCE5] hover:bg-[#00DCE5]/5 transition-all duration-200 group text-left"
                             >
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center shrink-0 group-hover:bg-[#52B0D8]/20 transition-colors">
-                                    <HiOutlineUser className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center shrink-0 group-hover:bg-[#00DCE5]/20 transition-colors">
+                                    <HiOutlineUser className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-[#1a2332]">Edit Profile</p>
@@ -222,10 +222,10 @@ const Settings = () => {
                             </button>
                             <button
                                 onClick={() => navigate('/account/addresses')}
-                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#52B0D8] hover:bg-[#52B0D8]/5 transition-all duration-200 group text-left"
+                                className="flex items-center gap-3 px-4 py-3.5 rounded-xl border border-gray-200 hover:border-[#00DCE5] hover:bg-[#00DCE5]/5 transition-all duration-200 group text-left"
                             >
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center shrink-0 group-hover:bg-[#52B0D8]/20 transition-colors">
-                                    <HiOutlineMapPin className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center shrink-0 group-hover:bg-[#00DCE5]/20 transition-colors">
+                                    <HiOutlineMapPin className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-[#1a2332]">Manage Addresses</p>
@@ -240,8 +240,8 @@ const Settings = () => {
                         <h2 className="text-lg font-semibold text-[#1a2332] mb-5">Security</h2>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center shrink-0">
-                                    <HiOutlineShieldCheck className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center shrink-0">
+                                    <HiOutlineShieldCheck className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-[#1a2332]">Password</p>
@@ -250,7 +250,7 @@ const Settings = () => {
                             </div>
                             <button
                                 onClick={() => setShowPasswordModal(true)}
-                                className="px-4 py-2 text-sm font-medium text-[#52B0D8] border border-[#52B0D8] rounded-lg hover:bg-[#52B0D8] hover:text-white transition-all duration-200"
+                                className="px-4 py-2 text-sm font-medium text-[#00DCE5] border border-[#00DCE5] rounded-lg hover:bg-[#00DCE5] hover:text-white transition-all duration-200"
                             >
                                 Change
                             </button>
@@ -292,8 +292,8 @@ const Settings = () => {
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                             <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-lg bg-[#52B0D8]/10 flex items-center justify-center">
-                                    <HiOutlineLockClosed className="w-4 h-4 text-[#52B0D8]" />
+                                <div className="w-9 h-9 rounded-lg bg-[#00DCE5]/10 flex items-center justify-center">
+                                    <HiOutlineLockClosed className="w-4 h-4 text-[#00DCE5]" />
                                 </div>
                                 <h2 className="text-lg font-semibold text-[#1a2332]">Change Password</h2>
                             </div>
@@ -333,7 +333,7 @@ const Settings = () => {
                                             onChange={(e) => setPasswordForm(prev => ({ ...prev, oldPassword: e.target.value }))}
                                             placeholder="Enter current password"
                                             required
-                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#52B0D8]/30 focus:border-[#52B0D8] transition-all"
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00DCE5]/30 focus:border-[#00DCE5] transition-all"
                                         />
                                         <button
                                             type="button"
@@ -358,7 +358,7 @@ const Settings = () => {
                                             placeholder="Min 8 characters"
                                             required
                                             minLength={8}
-                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#52B0D8]/30 focus:border-[#52B0D8] transition-all"
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00DCE5]/30 focus:border-[#00DCE5] transition-all"
                                         />
                                         <button
                                             type="button"
@@ -386,7 +386,7 @@ const Settings = () => {
                                             placeholder="Re-enter new password"
                                             required
                                             minLength={8}
-                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#52B0D8]/30 focus:border-[#52B0D8] transition-all"
+                                            className="w-full px-4 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#00DCE5]/30 focus:border-[#00DCE5] transition-all"
                                         />
                                         <button
                                             type="button"
@@ -419,7 +419,7 @@ const Settings = () => {
                                 <button
                                     type="submit"
                                     disabled={passwordLoading}
-                                    className="px-5 py-2 text-sm font-medium text-white bg-[#52B0D8] rounded-lg hover:bg-[#3d9ac4] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                                    className="px-5 py-2 text-sm font-medium text-white bg-[#00DCE5] rounded-lg hover:bg-[#00C4CC] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                                 >
                                     {passwordLoading ? (
                                         <span className="flex items-center gap-2">

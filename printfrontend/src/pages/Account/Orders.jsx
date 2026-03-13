@@ -12,7 +12,7 @@ import orderService from '../../services/orderService';
 /* ── Status config ── */
 const STATUS_CONFIG = {
     delivered:  { icon: FaCheckCircle,   bg: 'bg-emerald-50',  text: 'text-emerald-700', ring: 'ring-emerald-200', dot: 'bg-emerald-500' },
-    paid:       { icon: FaMoneyBillWave, bg: 'bg-blue-50',     text: 'text-blue-700',    ring: 'ring-blue-200',    dot: 'bg-blue-500' },
+    paid:       { icon: FaMoneyBillWave, bg: 'bg-brand-50',     text: 'text-brand-700',    ring: 'ring-brand-200',    dot: 'bg-brand' },
     pending:    { icon: FaClock,         bg: 'bg-amber-50',    text: 'text-amber-700',   ring: 'ring-amber-200',   dot: 'bg-amber-500' },
     processing: { icon: FaClock,         bg: 'bg-amber-50',    text: 'text-amber-700',   ring: 'ring-amber-200',   dot: 'bg-amber-500' },
     printing:   { icon: FaClock,         bg: 'bg-orange-50',   text: 'text-orange-700',  ring: 'ring-orange-200',  dot: 'bg-orange-500' },

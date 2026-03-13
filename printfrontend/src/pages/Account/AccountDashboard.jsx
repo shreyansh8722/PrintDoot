@@ -12,7 +12,7 @@ import orderService from '../../services/orderService';
 /* ── Status badge config (same as Orders page) ── */
 const STATUS_CONFIG = {
     delivered:  { bg: 'bg-emerald-50',  text: 'text-emerald-700', dot: 'bg-emerald-500' },
-    paid:       { bg: 'bg-blue-50',     text: 'text-blue-700',    dot: 'bg-blue-500' },
+    paid:       { bg: 'bg-brand-50',     text: 'text-brand-700',    dot: 'bg-brand' },
     pending:    { bg: 'bg-amber-50',    text: 'text-amber-700',   dot: 'bg-amber-500' },
     processing: { bg: 'bg-amber-50',    text: 'text-amber-700',   dot: 'bg-amber-500' },
     printing:   { bg: 'bg-orange-50',   text: 'text-orange-700',  dot: 'bg-orange-500' },

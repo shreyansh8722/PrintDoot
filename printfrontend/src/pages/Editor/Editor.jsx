@@ -55,22 +55,22 @@ export default function Editor() {
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium">Save Draft</button>
-                    <button className="bg-brand hover:bg-blue-500 px-6 py-2 rounded-lg text-sm font-bold">Review & Buy</button>
+                    <button className="bg-brand hover:bg-brand-600 px-6 py-2 rounded-lg text-sm font-bold">Review & Buy</button>
                 </div>
             </div>
 
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Toolbar */}
                 <div className="w-20 bg-gray-800 border-r border-gray-700 flex flex-col items-center py-6 gap-8 shrink-0">
-                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-400">
+                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-brand-300">
                         <span className="text-2xl">T</span>
                         <span className="text-[10px] font-bold uppercase">Text</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-400">
+                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-brand-300">
                         <span className="text-2xl">🖼️</span>
                         <span className="text-[10px] font-bold uppercase">Image</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-blue-400">
+                    <div className="flex flex-col items-center gap-1 cursor-pointer hover:text-brand-300">
                         <span className="text-2xl">📐</span>
                         <span className="text-[10px] font-bold uppercase">Shapes</span>
                     </div>
@@ -122,7 +122,7 @@ export default function Editor() {
                                         maxWidth: `${el.max_width_percent}%`,
                                         userSelect: 'none'
                                     }}
-                                    className="hover:outline hover:outline-2 hover:outline-blue-500 hover:outline-offset-4"
+                                    className="hover:outline hover:outline-2 hover:outline-brand hover:outline-offset-4"
                                 >
                                     {el.type === 'text' ? el.default_text : 'Image Placeholder'}
                                 </div>
@@ -131,7 +131,7 @@ export default function Editor() {
                     </div>
 
                     {/* Tips Overlay */}
-                    <div className="absolute bottom-10 left-10 bg-gray-800/80 backdrop-blur p-4 rounded-xl border border-gray-700 max-w-xs transition-opacity hover:opacity-10 border-l-4 border-l-blue-500">
+                    <div className="absolute bottom-10 left-10 bg-gray-800/80 backdrop-blur p-4 rounded-xl border border-gray-700 max-w-xs transition-opacity hover:opacity-10 border-l-4 border-l-brand">
                         <h4 className="font-bold text-sm mb-1">Editor Tip</h4>
                         <p className="text-xs text-gray-400">The white area is your printable canvas. Everything inside is exactly what will be printed.</p>
                     </div>
