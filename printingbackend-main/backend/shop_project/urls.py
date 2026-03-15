@@ -18,27 +18,20 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.conf import settings
-
-admin.site.site_header = "PrintDoot Admin"
-admin.site.site_title = "PrintDoot Admin"
-admin.site.index_title = "PrintDoot Administration"
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path(settings.ADMIN_URL, admin.site.urls),
+    path('admin/', admin.site.urls),
     # API Version 1
     path('api/v1/', include('apps.users.urls')),
     path('api/v1/', include('apps.catalog.urls')),
     path('api/v1/', include('apps.designs.urls')),
     path('api/v1/', include('apps.orders.urls')),
     path('api/v1/zakeke/', include('apps.zakeke.urls')),
-    path('api/v1/pages/', include('apps.pages.urls')),
     
     # Admin API
     path('api/v1/admin/', include('apps.users.admin_urls')),
     path('api/v1/admin/', include('apps.catalog.admin_urls')),
-    path('api/v1/admin/', include('apps.orders.admin_urls')),
-    path('api/v1/admin/', include('apps.pages.admin_urls')),
 ]
 
 if settings.DEBUG:

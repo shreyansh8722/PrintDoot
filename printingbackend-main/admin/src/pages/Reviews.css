@@ -1,0 +1,21 @@
+.reviews-page {
+    padding-bottom: 40px;
+}
+
+.page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #111;
+}
+
+.reviews-list-section {
+    margin-top: 40px;
+}
+
+.reviews-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}

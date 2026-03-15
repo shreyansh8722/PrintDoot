@@ -1,0 +1,62 @@
+# =========================
+# OS / Editor junk
+# =========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.md
+.vscode/
+.idea/
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Python / Django
+# =========================
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments (DO NOT COMMIT THESE)
+venv/
+env/
+.venv/
+
+# Django static & media (depends on your setup)
+staticfiles/
+media/
+
+# =========================
+# Node / React
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+frontend/build/
+frontend/dist/
+
+# =========================
+# Testing / coverage
+# =========================
+.coverage
+coverage/
+htmlcov/
