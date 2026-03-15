@@ -98,6 +98,53 @@ export const adminOffersAPI = {
     deleteOffer: (id) => api.delete(`/admin/offers/${id}/`),
 };
 
+// Admin Orders Management APIs
+export const adminOrdersAPI = {
+    getOrders: (params) => api.get('/admin/orders/', { params }),
+    getOrder: (id) => api.get(`/admin/orders/${id}/`),
+    updateOrder: (id, data) => api.patch(`/admin/orders/${id}/`, data),
+    deleteOrder: (id) => api.delete(`/admin/orders/${id}/`),
+    transitionStatus: (id, data) => api.post(`/admin/orders/${id}/transition/`, data),
+    getOrderStats: () => api.get('/admin/orders/stats/'),
+    getRevenueChart: (params) => api.get('/admin/orders/revenue-chart/', { params }),
+    getStatusChart: () => api.get('/admin/orders/status-chart/'),
+};
+
+// Admin Dashboard Analytics APIs
+export const adminDashboardAPI = {
+    getAnalytics: () => api.get('/admin/dashboard/analytics/'),
+    getUserAnalytics: () => api.get('/admin/analytics/users/'),
+    getProductAnalytics: () => api.get('/admin/analytics/products/'),
+};
+
+// Admin Stock Management APIs
+export const adminStockAPI = {
+    getStockAlerts: (params) => api.get('/admin/stock-alerts/', { params }),
+    bulkUpdateStock: (updates) => api.post('/admin/stock-alerts/', { updates }),
+};
+
+// Admin Marketing APIs
+export const adminMarketingAPI = {
+    // Campaigns
+    getCampaigns: (params) => api.get('/admin/campaigns/', { params }),
+    getCampaign: (id) => api.get(`/admin/campaigns/${id}/`),
+    createCampaign: (data) => api.post('/admin/campaigns/', data),
+    updateCampaign: (id, data) => api.patch(`/admin/campaigns/${id}/`, data),
+    deleteCampaign: (id) => api.delete(`/admin/campaigns/${id}/`),
+    sendCampaign: (id) => api.post(`/admin/campaigns/${id}/send/`),
+    getCampaignAnalytics: (id) => api.get(`/admin/campaigns/${id}/analytics/`),
+    getCampaignStats: () => api.get('/admin/campaigns/stats/'),
+
+    // Abandoned Carts
+    getAbandonedCarts: (params) => api.get('/admin/abandoned-carts/', { params }),
+    sendCartReminder: (id) => api.post(`/admin/abandoned-carts/${id}/send-reminder/`),
+    getAbandonedCartStats: () => api.get('/admin/abandoned-carts/stats/'),
+
+    // Settings
+    getSettings: () => api.get('/admin/marketing/settings/'),
+    updateSettings: (data) => api.put('/admin/marketing/settings/', data),
+};
+
 // Auth API
 export const authAPI = {
     login: (username, password) => {

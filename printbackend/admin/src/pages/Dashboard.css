@@ -49,3 +49,50 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Low Stock Section */
+.low-stock-section {
+    margin-top: 20px;
+}
+
+.low-stock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.low-stock-item {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.low-stock-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #92400e;
+    margin-bottom: 4px;
+}
+
+.low-stock-sku code {
+    font-size: 12px;
+    background: #fef3c7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #78350f;
+}
+
+.low-stock-qty {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.loading {
+    text-align: center;
+    padding: 60px;
+    font-size: 18px;
+    color: #6b7280;
+}

@@ -10,6 +10,10 @@ import Customers from './pages/Customers';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Offers from './pages/Offers';
+import Orders from './pages/Orders';
+import Finance from './pages/Finance';
+import Marketing from './pages/Marketing';
+import Stocks from './pages/Stocks';
 
 function App() {
   return (
@@ -28,6 +32,11 @@ function App() {
             <Route path="products" element={<Products />} />
             <Route path="categories" element={<Categories />} />
             <Route path="offers" element={<Offers />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="payments" element={<Finance />} />
+            <Route path="finance" element={<Finance />} />
+            <Route path="marketing" element={<Marketing />} />
+            <Route path="stocks" element={<Stocks />} />
             <Route path="*" element={<div className="p-4">Page Not Found</div>} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />

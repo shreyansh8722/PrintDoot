@@ -1,27 +1,22 @@
 import React from 'react';
 import './RecentOrders.css';
 
-const RecentOrders = () => {
-    // This combines "Most Selling Products" and "Low Selling Products" from the image concepts, 
-    // but I'll make generic table components.
-    // Actually, looking at image 1 bottom: "Most Selling Products" and "Low Selling Products" tables.
-
-    // I will create a reusable Table component.
+const RecentOrders = ({ mostSelling, leastSelling }) => {
     return (
         <div className="tables-grid">
-            <ProductTable title="Most Selling Products" />
-            <ProductTable title="Low Selling Products" />
+            <ProductTable title="Most Selling Products" products={mostSelling} />
+            <ProductTable title="Low Selling Products" products={leastSelling} />
         </div>
     );
 };
 
-const ProductTable = ({ title }) => {
-    const products = title.includes("Most") ? [
-        { name: 'Customized Pens', orders: 234, revenue: '₹2,40,500' },
-        // ... more
-    ] : [
-        { name: 'Envelopes', orders: 12, revenue: '₹15,000' }
-    ];
+const formatCurrency = (amount) => {
+    if (!amount) return '₹0';
+    return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+};
+
+const ProductTable = ({ title, products }) => {
+    const data = products && products.length > 0 ? products : [];
 
     return (
         <div className="product-table-card">
@@ -35,20 +30,21 @@ const ProductTable = ({ title }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {products.map((p, i) => (
-                        <tr key={i}>
-                            <td>{p.name}</td>
-                            <td style={{ textAlign: 'center' }}>{p.orders}</td>
-                            <td style={{ textAlign: 'right' }}>{p.revenue}</td>
-                        </tr>
-                    ))}
-                    {/* Filler rows */}
-                    <tr><td>&nbsp;</td><td></td><td></td></tr>
-                    <tr><td>&nbsp;</td><td></td><td></td></tr>
+                    {data.length === 0 ? (
+                        <tr><td colSpan="3" style={{ textAlign: 'center', color: '#9ca3af', padding: '20px' }}>No data available</td></tr>
+                    ) : (
+                        data.map((p, i) => (
+                            <tr key={i}>
+                                <td>{p.name}</td>
+                                <td style={{ textAlign: 'center' }}>{p.orders}</td>
+                                <td style={{ textAlign: 'right' }}>{formatCurrency(p.revenue)}</td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
         </div>
-    )
-}
+    );
+};
 
 export default RecentOrders;
