@@ -101,12 +101,18 @@ class BruteForceProtectionMiddleware:
     BAN_DURATION = 30 * 60
     # Tracking window in seconds (1 hour)
     TRACK_WINDOW = 60 * 60
+    # Localhost IPs that should never be banned during development
+    LOCALHOST_IPS = {'127.0.0.1', '::1', 'localhost'}
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         ip = self._get_ip(request)
+
+        # Never ban localhost IPs in development mode
+        if settings.DEBUG and ip in self.LOCALHOST_IPS:
+            return self.get_response(request)
 
         # Check if IP is banned
         ban_key = f'security:banned:{ip}'

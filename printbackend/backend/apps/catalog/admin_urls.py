@@ -6,6 +6,7 @@ from .admin_views import (
     AdminProductViewSet,
     AdminProductImageViewSet,
     AdminProductReviewViewSet,
+    S3ImageUploadView,
 )
 
 router = DefaultRouter()
@@ -17,4 +18,5 @@ router.register('product-reviews', AdminProductReviewViewSet, basename='admin-pr
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('upload/', S3ImageUploadView.as_view(), name='admin-image-upload'),
 ]

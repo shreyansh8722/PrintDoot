@@ -1,29 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { adminStockAPI } from '../services/api';
+import {
+    Search, Filter, Plus, Package, ArrowUp, ArrowDown,
+    AlertTriangle, ChevronLeft, ChevronRight
+} from 'lucide-react';
+import { adminStockAPI, adminCatalogAPI } from '../services/api';
 import './Stocks.css';
 
+const STATUS_BADGE = {
+    in_stock:     { label: 'In Stock',     bg: '#dcfce7', color: '#15803d' },
+    low_stock:    { label: 'Low Stock',    bg: '#fef3c7', color: '#92400e' },
+    out_of_stock: { label: 'Out of Stock', bg: '#fee2e2', color: '#991b1b' },
+};
+
 const Stocks = () => {
+    const [products, setProducts] = useState([]);
     const [stockData, setStockData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('All');
     const [threshold, setThreshold] = useState(10);
     const [editingStock, setEditingStock] = useState({});
     const [showBulkModal, setShowBulkModal] = useState(false);
 
-    useEffect(() => {
-        fetchStockData();
-    }, [threshold]);
+    useEffect(() => { fetchAll(); }, []);
 
-    const fetchStockData = async () => {
+    const fetchAll = async () => {
         try {
             setLoading(true);
-            const response = await adminStockAPI.getStockAlerts({ threshold });
-            setStockData(response.data);
+            const [stockRes, productsRes] = await Promise.all([
+                adminStockAPI.getStockAlerts({ threshold }),
+                adminCatalogAPI.getProducts({ page_size: 100 }),
+            ]);
+            setStockData(stockRes.data);
+            const prodData = productsRes.data;
+            setProducts(Array.isArray(prodData) ? prodData : (prodData.results || []));
         } catch (error) {
-            console.error('Error fetching stock data:', error);
+            console.error('Error:', error);
         } finally {
             setLoading(false);
         }
     };
+
+    const getStockStatus = (product) => {
+        if (product.stock_quantity === 0) return 'out_of_stock';
+        if (product.stock_quantity <= threshold) return 'low_stock';
+        return 'in_stock';
+    };
+
+    const getMovement = (product) => {
+        // Mock movement data (would come from backend in production)
+        const movements = ['+100', '-50', '+200', '-20', '+50', '-10'];
+        const idx = product.id % movements.length;
+        return movements[idx];
+    };
+
+    const filteredProducts = products.filter(p => {
+        const matchSearch = !searchTerm ||
+            p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.sku?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const status = getStockStatus(p);
+        let matchTab = true;
+        if (activeTab === 'In Stock') matchTab = status === 'in_stock';
+        if (activeTab === 'Low Stock') matchTab = status === 'low_stock';
+        if (activeTab === 'Out of Stock') matchTab = status === 'out_of_stock';
+
+        return matchSearch && matchTab;
+    });
 
     const handleStockChange = (productId, value) => {
         setEditingStock(prev => ({ ...prev, [productId]: parseInt(value) || 0 }));
@@ -31,228 +74,153 @@ const Stocks = () => {
 
     const handleBulkUpdate = async () => {
         const updates = Object.entries(editingStock).map(([id, stock_quantity]) => ({
-            id: parseInt(id),
-            stock_quantity,
+            id: parseInt(id), stock_quantity,
         }));
-
-        if (updates.length === 0) {
-            alert('No stock changes to update');
-            return;
-        }
-
+        if (updates.length === 0) return;
         try {
             await adminStockAPI.bulkUpdateStock(updates);
-            alert(`Successfully updated ${updates.length} product(s)`);
             setEditingStock({});
             setShowBulkModal(false);
-            fetchStockData();
+            fetchAll();
         } catch (error) {
-            alert('Error updating stock: ' + (error.response?.data?.detail || error.message));
+            alert('Error: ' + (error.response?.data?.detail || error.message));
         }
-    };
-
-    const formatCurrency = (amount) => {
-        if (!amount) return '₹0';
-        return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
     };
 
     if (loading) {
-        return <div className="loading">Loading stock data...</div>;
+        return <div className="stk-loading"><div className="stk-spinner"></div><p>Loading inventory...</p></div>;
     }
 
     return (
-        <div className="stocks-page">
-            <div className="page-header">
-                <h1>Stock Management</h1>
-                <div className="header-actions">
-                    <div className="threshold-control">
-                        <label>Low stock threshold:</label>
+        <div className="stk-page">
+            {/* ═══ HEADER ═══ */}
+            <h1 className="stk-page-title">Stock and Inventory Management</h1>
+
+            <section className="stk-overview">
+                <h2 className="stk-heading">Inventory Overview</h2>
+                <p className="stk-desc">Manage your product stock levels, track inventory movement, and set low-stock alerts.</p>
+
+                {/* Search + Filters */}
+                <div className="stk-toolbar">
+                    <div className="stk-search-wrap">
+                        <Search size={16} className="stk-search-icon" />
                         <input
-                            type="number"
-                            value={threshold}
-                            onChange={(e) => setThreshold(parseInt(e.target.value) || 10)}
-                            className="threshold-input"
-                            min="1"
+                            type="text"
+                            placeholder="Search for products"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="stk-search-input"
                         />
                     </div>
-                    <button onClick={fetchStockData} className="btn-refresh">🔄 Refresh</button>
-                    {Object.keys(editingStock).length > 0 && (
-                        <button onClick={() => setShowBulkModal(true)} className="btn-primary">
-                            💾 Save Changes ({Object.keys(editingStock).length})
-                        </button>
-                    )}
+                    <div className="stk-tabs">
+                        {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map(tab => (
+                            <button
+                                key={tab}
+                                className={`stk-tab ${activeTab === tab ? 'stk-tab-active' : ''}`}
+                                onClick={() => setActiveTab(tab)}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                    <button className="stk-filter-btn"><Filter size={15} /> Filter</button>
+                    <button className="stk-add-btn" onClick={() => {}}>
+                        <Plus size={15} /> Add Product
+                    </button>
                 </div>
-            </div>
 
-            {/* Stock Summary Cards */}
-            {stockData && (
-                <div className="stock-summary-grid">
-                    <div className="stock-card warning">
-                        <div className="stock-card-icon">⚠️</div>
-                        <div className="stock-card-info">
-                            <div className="stock-card-number">{stockData.low_stock_count}</div>
-                            <div className="stock-card-label">Low Stock Products</div>
-                        </div>
-                    </div>
-                    <div className="stock-card danger">
-                        <div className="stock-card-icon">🚫</div>
-                        <div className="stock-card-info">
-                            <div className="stock-card-number">{stockData.out_of_stock_count}</div>
-                            <div className="stock-card-label">Out of Stock</div>
-                        </div>
-                    </div>
-                    <div className="stock-card info">
-                        <div className="stock-card-icon">📦</div>
-                        <div className="stock-card-info">
-                            <div className="stock-card-number">{stockData.total_stock_items?.toLocaleString()}</div>
-                            <div className="stock-card-label">Total Items in Stock</div>
-                        </div>
-                    </div>
-                    <div className="stock-card primary">
-                        <div className="stock-card-icon">💰</div>
-                        <div className="stock-card-info">
-                            <div className="stock-card-number">{formatCurrency(stockData.total_stock_value)}</div>
-                            <div className="stock-card-label">Total Stock Value</div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Out of Stock Products */}
-            {stockData?.out_of_stock?.length > 0 && (
-                <div className="stock-section">
-                    <h2>🚫 Out of Stock Products</h2>
-                    <div className="stock-table-container">
-                        <table className="stock-table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>Category</th>
-                                    <th>Stock</th>
-                                    <th>Update Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {stockData.out_of_stock.map(product => (
-                                    <tr key={product.id} className="out-of-stock-row">
-                                        <td>
-                                            <div className="product-name-cell">
-                                                {product.primary_image && (
-                                                    <img src={product.primary_image} alt="" className="product-thumb" />
-                                                )}
-                                                <div>
-                                                    <strong>{product.name}</strong>
-                                                    <br /><code className="sku">{product.sku}</code>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>{product.category_name || '—'}</td>
-                                        <td><span className="stock-badge out">0</span></td>
-                                        <td>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                className="stock-input"
-                                                placeholder="New qty"
-                                                value={editingStock[product.id] ?? ''}
-                                                onChange={(e) => handleStockChange(product.id, e.target.value)}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {/* Low Stock Products */}
-            {stockData?.low_stock?.length > 0 && (
-                <div className="stock-section">
-                    <h2>⚠️ Low Stock Products (below {threshold} units)</h2>
-                    <div className="stock-table-container">
-                        <table className="stock-table">
-                            <thead>
-                                <tr>
-                                    <th>Product</th>
-                                    <th>SKU</th>
-                                    <th>Category</th>
-                                    <th>Subcategory</th>
-                                    <th>Price</th>
-                                    <th>Current Stock</th>
-                                    <th>Update Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {stockData.low_stock.map(product => (
-                                    <tr key={product.id}>
-                                        <td>
-                                            <div className="product-name-cell">
-                                                {product.primary_image && (
-                                                    <img src={product.primary_image} alt="" className="product-thumb" />
-                                                )}
-                                                <strong>{product.name}</strong>
-                                            </div>
-                                        </td>
-                                        <td><code className="sku">{product.sku}</code></td>
-                                        <td>{product.category_name || '—'}</td>
-                                        <td>{product.subcategory_name || '—'}</td>
-                                        <td>{formatCurrency(product.base_price)}</td>
-                                        <td>
-                                            <span className={`stock-badge ${product.stock_quantity === 0 ? 'out' : product.stock_quantity < 5 ? 'critical' : 'low'}`}>
-                                                {product.stock_quantity}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                className="stock-input"
-                                                placeholder="New qty"
-                                                value={editingStock[product.id] ?? ''}
-                                                onChange={(e) => handleStockChange(product.id, e.target.value)}
-                                            />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
-
-            {stockData?.low_stock?.length === 0 && stockData?.out_of_stock?.length === 0 && (
-                <div className="empty-stock">
-                    <div className="empty-icon">✅</div>
-                    <h3>All products are well stocked!</h3>
-                    <p>No products below the threshold of {threshold} units.</p>
-                </div>
-            )}
-
-            {/* Bulk Update Confirmation Modal */}
-            {showBulkModal && (
-                <div className="modal-overlay" onClick={() => setShowBulkModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h2>Confirm Stock Update</h2>
-                            <button className="modal-close" onClick={() => setShowBulkModal(false)}>&times;</button>
-                        </div>
-                        <div className="modal-body">
-                            <p>You are about to update stock for <strong>{Object.keys(editingStock).length}</strong> product(s):</p>
-                            <ul className="update-list">
-                                {Object.entries(editingStock).map(([id, qty]) => {
-                                    const product = [...(stockData?.low_stock || []), ...(stockData?.out_of_stock || [])].find(p => p.id === parseInt(id));
+                {/* Inventory Table */}
+                <div className="stk-table-wrap">
+                    <table className="stk-table">
+                        <thead>
+                            <tr>
+                                <th>PRODUCT NAME</th>
+                                <th>SKU</th>
+                                <th>STATUS</th>
+                                <th>CURRENT STOCK</th>
+                                <th>MOVEMENT</th>
+                                <th>LOW STOCK ALERT</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProducts.length === 0 ? (
+                                <tr><td colSpan="7" className="stk-empty">
+                                    <Package size={28} strokeWidth={1.2} />
+                                    <span>No products found</span>
+                                </td></tr>
+                            ) : (
+                                filteredProducts.map(product => {
+                                    const status = getStockStatus(product);
+                                    const cfg = STATUS_BADGE[status];
+                                    const movement = getMovement(product);
+                                    const movementPositive = movement.startsWith('+');
                                     return (
-                                        <li key={id}>
-                                            {product?.name || `Product #${id}`}: <strong>{qty} units</strong>
-                                        </li>
+                                        <tr key={product.id}>
+                                            <td className="stk-prod-name">{product.name}</td>
+                                            <td><code className="stk-sku">{product.sku || '—'}</code></td>
+                                            <td>
+                                                <span className="stk-status-badge" style={{ background: cfg.bg, color: cfg.color }}>
+                                                    {cfg.label}
+                                                </span>
+                                            </td>
+                                            <td className="stk-stock-val">{product.stock_quantity?.toLocaleString() || 0} units</td>
+                                            <td>
+                                                <span className={`stk-movement ${movementPositive ? 'stk-mov-up' : 'stk-mov-down'}`}>
+                                                    {movement}
+                                                </span>
+                                            </td>
+                                            <td className="stk-alert-val">{threshold} units</td>
+                                            <td>
+                                                <button
+                                                    className="stk-adjust-btn"
+                                                    onClick={() => {
+                                                        const newQty = prompt(`New stock quantity for ${product.name}:`, product.stock_quantity);
+                                                        if (newQty !== null) handleStockChange(product.id, newQty);
+                                                    }}
+                                                >
+                                                    Adjust
+                                                </button>
+                                            </td>
+                                        </tr>
                                     );
-                                })}
-                            </ul>
-                            <div className="modal-actions">
-                                <button className="btn-secondary" onClick={() => setShowBulkModal(false)}>Cancel</button>
-                                <button className="btn-primary" onClick={handleBulkUpdate}>Confirm Update</button>
-                            </div>
+                                })
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="stk-pagination">
+                    <span className="stk-page-info">
+                        Showing 1 to {Math.min(filteredProducts.length, 6)} of {filteredProducts.length} results
+                    </span>
+                    <div className="stk-page-btns">
+                        <button className="stk-page-btn" disabled>Previous</button>
+                        <button className="stk-page-btn" disabled={filteredProducts.length <= 6}>Next</button>
+                    </div>
+                </div>
+
+                {/* Save bar */}
+                {Object.keys(editingStock).length > 0 && (
+                    <div className="stk-save-bar">
+                        <span>{Object.keys(editingStock).length} change(s) pending</span>
+                        <button className="stk-save-btn" onClick={() => setShowBulkModal(true)}>
+                            Save Changes
+                        </button>
+                    </div>
+                )}
+            </section>
+
+            {/* Bulk Update Modal */}
+            {showBulkModal && (
+                <div className="stk-modal-overlay" onClick={() => setShowBulkModal(false)}>
+                    <div className="stk-modal" onClick={(e) => e.stopPropagation()}>
+                        <h2>Confirm Stock Update</h2>
+                        <p>Updating {Object.keys(editingStock).length} product(s)</p>
+                        <div className="stk-modal-actions">
+                            <button className="bn-btn-cancel" onClick={() => setShowBulkModal(false)}>Cancel</button>
+                            <button className="bn-btn-confirm" onClick={handleBulkUpdate}>Confirm</button>
                         </div>
                     </div>
                 </div>

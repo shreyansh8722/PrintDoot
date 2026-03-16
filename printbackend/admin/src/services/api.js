@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://api.printdoot.com/api/v1'
+// const API_BASE_URL = 'https://api.printdoot.com/api/v1'
+const API_BASE_URL = 'http://localhost:8000/api/v1'
 // const API_BASE_URL = import.meta.env.VITE_API_URL
 
 // Create axios instance with default config
@@ -54,6 +55,7 @@ export const adminCatalogAPI = {
     getProduct: (id) => api.get(`/admin/products/${id}/`),
     createProduct: (data) => api.post('/admin/products/', data),
     updateProduct: (id, data) => api.put(`/admin/products/${id}/`, data),
+    patchProduct: (id, data) => api.patch(`/admin/products/${id}/`, data),
     deleteProduct: (id) => api.delete(`/admin/products/${id}/`),
 
     // Product Attributes
@@ -113,6 +115,7 @@ export const adminOrdersAPI = {
 // Admin Dashboard Analytics APIs
 export const adminDashboardAPI = {
     getAnalytics: () => api.get('/admin/dashboard/analytics/'),
+    getSalesOrderAnalytics: () => api.get('/admin/analytics/sales-orders/'),
     getUserAnalytics: () => api.get('/admin/analytics/users/'),
     getProductAnalytics: () => api.get('/admin/analytics/products/'),
 };
@@ -143,6 +146,35 @@ export const adminMarketingAPI = {
     // Settings
     getSettings: () => api.get('/admin/marketing/settings/'),
     updateSettings: (data) => api.put('/admin/marketing/settings/', data),
+};
+
+// Admin Banner Management APIs
+export const adminBannerAPI = {
+    getBanners: (params) => api.get('/admin/banners/', { params }),
+    getBanner: (id) => api.get(`/admin/banners/${id}/`),
+    createBanner: (data) => api.post('/admin/banners/', data),
+    updateBanner: (id, data) => api.patch(`/admin/banners/${id}/`, data),
+    deleteBanner: (id) => api.delete(`/admin/banners/${id}/`),
+    reorderBanners: (order) => api.post('/admin/banners/reorder/', { order }),
+    getBannerStats: () => api.get('/admin/banners/stats/'),
+};
+
+// Admin Courier / Shipment APIs
+export const adminCourierAPI = {
+    getDashboard: () => api.get('/admin/courier/dashboard/'),
+    trackShipment: (id) => api.get(`/admin/courier/track/${id}/`),
+};
+
+// S3 Image Upload
+export const adminUploadAPI = {
+    uploadImage: (file, folder = 'uploads') => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', folder);
+        return api.post('/admin/catalog/upload/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    },
 };
 
 // Auth API

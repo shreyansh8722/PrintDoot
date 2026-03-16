@@ -1,6 +1,9 @@
 from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Q
 from .models import Category, Subcategory, Product, ProductImage, ProductReview
 from .serializers import (
     CategorySerializer, SubcategorySerializer, ProductSerializer,
@@ -67,13 +70,21 @@ class AdminProductViewSet(viewsets.ModelViewSet):
         """Get product statistics"""
         total = Product.objects.count()
         active = Product.objects.filter(is_active=True).count()
-        low_stock = Product.objects.filter(stock_quantity__lt=10, is_infinite_stock=False).count()
+        in_stock = Product.objects.filter(
+            Q(stock_quantity__gt=0) | Q(is_infinite_stock=True)
+        ).count()
+        out_of_stock = Product.objects.filter(stock_quantity=0, is_infinite_stock=False).count()
+        low_stock = Product.objects.filter(stock_quantity__lt=10, stock_quantity__gt=0, is_infinite_stock=False).count()
+        categories_count = Category.objects.count()
         
         return Response({
             'total': total,
             'active': active,
             'inactive': total - active,
+            'in_stock': in_stock,
+            'out_of_stock': out_of_stock,
             'low_stock': low_stock,
+            'categories_count': categories_count,
         })
 
 
@@ -119,4 +130,45 @@ class AdminProductReviewViewSet(viewsets.ModelViewSet):
         review.helpful_count += 1
         review.save()
         return Response({'helpful_count': review.helpful_count})
+
+
+class S3ImageUploadView(APIView):
+    """
+    Upload images to S3 via Django's configured storage backend.
+    Accepts multipart file uploads and returns the S3 URL.
+    Uses MediaStorage which auto-converts to WebP.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        file = request.FILES.get('file')
+        if not file:
+            return Response({'error': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate image file
+        allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp']
+        if file.content_type not in allowed_types:
+            return Response({'error': f'Unsupported file type: {file.content_type}'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Max 10MB
+        if file.size > 10 * 1024 * 1024:
+            return Response({'error': 'File too large (max 10MB)'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Use the folder from request or default
+        folder = request.data.get('folder', 'uploads')
+        import uuid
+        ext = file.name.rsplit('.', 1)[-1] if '.' in file.name else 'jpg'
+        filename = f'{folder}/{uuid.uuid4().hex}.{ext}'
+
+        from django.core.files.storage import default_storage
+        saved_name = default_storage.save(filename, file)
+        url = default_storage.url(saved_name)
+
+        return Response({
+            'url': url,
+            'filename': saved_name,
+            'size': file.size,
+        }, status=status.HTTP_201_CREATED)
+
 

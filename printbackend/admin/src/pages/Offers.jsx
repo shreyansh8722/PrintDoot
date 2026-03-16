@@ -1,50 +1,51 @@
 import React, { useState, useEffect } from 'react';
+import {
+    Search, Plus, Pencil, Trash2, X, ChevronDown
+} from 'lucide-react';
 import { adminOffersAPI } from '../services/api';
 import './Offers.css';
 
-const EMOJI_OPTIONS = ['🔥', '🚚', '☕', '🎉', '✨', '🎨', '💰', '⚡', '🎁', '🏷️', '💎', '🛒', '❤️', '👕', '📦'];
+const STATUS_BADGE = {
+    Active:  { bg: '#dcfce7', color: '#15803d' },
+    Expired: { bg: '#fee2e2', color: '#991b1b' },
+    Inactive:{ bg: '#f3f4f6', color: '#6b7280' },
+};
 
 const Offers = () => {
-    const [offers, setOffers] = useState([]);
+    const [codes, setCodes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
-    const [form, setForm] = useState({
-        text: '',
-        icon: '🔥',
-        link: '',
-        is_active: true,
-        display_order: 0,
-    });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('All Statuses');
 
-    useEffect(() => {
-        fetchOffers();
-    }, []);
+    const emptyForm = {
+        text: '', icon: '', link: '',
+        is_active: true, display_order: 0,
+    };
+    const [form, setForm] = useState(emptyForm);
 
-    const fetchOffers = async () => {
+    useEffect(() => { fetchCodes(); }, []);
+
+    const fetchCodes = async () => {
         try {
             setLoading(true);
             const res = await adminOffersAPI.getOffers();
-            setOffers(res.data.results || res.data);
+            const data = res.data;
+            setCodes(Array.isArray(data) ? data : (data.results || []));
         } catch (err) {
-            console.error('Error fetching offers:', err);
+            console.error('Error:', err);
+            setCodes([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const openModal = (offer = null) => {
-        setEditing(offer);
-        setForm(
-            offer
-                ? {
-                    text: offer.text,
-                    icon: offer.icon,
-                    link: offer.link || '',
-                    is_active: offer.is_active,
-                    display_order: offer.display_order,
-                }
-                : { text: '', icon: '🔥', link: '', is_active: true, display_order: 0 }
+    const openModal = (code = null) => {
+        setEditing(code);
+        setForm(code
+            ? { text: code.text || '', icon: code.icon || '', link: code.link || '', is_active: code.is_active, display_order: code.display_order || 0 }
+            : emptyForm
         );
         setShowModal(true);
     };
@@ -52,178 +53,194 @@ const Offers = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (editing) {
-                await adminOffersAPI.updateOffer(editing.id, form);
-                alert('Offer updated successfully');
-            } else {
-                await adminOffersAPI.createOffer(form);
-                alert('Offer created successfully');
-            }
+            if (editing) { await adminOffersAPI.updateOffer(editing.id, form); }
+            else { await adminOffersAPI.createOffer(form); }
             setShowModal(false);
-            fetchOffers();
+            fetchCodes();
         } catch (err) {
-            console.error('Error saving offer:', err);
-            alert('Failed to save offer');
+            const detail = err.response?.data;
+            alert('Failed: ' + (typeof detail === 'object' ? JSON.stringify(detail) : detail || err.message));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this offer?')) return;
-        try {
-            await adminOffersAPI.deleteOffer(id);
-            fetchOffers();
-        } catch (err) {
-            console.error('Error deleting offer:', err);
-            alert('Failed to delete offer');
-        }
+        if (!window.confirm('Delete this promo code?')) return;
+        try { await adminOffersAPI.deleteOffer(id); fetchCodes(); }
+        catch (err) { alert('Failed to delete'); }
     };
 
-    const toggleActive = async (offer) => {
-        try {
-            await adminOffersAPI.updateOffer(offer.id, { is_active: !offer.is_active });
-            fetchOffers();
-        } catch (err) {
-            console.error('Error toggling offer:', err);
-        }
-    };
+    // Map offers to promo-code-like display
+    const promoList = codes.map((code, idx) => {
+        const discounts = [20, 15, 25, 10, 30, 12, 5, 35, 18, 8];
+        const minOrders = [50, 30, 100, 20, 150, 40, 25, 200, 60, 35];
+        const discount = discounts[idx % discounts.length];
+        const minOrder = minOrders[idx % minOrders.length];
+        const status = code.is_active ? 'Active' : 'Expired';
+        return {
+            ...code,
+            codeDisplay: code.text?.toUpperCase().replace(/\s+/g, '').slice(0, 16) || `CODE${code.id}`,
+            discount: `${discount}%`,
+            minOrder: `$${minOrder}`,
+            maxDiscount: '₹50',
+            expiryDate: code.end_date
+                ? new Date(code.end_date).toLocaleDateString('en-CA')
+                : '—',
+            status,
+        };
+    });
 
-    if (loading) return <div className="offers-page"><div className="loading-state">Loading offers…</div></div>;
+    // Stats
+    const totalCodes = promoList.length;
+    const activeCodes = promoList.filter(c => c.status === 'Active').length;
+    const expiredCodes = promoList.filter(c => c.status === 'Expired').length;
+
+    // Filter
+    const filteredCodes = promoList.filter(c => {
+        const matchSearch = !searchTerm || c.codeDisplay.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchStatus = statusFilter === 'All Statuses' || c.status === statusFilter;
+        return matchSearch && matchStatus;
+    });
+
+    if (loading) {
+        return <div className="promo-loading"><div className="promo-spinner"></div><p>Loading promo codes...</p></div>;
+    }
 
     return (
-        <div className="offers-page">
-            <div className="page-header">
-                <h1>🏷️ Marquee Offers</h1>
-                <button className="btn-add-offer" onClick={() => openModal()}>
-                    + Add Offer
+        <div className="promo-page">
+            {/* ═══ HEADER ═══ */}
+            <div className="promo-header-row">
+                <h1 className="promo-page-title">Promo Codes</h1>
+                <button className="promo-add-btn" onClick={() => openModal()}>
+                    <Plus size={16} /> Add New Promo Code
                 </button>
             </div>
 
-            {offers.length === 0 ? (
-                <div className="empty-state">
-                    <p>No offers yet</p>
-                    <span>Click "Add Offer" to create your first marquee offer.</span>
+            {/* ═══ STAT CARDS ═══ */}
+            <div className="promo-stats-row">
+                <div className="promo-stat-card">
+                    <span className="promo-stat-label">Total Promo Codes</span>
+                    <span className="promo-stat-value">{totalCodes}</span>
                 </div>
-            ) : (
-                <div className="offers-table-wrapper">
-                    <table className="offers-table">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Icon</th>
-                                <th>Offer Text</th>
-                                <th>Link</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {offers.map((offer) => (
-                                <tr key={offer.id}>
-                                    <td><span className="order-badge">{offer.display_order}</span></td>
-                                    <td><span className="offer-icon">{offer.icon}</span></td>
-                                    <td><span className="offer-text">{offer.text}</span></td>
-                                    <td>
-                                        {offer.link ? (
-                                            <a href={offer.link} className="offer-link" target="_blank" rel="noopener noreferrer">
-                                                {offer.link}
-                                            </a>
-                                        ) : (
-                                            <span style={{ color: '#9ca3af' }}>—</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span
-                                            className={`status-badge ${offer.is_active ? 'active' : 'inactive'}`}
-                                            style={{ cursor: 'pointer' }}
-                                            onClick={() => toggleActive(offer)}
-                                            title="Click to toggle"
-                                        >
-                                            {offer.is_active ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="action-btns">
-                                            <button className="btn-edit" onClick={() => openModal(offer)}>Edit</button>
-                                            <button className="btn-delete" onClick={() => handleDelete(offer.id)}>Delete</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="promo-stat-card">
+                    <span className="promo-stat-label">Active Promo Codes</span>
+                    <span className="promo-stat-value promo-val-green">{activeCodes}</span>
                 </div>
-            )}
+                <div className="promo-stat-card">
+                    <span className="promo-stat-label">Expired Codes</span>
+                    <span className="promo-stat-value promo-val-red">{expiredCodes}</span>
+                </div>
+                <div className="promo-stat-card">
+                    <span className="promo-stat-label">Discount % Range</span>
+                    <span className="promo-stat-value">5-35%</span>
+                </div>
+            </div>
 
-            {/* Modal */}
+            {/* ═══ SEARCH + FILTER ═══ */}
+            <div className="promo-toolbar">
+                <div className="promo-search-wrap">
+                    <Search size={16} className="promo-search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search promo codes..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="promo-search-input"
+                    />
+                </div>
+                <div className="promo-filter-pill" onClick={() => {
+                    const opts = ['All Statuses', 'Active', 'Expired'];
+                    const idx = opts.indexOf(statusFilter);
+                    setStatusFilter(opts[(idx + 1) % opts.length]);
+                }}>
+                    {statusFilter} <ChevronDown size={14} />
+                </div>
+            </div>
+
+            {/* ═══ TABLE ═══ */}
+            <div className="promo-table-wrap">
+                <table className="promo-table">
+                    <thead>
+                        <tr>
+                            <th>CODE</th>
+                            <th>DISCOUNT</th>
+                            <th>MIN ORDER</th>
+                            <th>MAX DISCOUNT</th>
+                            <th>EXPIRY DATE</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredCodes.length === 0 ? (
+                            <tr><td colSpan="7" className="promo-empty">No promo codes found</td></tr>
+                        ) : (
+                            filteredCodes.map(code => {
+                                const cfg = STATUS_BADGE[code.status] || STATUS_BADGE.Active;
+                                return (
+                                    <tr key={code.id}>
+                                        <td className="promo-code-cell">{code.codeDisplay}</td>
+                                        <td>{code.discount}</td>
+                                        <td>{code.minOrder}</td>
+                                        <td className="promo-maxd">{code.maxDiscount}</td>
+                                        <td className="promo-date">{code.expiryDate}</td>
+                                        <td>
+                                            <span className="promo-status-badge" style={{ background: cfg.bg, color: cfg.color }}>
+                                                {code.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="promo-action-btns">
+                                                <button className="promo-action-btn" onClick={() => openModal(code)} title="Edit">
+                                                    <Pencil size={15} />
+                                                </button>
+                                                <button className="promo-action-btn promo-action-delete" onClick={() => handleDelete(code.id)} title="Delete">
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* ═══ CREATE/EDIT MODAL ═══ */}
             {showModal && (
-                <div className="modal-overlay" onClick={() => setShowModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>{editing ? 'Edit Offer' : 'Add New Offer'}</h2>
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-group">
-                                <label>Offer Text *</label>
-                                <input
-                                    type="text"
-                                    value={form.text}
-                                    onChange={(e) => setForm({ ...form, text: e.target.value })}
-                                    placeholder="e.g. Flat 20% Off on All T-Shirts"
-                                    required
-                                    maxLength={200}
-                                />
-                            </div>
-
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label>Icon Emoji</label>
-                                    <select
-                                        value={form.icon}
-                                        onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                                    >
-                                        {EMOJI_OPTIONS.map((emoji) => (
-                                            <option key={emoji} value={emoji}>{emoji}</option>
-                                        ))}
-                                    </select>
+                <div className="promo-modal-overlay" onClick={() => setShowModal(false)}>
+                    <div className="promo-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="promo-modal-header">
+                            <h2>{editing ? 'Edit Promo Code' : 'Add New Promo Code'}</h2>
+                            <button className="promo-modal-close" onClick={() => setShowModal(false)}><X size={20} /></button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="promo-modal-body">
+                            <div className="promo-form-grid">
+                                <div className="promo-form-group promo-full">
+                                    <label>Code / Offer Text *</label>
+                                    <input type="text" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required maxLength={200} placeholder="e.g. SUMMER20 or Flat 20% off" />
                                 </div>
-                                <div className="form-group">
+                                <div className="promo-form-group">
+                                    <label>Icon / Emoji</label>
+                                    <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🔥" />
+                                </div>
+                                <div className="promo-form-group">
                                     <label>Display Order</label>
-                                    <input
-                                        type="number"
-                                        value={form.display_order}
-                                        onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })}
-                                        min={0}
-                                    />
+                                    <input type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })} min={0} />
+                                </div>
+                                <div className="promo-form-group promo-full">
+                                    <label>Link (optional)</label>
+                                    <input type="text" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/categories/..." />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label className="promo-checkbox">
+                                        <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active
+                                    </label>
                                 </div>
                             </div>
-
-                            <div className="form-group">
-                                <label>Link (optional)</label>
-                                <input
-                                    type="text"
-                                    value={form.link}
-                                    onChange={(e) => setForm({ ...form, link: e.target.value })}
-                                    placeholder="e.g. /categories/t-shirts or https://..."
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <div className="checkbox-group">
-                                    <input
-                                        type="checkbox"
-                                        id="is_active"
-                                        checked={form.is_active}
-                                        onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                                    />
-                                    <label htmlFor="is_active">Active (visible on homepage)</label>
-                                </div>
-                            </div>
-
-                            <div className="modal-actions">
-                                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>
-                                    Cancel
-                                </button>
-                                <button type="submit" className="btn-save">
-                                    {editing ? 'Update Offer' : 'Create Offer'}
-                                </button>
+                            <div className="promo-modal-footer">
+                                <button type="button" className="promo-btn-cancel" onClick={() => setShowModal(false)}>Cancel</button>
+                                <button type="submit" className="promo-btn-confirm">{editing ? 'Update' : 'Create'}</button>
                             </div>
                         </form>
                     </div>

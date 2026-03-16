@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════════
+   PAYMENT DASHBOARD — Figma design
+   ═══════════════════════════════════════════════════════════════ */
+.pay-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.pay-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:pay-spin .7s linear infinite; }
+@keyframes pay-spin { to { transform:rotate(360deg); } }
+
+.pay-page { padding:0 0 40px; }
+
+/* Header */
+.pay-header-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+.pay-page-title { font-size:1.5rem; font-weight:700; color:#1f2937; margin-bottom:2px; }
+.pay-subtitle { font-size:.85rem; color:#6b7280; }
+.pay-header-actions { display:flex; gap:10px; align-items:center; }
+.pay-export-btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; font-size:.82rem; font-weight:500; color:#374151; cursor:pointer; }
+.pay-export-btn:hover { border-color:#00897b; }
+.pay-new-btn { padding:9px 20px; background:#00897b; color:#fff; border:none; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer; }
+.pay-new-btn:hover { background:#00695c; }
+
+/* Stat cards */
+.pay-stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+.pay-stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; display:flex; flex-direction:column; gap:6px; }
+.pay-stat-label { font-size:.75rem; font-weight:500; color:#6b7280; }
+.pay-stat-value { font-size:1.3rem; font-weight:700; color:#1f2937; }
+.pay-stat-text { font-size:1.1rem; }
+
+/* Transactions section */
+.pay-txn-section { background:#fff; border-radius:12px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; margin-bottom:20px; }
+.pay-txn-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.pay-txn-title { font-size:1.05rem; font-weight:700; color:#1f2937; }
+.pay-txn-filters { display:flex; gap:8px; }
+.pay-filter-pill { display:inline-flex; align-items:center; gap:4px; padding:7px 14px; border:1px solid #e5e7eb; border-radius:6px; font-size:.82rem; font-weight:500; color:#374151; cursor:pointer; user-select:none; }
+.pay-filter-pill:hover { border-color:#00897b; }
+
+/* Table */
+.pay-table-wrap { border:1px solid #f0f0f0; border-radius:10px; overflow:hidden; }
+.pay-table { width:100%; border-collapse:collapse; }
+.pay-table th { text-align:left; padding:12px 14px; font-weight:600; font-size:.72rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; border-bottom:2px solid #e5e7eb; white-space:nowrap; }
+.pay-table td { padding:12px 14px; font-size:.85rem; color:#374151; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
+.pay-table tbody tr { transition:background .12s; }
+.pay-table tbody tr:hover { background:#f9fafb; }
+.pay-txn-id { font-weight:600; color:#1f2937; white-space:nowrap; }
+.pay-customer { font-weight:500; }
+.pay-order-id { font-weight:500; color:#6b7280; }
+.pay-amount { font-weight:600; }
+.pay-status-badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:.75rem; font-weight:600; white-space:nowrap; }
+.pay-date { font-size:.82rem; color:#6b7280; white-space:nowrap; }
+.pay-view-btn { background:none; border:none; font-size:.82rem; font-weight:600; color:#00897b; cursor:pointer; }
+.pay-view-btn:hover { text-decoration:underline; }
+.pay-empty { text-align:center; padding:40px !important; color:#9ca3af; }
+
+/* Pagination */
+.pay-pagination { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+.pay-page-info { font-size:.82rem; color:#00897b; font-weight:500; }
+.pay-page-btns { display:flex; gap:8px; }
+.pay-page-btn { padding:7px 16px; border:1px solid #e5e7eb; border-radius:6px; background:#fff; font-size:.82rem; font-weight:500; color:#374151; cursor:pointer; }
+.pay-page-btn:hover:not(:disabled) { border-color:#00897b; }
+.pay-page-btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* Admin Actions */
+.pay-admin-section { background:#fff; border-radius:12px; padding:22px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.pay-admin-title { font-size:1.05rem; font-weight:700; color:#1f2937; margin-bottom:14px; }
+.pay-admin-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.pay-admin-card { display:flex; align-items:center; gap:10px; padding:16px 20px; border:1px solid #e5e7eb; border-radius:10px; background:#fff; font-size:.88rem; font-weight:500; color:#374151; cursor:pointer; transition:all .2s; }
+.pay-admin-card:hover { border-color:#00897b; background:#f0fdf4; color:#00897b; }
+
+/* Modal */
+.pay-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px; backdrop-filter:blur(2px); }
+.pay-modal { background:#fff; border-radius:16px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.15); animation:payIn .25s ease-out; }
+@keyframes payIn { from { opacity:0; transform:translateY(10px) scale(.98); } to { opacity:1; transform:none; } }
+.pay-modal-header { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; border-bottom:1px solid #e5e7eb; }
+.pay-modal-header h2 { font-size:1.1rem; font-weight:700; }
+.pay-modal-close { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#6b7280; background:none; border:none; cursor:pointer; font-size:1.3rem; }
+.pay-modal-close:hover { background:#f3f4f6; }
+.pay-modal-body { padding:24px; }
+.pay-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.pay-detail-grid > div { display:flex; flex-direction:column; gap:4px; }
+.pay-detail-label { font-size:.78rem; font-weight:500; color:#9ca3af; }
+.pay-detail-val { font-size:.95rem; font-weight:600; color:#1f2937; }
+
+@media (max-width:1100px) { .pay-stats-row { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:768px) { .pay-stats-row { grid-template-columns:1fr 1fr; } .pay-admin-grid { grid-template-columns:1fr; } }
+@media (max-width:480px) { .pay-stats-row { grid-template-columns:1fr; } }

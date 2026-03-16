@@ -1,221 +1,71 @@
-.stocks-page {
-    padding: 24px;
-}
+/* ═══════════════════════════════════════════════════════════════
+   STOCKS / INVENTORY MANAGEMENT — Figma design
+   ═══════════════════════════════════════════════════════════════ */
+.stk-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.stk-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:stk-spin .7s linear infinite; }
+@keyframes stk-spin { to { transform:rotate(360deg); } }
 
-/* Stock Summary Cards */
-.stock-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-}
+.stk-page { padding:0 0 40px; }
+.stk-page-title { font-size:1.5rem; font-weight:700; color:#1f2937; margin-bottom:24px; }
 
-.stock-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    border-left: 4px solid #e5e7eb;
-}
+.stk-overview { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.stk-heading { font-size:1.15rem; font-weight:700; color:#1f2937; margin-bottom:4px; }
+.stk-desc { font-size:.85rem; color:#6b7280; margin-bottom:20px; }
 
-.stock-card.warning { border-left-color: #f59e0b; }
-.stock-card.danger { border-left-color: #ef4444; }
-.stock-card.info { border-left-color: #3b82f6; }
-.stock-card.primary { border-left-color: #4f46e5; }
+/* Toolbar */
+.stk-toolbar { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+.stk-search-wrap { position:relative; flex:0 1 240px; }
+.stk-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#9ca3af; pointer-events:none; }
+.stk-search-input { width:100%; padding:9px 12px 9px 34px; border:1px solid #e5e7eb; border-radius:8px; font-size:.85rem; color:#374151; outline:none; }
+.stk-search-input:focus { border-color:#00897b; }
+.stk-tabs { display:flex; gap:2px; background:#f3f4f6; border-radius:8px; padding:2px; }
+.stk-tab { padding:7px 14px; border:none; background:transparent; border-radius:6px; font-size:.82rem; font-weight:500; color:#6b7280; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.stk-tab-active { background:#00897b; color:#fff; }
+.stk-filter-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; font-size:.82rem; font-weight:500; color:#374151; cursor:pointer; }
+.stk-filter-btn:hover { border-color:#00897b; }
+.stk-add-btn { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:#00897b; color:#fff; border:none; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer; }
+.stk-add-btn:hover { background:#00695c; }
 
-.stock-card-icon { font-size: 28px; }
+/* Table */
+.stk-table-wrap { border:1px solid #f0f0f0; border-radius:10px; overflow:hidden; }
+.stk-table { width:100%; border-collapse:collapse; }
+.stk-table th { text-align:left; padding:13px 16px; font-weight:600; font-size:.72rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; border-bottom:2px solid #e5e7eb; white-space:nowrap; }
+.stk-table td { padding:13px 16px; font-size:.88rem; color:#374151; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
+.stk-table tbody tr { transition:background .12s; }
+.stk-table tbody tr:hover { background:#f9fafb; }
+.stk-prod-name { font-weight:600; color:#1f2937; }
+.stk-sku { background:#e0f2f1; color:#00897b; padding:2px 8px; border-radius:4px; font-size:.78rem; font-family:'SF Mono','Menlo',monospace; }
+.stk-status-badge { display:inline-flex; align-items:center; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:600; white-space:nowrap; }
+.stk-stock-val { font-weight:500; }
+.stk-movement { font-weight:600; font-size:.85rem; }
+.stk-mov-up { color:#15803d; }
+.stk-mov-down { color:#dc2626; }
+.stk-alert-val { font-size:.85rem; color:#6b7280; }
+.stk-adjust-btn { padding:5px 14px; border:1px solid #00897b; border-radius:6px; background:#fff; color:#00897b; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; }
+.stk-adjust-btn:hover { background:#00897b; color:#fff; }
+.stk-empty { text-align:center; padding:40px !important; color:#9ca3af; display:flex; flex-direction:column; align-items:center; gap:8px; }
 
-.stock-card-number {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-}
+/* Pagination */
+.stk-pagination { display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding:0 4px; }
+.stk-page-info { font-size:.82rem; color:#00897b; font-weight:500; }
+.stk-page-btns { display:flex; gap:8px; }
+.stk-page-btn { padding:7px 16px; border:1px solid #e5e7eb; border-radius:6px; background:#fff; font-size:.82rem; font-weight:500; color:#374151; cursor:pointer; transition:all .2s; }
+.stk-page-btn:hover:not(:disabled) { border-color:#00897b; color:#00897b; }
+.stk-page-btn:disabled { opacity:.5; cursor:not-allowed; }
 
-.stock-card-label {
-    font-size: 12px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+/* Save Bar */
+.stk-save-bar { display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding:12px 16px; background:#e0f2f1; border-radius:8px; }
+.stk-save-bar span { font-size:.88rem; font-weight:500; color:#00695c; }
+.stk-save-btn { padding:8px 20px; background:#00897b; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
 
-/* Threshold Control */
-.threshold-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    color: #374151;
-}
+/* Modal */
+.stk-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.stk-modal { background:#fff; border-radius:16px; padding:24px; max-width:420px; width:100%; }
+.stk-modal h2 { font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+.stk-modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; }
 
-.threshold-input {
-    width: 70px;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    text-align: center;
-}
-
-/* Stock Section */
-.stock-section {
-    margin-bottom: 28px;
-}
-
-.stock-section h2 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 16px;
-}
-
-/* Stock Table */
-.stock-table-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.stock-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.stock-table thead {
-    background: #f9fafb;
-}
-
-.stock-table th {
-    text-align: left;
-    padding: 12px 16px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stock-table td {
-    padding: 14px 16px;
-    border-top: 1px solid #f3f4f6;
-    font-size: 14px;
-    color: #374151;
-}
-
-.out-of-stock-row {
-    background: #fef2f2;
-}
-
-.product-name-cell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.product-thumb {
-    width: 40px;
-    height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
-    border: 1px solid #e5e7eb;
-}
-
-.sku {
-    font-size: 12px;
-    background: #f3f4f6;
-    padding: 2px 8px;
-    border-radius: 4px;
-    color: #6b7280;
-}
-
-/* Stock Badge */
-.stock-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.stock-badge.out {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.stock-badge.critical {
-    background: #fff7ed;
-    color: #c2410c;
-}
-
-.stock-badge.low {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-/* Stock Input */
-.stock-input {
-    width: 90px;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    text-align: center;
-}
-
-.stock-input:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-/* Empty State */
-.empty-stock {
-    text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.empty-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-}
-
-.empty-stock h3 {
-    font-size: 20px;
-    color: #111827;
-    margin-bottom: 8px;
-}
-
-.empty-stock p {
-    color: #6b7280;
-}
-
-/* Update List */
-.update-list {
-    margin: 12px 0;
-    padding-left: 20px;
-}
-
-.update-list li {
-    padding: 4px 0;
-    font-size: 14px;
-    color: #374151;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .stock-summary-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .stock-summary-grid {
-        grid-template-columns: 1fr;
-    }
+@media (max-width:768px) {
+    .stk-toolbar { flex-direction:column; align-items:stretch; }
+    .stk-search-wrap { flex:1 1 100%; }
+    .stk-tabs { overflow-x:auto; }
 }

@@ -1,11 +1,25 @@
 from rest_framework import serializers
-from .models import LegalPage, Offer
+from .models import LegalPage, Offer, Banner
 
 
 class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = ['id', 'text', 'icon', 'link', 'is_active', 'display_order', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+
+class BannerSerializer(serializers.ModelSerializer):
+    position_display = serializers.CharField(source='get_position_display', read_only=True)
+
+    class Meta:
+        model = Banner
+        fields = [
+            'id', 'title', 'subtitle', 'image_url', 'mobile_image_url',
+            'link', 'position', 'position_display', 'is_active',
+            'display_order', 'start_date', 'end_date',
+            'created_at', 'updated_at'
+        ]
         read_only_fields = ['created_at', 'updated_at']
 
 

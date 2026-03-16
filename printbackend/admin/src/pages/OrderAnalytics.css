@@ -1,0 +1,42 @@
+/* ═══════════════════════════════════════════════════════════════
+   ORDER ANALYTICS — Figma design
+   ═══════════════════════════════════════════════════════════════ */
+.oa-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.oa-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:oa-spin .7s linear infinite; }
+@keyframes oa-spin { to { transform:rotate(360deg); } }
+
+.oa-page { padding:0 0 40px; }
+
+/* Top grid: Orders + Sales */
+.oa-top-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+
+/* Bottom grid: AOV + Repeat */
+.oa-bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+
+/* Card */
+.oa-card { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.oa-card-title { font-size:1.1rem; font-weight:700; color:#1f2937; margin-bottom:2px; }
+.oa-card-sub { font-size:.82rem; color:#6b7280; margin-bottom:6px; }
+.oa-big-value { font-size:2rem; font-weight:800; color:#1f2937; margin-bottom:2px; }
+.oa-trend { font-size:.82rem; color:#6b7280; margin-bottom:16px; }
+.oa-up { color:#15803d; font-weight:600; }
+
+/* Channel bars */
+.oa-channel-bars { display:flex; flex-direction:column; gap:10px; }
+.oa-channel-row { display:flex; align-items:center; gap:10px; }
+.oa-channel-row > span:first-child { font-size:.82rem; color:#6b7280; min-width:50px; }
+.oa-bar-track { flex:1; height:8px; background:#e5e7eb; border-radius:4px; overflow:hidden; }
+.oa-bar-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+.oa-bar-blue { background:linear-gradient(90deg,#00897b,#26c6da); }
+.oa-bar-val { font-size:.82rem; font-weight:600; color:#1f2937; min-width:80px; text-align:right; }
+
+/* AOV chart */
+.oa-aov-chart { margin-top:8px; }
+
+/* Repeat donut */
+.oa-repeat-wrap { display:flex; flex-direction:column; align-items:center; }
+.oa-repeat-legend { display:flex; gap:16px; margin-top:8px; }
+.oa-repeat-item { display:flex; align-items:center; gap:6px; font-size:.82rem; color:#6b7280; }
+.oa-repeat-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+
+@media (max-width:900px) { .oa-top-grid, .oa-bottom-grid { grid-template-columns:1fr; } }

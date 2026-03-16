@@ -1,236 +1,87 @@
-.marketing-page {
-    padding: 24px;
-}
+/* ═══════════════════════════════════════════════════════════════
+   MARKETING — Email Campaigns + WhatsApp Marketing
+   ═══════════════════════════════════════════════════════════════ */
+.mk-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.mk-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:mk-spin .7s linear infinite; }
+@keyframes mk-spin { to { transform:rotate(360deg); } }
 
-/* Marketing Stats Grid */
-.marketing-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-}
+.mk-page { padding:0 0 40px; }
 
-.mkt-stat {
-    background: white;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    text-align: center;
-}
+/* Tab bar */
+.mk-tab-bar { display:flex; gap:0; background:#fff; border-radius:10px 10px 0 0; border:1px solid #e5e7eb; border-bottom:none; overflow:hidden; margin-bottom:0; }
+.mk-tab { flex:1; padding:14px 20px; font-size:.92rem; font-weight:600; color:#6b7280; background:transparent; border:none; cursor:pointer; transition:all .15s; border-bottom:3px solid transparent; }
+.mk-tab:hover { color:#00897b; background:#f0fdfa; }
+.mk-tab-active { color:#00897b; border-bottom-color:#00897b; background:#f0fdfa; }
 
-.mkt-stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111827;
-}
+/* Header */
+.mk-header-row { display:flex; align-items:center; justify-content:space-between; background:#fff; padding:20px 24px; border:1px solid #e5e7eb; border-top:none; }
+.mk-page-title { font-size:1.3rem; font-weight:700; color:#1f2937; }
+.mk-subtitle { font-size:.85rem; color:#6b7280; margin-top:2px; }
+.mk-add-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; background:#00897b; color:#fff; border:none; border-radius:8px; font-size:.88rem; font-weight:600; cursor:pointer; }
+.mk-add-btn:hover { background:#00695c; }
 
-.mkt-stat-value.text-success {
-    color: #10b981;
-}
+/* Email Campaigns Table */
+.mk-table-wrap { background:#fff; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 10px 10px; overflow:hidden; }
+.mk-table { width:100%; border-collapse:collapse; }
+.mk-table th { text-align:left; padding:14px 20px; font-weight:600; font-size:.82rem; color:#6b7280; border-bottom:2px solid #e5e7eb; }
+.mk-table td { padding:14px 20px; font-size:.88rem; color:#374151; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
+.mk-table tbody tr { transition:background .12s; }
+.mk-table tbody tr:hover { background:#f9fafb; }
+.mk-campaign-name { font-weight:600; color:#1f2937; }
+.mk-date { color:#6b7280; white-space:nowrap; }
+.mk-status-badge { display:inline-flex; padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:600; white-space:nowrap; }
+.mk-action-link { background:none; border:none; color:#00897b; font-weight:600; font-size:.85rem; cursor:pointer; }
+.mk-action-link:hover { text-decoration:underline; }
+.mk-action-link.mk-send { color:#2563eb; margin-left:12px; }
+.mk-action-btns { display:flex; align-items:center; }
+.mk-empty { text-align:center; padding:40px !important; color:#9ca3af; }
 
-.mkt-stat-label {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
+/* WhatsApp layout */
+.mk-wa-layout { display:grid; grid-template-columns:1fr 280px; gap:20px; background:#fff; padding:24px; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 10px 10px; }
+.mk-wa-compose { }
+.mk-wa-section-title { font-size:1rem; font-weight:700; color:#1f2937; margin-bottom:10px; }
+.mk-wa-textarea { width:100%; padding:14px; border:1px solid #e5e7eb; border-radius:8px; font-size:.88rem; resize:vertical; font-family:inherit; margin-bottom:18px; }
+.mk-wa-textarea:focus { outline:none; border-color:#00897b; }
+.mk-wa-select { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:.88rem; margin-bottom:10px; background:#fff; }
+.mk-wa-phones-wrap { display:flex; align-items:center; gap:8px; border:1px solid #e5e7eb; border-radius:8px; padding:8px 14px; margin-bottom:14px; }
+.mk-wa-phone-icon { color:#6b7280; flex-shrink:0; }
+.mk-wa-phones-input { flex:1; border:none; font-size:.88rem; outline:none; }
+.mk-wa-schedule-opts { display:flex; flex-direction:column; gap:8px; margin-bottom:14px; }
+.mk-wa-radio { display:flex; align-items:center; gap:8px; font-size:.88rem; color:#374151; cursor:pointer; }
+.mk-wa-radio input[type="radio"] { accent-color:#00897b; }
+.mk-wa-datetime { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.mk-wa-date, .mk-wa-time { padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:.88rem; }
+.mk-wa-send-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:auto; margin:0 auto; padding:12px 32px; background:#00897b; color:#fff; border:none; border-radius:8px; font-size:.92rem; font-weight:600; cursor:pointer; }
+.mk-wa-send-btn:hover { background:#00695c; }
+.mk-wa-send-btn:disabled { opacity:.5; cursor:not-allowed; }
 
-/* Tabs */
-.marketing-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 0;
-}
+/* WhatsApp Analytics sidebar */
+.mk-wa-analytics { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:20px; height:fit-content; }
+.mk-wa-analytics-title { font-size:1rem; font-weight:700; color:#1f2937; margin-bottom:16px; }
+.mk-wa-stat-row { display:flex; justify-content:space-between; align-items:baseline; padding:8px 0; border-bottom:1px solid #f3f4f6; }
+.mk-wa-stat-row:last-child { border-bottom:none; }
+.mk-wa-stat-label { font-size:.85rem; color:#6b7280; }
+.mk-wa-stat-val { font-size:1rem; font-weight:700; color:#1f2937; }
+.mk-green { color:#15803d; }
 
-.tab-btn {
-    padding: 10px 20px;
-    border: none;
-    background: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.2s;
-}
+/* Modal */
+.mk-modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:1000; }
+.mk-modal { background:#fff; border-radius:14px; width:90%; max-width:620px; max-height:85vh; overflow-y:auto; }
+.mk-modal-header { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid #e5e7eb; }
+.mk-modal-header h2 { font-size:1.15rem; font-weight:700; color:#1f2937; }
+.mk-modal-close { background:none; border:none; color:#6b7280; cursor:pointer; padding:4px; }
+.mk-modal-body { padding:20px 24px; }
+.mk-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.mk-form-group { display:flex; flex-direction:column; gap:4px; }
+.mk-form-group.mk-full { grid-column:1/-1; }
+.mk-form-group label { font-size:.82rem; font-weight:600; color:#374151; }
+.mk-form-group input, .mk-form-group select, .mk-form-group textarea { padding:10px 12px; border:1px solid #e5e7eb; border-radius:6px; font-size:.88rem; font-family:inherit; }
+.mk-form-group input:focus, .mk-form-group select:focus, .mk-form-group textarea:focus { outline:none; border-color:#00897b; }
+.mk-checkbox { display:flex; align-items:center; gap:8px; font-size:.88rem; cursor:pointer; margin-top:8px; }
+.mk-checkbox input { accent-color:#00897b; }
+.mk-modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:16px 24px; border-top:1px solid #e5e7eb; }
+.mk-btn-cancel { padding:9px 18px; border:1px solid #e5e7eb; background:#fff; border-radius:8px; font-size:.85rem; font-weight:600; cursor:pointer; color:#374151; }
+.mk-btn-confirm { padding:9px 18px; background:#00897b; color:#fff; border:none; border-radius:8px; font-size:.85rem; font-weight:600; cursor:pointer; }
+.mk-btn-confirm:hover { background:#00695c; }
 
-.tab-btn.active {
-    color: #4f46e5;
-    border-bottom-color: #4f46e5;
-}
-
-.tab-btn:hover {
-    color: #374151;
-}
-
-/* Table */
-.table-container {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-}
-
-.marketing-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.marketing-table thead {
-    background: #f9fafb;
-}
-
-.marketing-table th {
-    text-align: left;
-    padding: 12px 16px;
-    font-weight: 600;
-    font-size: 13px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.marketing-table td {
-    padding: 14px 16px;
-    border-top: 1px solid #f3f4f6;
-    font-size: 14px;
-    color: #374151;
-}
-
-.channel-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    text-transform: capitalize;
-}
-
-.campaign-status, .cart-status {
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: capitalize;
-}
-
-/* Form */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-    font-weight: 600;
-    font-size: 14px;
-    color: #374151;
-    margin-bottom: 6px;
-}
-
-.form-input, .form-select, .form-textarea {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-    color: #374151;
-    box-sizing: border-box;
-}
-
-.form-input:focus, .form-select:focus, .form-textarea:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-.checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 400 !important;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-/* Settings Section */
-.settings-section {
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.settings-section:last-child {
-    border-bottom: none;
-}
-
-.settings-section h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 12px;
-}
-
-/* Modal Footer */
-.modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
-/* Shared */
-.action-buttons {
-    display: flex;
-    gap: 6px;
-}
-
-.action-buttons button {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.btn-view { background: #eff6ff; color: #1e40af; }
-.btn-view:hover { background: #dbeafe; }
-.btn-toggle { background: #fef3c7; color: #92400e; }
-.btn-toggle:hover { background: #fde68a; }
-.btn-delete { background: #fee2e2; color: #991b1b; }
-.btn-delete:hover { background: #fecaca; }
-
-.text-center {
-    text-align: center;
-    padding: 40px !important;
-    color: #9ca3af;
-}
-
-.text-muted {
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .marketing-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
+@media (max-width:800px) { .mk-wa-layout { grid-template-columns:1fr; } }

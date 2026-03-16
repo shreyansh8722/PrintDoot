@@ -1,0 +1,61 @@
+/* ═══════════════════════════════════════════════════════════════
+   USER ANALYTICS — Figma design
+   ═══════════════════════════════════════════════════════════════ */
+.ua-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.ua-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:ua-spin .7s linear infinite; }
+@keyframes ua-spin { to { transform:rotate(360deg); } }
+
+.ua-page { padding:0 0 40px; }
+
+/* Stats */
+.ua-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px; }
+.ua-stat-card { background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:18px 20px; display:flex; flex-direction:column; gap:4px; }
+.ua-stat-label { font-size:.78rem; font-weight:500; color:#6b7280; }
+.ua-stat-value { font-size:1.5rem; font-weight:700; color:#1f2937; display:flex; align-items:baseline; gap:6px; }
+.ua-growth { font-size:.82rem; font-weight:600; }
+.ua-up { color:#15803d; }
+.ua-down { color:#dc2626; }
+.ua-stat-sub { font-size:.72rem; color:#9ca3af; font-style:italic; }
+
+/* Sales Report Chart */
+.ua-chart-section { background:linear-gradient(135deg,#00897b 0%,#26c6da 50%,#81c784 100%); border-radius:14px; padding:22px; margin-bottom:22px; box-shadow:0 4px 16px rgba(0,137,123,.18); }
+.ua-chart-title { font-size:1.15rem; font-weight:700; color:#fff; text-align:center; margin-bottom:14px; }
+.ua-chart-wrap { background:rgba(255,255,255,.12); border-radius:10px; padding:12px; }
+
+/* Mid grid: Segmentation + Abandoned */
+.ua-mid-grid { display:grid; grid-template-columns:1fr 2fr; gap:16px; margin-bottom:22px; }
+.ua-seg-card, .ua-abandoned-card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.ua-seg-title { font-size:.95rem; font-weight:700; color:#1f2937; margin-bottom:12px; }
+.ua-seg-chart { display:flex; align-items:center; gap:16px; }
+.ua-seg-legend { display:flex; flex-direction:column; gap:6px; }
+.ua-seg-item { display:flex; align-items:center; gap:8px; font-size:.82rem; color:#374151; }
+.ua-seg-dot { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+.ua-abandoned-chart { }
+
+/* Insights */
+.ua-insights-section { margin-bottom:22px; }
+.ua-section-title { font-size:1.1rem; font-weight:700; color:#1f2937; margin-bottom:14px; }
+.ua-insights-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.ua-insight-card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,.06); border:1px solid #f0f0f0; }
+.ua-insight-card h4 { font-size:.92rem; font-weight:700; color:#1f2937; margin-bottom:4px; }
+.ua-insight-card p { font-size:.85rem; color:#6b7280; }
+.ua-insight-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+.ua-icon-blue { background:#e3f2fd; color:#1e88e5; }
+.ua-icon-teal { background:#e0f2f1; color:#00897b; }
+
+/* Customer Details Table */
+.ua-table-section { }
+.ua-table-wrap { background:#fff; border-radius:12px; border:1px solid #f0f0f0; box-shadow:0 1px 3px rgba(0,0,0,.06); overflow:hidden; }
+.ua-table { width:100%; border-collapse:collapse; }
+.ua-table th { text-align:left; padding:13px 14px; font-weight:600; font-size:.72rem; color:#9ca3af; text-transform:uppercase; letter-spacing:.5px; border-bottom:2px solid #e5e7eb; white-space:nowrap; }
+.ua-table td { padding:13px 14px; font-size:.85rem; color:#374151; border-bottom:1px solid #f3f4f6; vertical-align:middle; }
+.ua-table tbody tr { transition:background .12s; }
+.ua-table tbody tr:hover { background:#f9fafb; }
+.ua-cid { font-weight:600; color:#00897b; }
+.ua-cname { font-weight:600; color:#1f2937; }
+.ua-date { font-size:.82rem; color:#6b7280; white-space:nowrap; }
+.ua-checkbox { width:18px; height:18px; accent-color:#00897b; cursor:default; }
+.ua-empty { text-align:center; padding:40px !important; color:#9ca3af; }
+
+@media (max-width:1024px) { .ua-stats-row { grid-template-columns:repeat(2,1fr); } .ua-mid-grid { grid-template-columns:1fr; } .ua-insights-grid { grid-template-columns:1fr; } }
+@media (max-width:640px) { .ua-stats-row { grid-template-columns:1fr; } }

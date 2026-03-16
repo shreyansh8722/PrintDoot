@@ -229,7 +229,13 @@ class AdminOrderViewSet(viewsets.ModelViewSet):
 class DashboardAnalyticsView(APIView):
     """
     Comprehensive dashboard analytics endpoint.
-    Returns all stats in a single API call for the dashboard page.
+    Returns all stats in a single API call for the admin dashboard page.
+    Matches the admin dashboard image design with:
+    - Top stat cards (Orders, Sales & Analytics, Total Customers, Reviews)
+    - Second row cards (Comparison Reports, Sale Event, Total Payments, Expense Payment)
+    - Product Performance section with SKU-level details
+    - Stocks donut chart & Monthly New Customer Reports pie chart
+    - Alerts section (Low Inventory, Out of Stock, Slow Moving SKUs)
     """
     permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
 
@@ -245,7 +251,7 @@ class DashboardAnalyticsView(APIView):
         cancelled = Order.objects.filter(status='Cancelled').count()
         cancellation_rate = round((cancelled / total_orders * 100), 1) if total_orders > 0 else 0
 
-        # ── Revenue ──
+        # ── Revenue / Payments ──
         total_revenue = Order.objects.filter(is_paid=True).aggregate(
             total=Coalesce(Sum('total_amount'), Decimal('0'))
         )['total']
@@ -270,12 +276,32 @@ class DashboardAnalyticsView(APIView):
             avg=Coalesce(Avg('total_amount'), Decimal('0'))
         )['avg']
 
-        # ── User Stats ──
+        # Total payments (sum of all paid orders)
+        total_payments = total_revenue
+
+        # Expense payment (shipping + tax totals as proxy for expenses)
+        expense_payment = Order.objects.filter(is_paid=True).aggregate(
+            shipping=Coalesce(Sum('shipping_total'), Decimal('0')),
+            tax=Coalesce(Sum('tax_total'), Decimal('0')),
+            discount=Coalesce(Sum('discount_total'), Decimal('0')),
+        )
+        total_expense = expense_payment['shipping'] + expense_payment['tax'] + expense_payment['discount']
+
+        # ── User / Customer Stats ──
         from django.contrib.auth import get_user_model
         User = get_user_model()
         total_users = User.objects.count()
         new_users_this_month = User.objects.filter(
             date_joined__gte=thirty_days_ago
+        ).count()
+
+        # ── Reviews Stats ──
+        from apps.catalog.models import ProductReview
+        total_reviews = ProductReview.objects.count()
+
+        # ── Sale Event (current month orders count as "sale event" metric) ──
+        current_month_orders = Order.objects.filter(
+            created_at__gte=thirty_days_ago
         ).count()
 
         # ── Order Status Distribution (for bar chart) ──
@@ -289,10 +315,15 @@ class DashboardAnalyticsView(APIView):
         from apps.catalog.models import Product, Category
         category_distribution = list(
             Product.objects.filter(is_active=True)
-            .values(name=F('subcategory__category__name'))
+            .values(category_name=F('subcategory__category__name'))
             .annotate(value=Count('id'))
             .order_by('-value')[:8]
         )
+        # Rename key for frontend compatibility
+        category_distribution = [
+            {'name': item['category_name'], 'value': item['value']}
+            for item in category_distribution
+        ]
 
         # ── New vs Repeated Customers ──
         users_with_orders = Order.objects.filter(is_paid=True).values('user').annotate(
@@ -301,7 +332,165 @@ class DashboardAnalyticsView(APIView):
         new_customers = users_with_orders.filter(order_count=1).count()
         repeated_customers = users_with_orders.filter(order_count__gt=1).count()
 
-        # ── Most & Least Selling Products ──
+        # ── Product Performance Stats ──
+        total_active_skus = Product.objects.filter(is_active=True).count()
+
+        # Top selling SKU (from orders, or fall back to any active product SKU)
+        top_selling_sku_data = (
+            OrderItem.objects.filter(order__is_paid=True)
+            .values('product__sku')
+            .annotate(total_sold=Sum('quantity'))
+            .order_by('-total_sold')
+            .first()
+        )
+        if top_selling_sku_data:
+            top_selling_sku = top_selling_sku_data['product__sku']
+        else:
+            # Fall back to the first active product's SKU
+            active_product = Product.objects.filter(is_active=True).first()
+            top_selling_sku = active_product.sku if active_product else 'N/A'
+
+        # Low performing SKU count (ordered less than 5 times)
+        low_performing_sku_count = Product.objects.filter(
+            is_active=True, order_count__lt=5
+        ).count()
+
+        # Stock alerts count
+        stock_alerts_count = Product.objects.filter(
+            stock_quantity__lte=10,
+            is_infinite_stock=False,
+            is_active=True
+        ).count()
+
+        # ── Product Details Table (SKU-level with sales, margin, customization, inventory, status) ──
+        from django.db.models import ExpressionWrapper
+        product_details = []
+        top_products = (
+            OrderItem.objects.filter(order__is_paid=True)
+            .values('product__sku', 'product__name', 'product__base_price', 'product__stock_quantity', 'product__is_infinite_stock')
+            .annotate(
+                total_sales=Sum('total_price'),
+                units_sold=Sum('quantity'),
+            )
+            .order_by('-total_sales')[:10]
+        )
+        for p in top_products:
+            sales = p['total_sales'] or Decimal('0')
+            units = p['units_sold'] or 0
+            base_price = p['product__base_price'] or Decimal('0')
+            cost_estimate = base_price * Decimal('0.6')  # estimated cost ~60% of price
+            margin_pct = round(((base_price - cost_estimate) / base_price * 100), 0) if base_price > 0 else 0
+
+            stock_qty = p['product__stock_quantity']
+            is_infinite = p['product__is_infinite_stock']
+
+            if is_infinite:
+                stock_status = 'In Stock'
+                inventory = '∞'
+                notes = 'Print on Demand'
+            elif stock_qty > 20:
+                stock_status = 'In Stock'
+                inventory = stock_qty
+                notes = 'High demand' if units > 50 else 'Moderate demand'
+            elif stock_qty > 0:
+                stock_status = 'Low Stock'
+                inventory = stock_qty
+                notes = 'Needs restocking'
+            else:
+                stock_status = 'Out of Stock'
+                inventory = 0
+                notes = 'Restocking' if units > 10 else 'Discontinued'
+
+            # Customization % (items with design / total items)
+            total_items_for_sku = OrderItem.objects.filter(
+                product__sku=p['product__sku'], order__is_paid=True
+            ).count()
+            customized_items = OrderItem.objects.filter(
+                product__sku=p['product__sku'], order__is_paid=True
+            ).exclude(
+                Q(zakeke_design_id='') | Q(zakeke_design_id__isnull=True)
+            ).count()
+            customization_pct = round((customized_items / total_items_for_sku * 100), 0) if total_items_for_sku > 0 else 0
+
+            product_details.append({
+                'sku': p['product__sku'],
+                'sales': str(sales),
+                'units_sold': units,
+                'margin_pct': int(margin_pct),
+                'customization_pct': int(customization_pct),
+                'inventory': inventory,
+                'status': stock_status,
+                'notes': notes,
+            })
+
+        # ── Stock Chart Data (donut chart) ──
+        in_stock_count = Product.objects.filter(
+            is_active=True
+        ).filter(
+            Q(is_infinite_stock=True) | Q(stock_quantity__gt=10)
+        ).count()
+        limited_stock_count = Product.objects.filter(
+            is_active=True, is_infinite_stock=False,
+            stock_quantity__gt=0, stock_quantity__lte=10
+        ).count()
+        out_of_stock_count = Product.objects.filter(
+            is_active=True, is_infinite_stock=False, stock_quantity=0
+        ).count()
+
+        stocks_chart = [
+            {'name': 'In Stocks', 'value': in_stock_count},
+            {'name': 'Limited stocks', 'value': limited_stock_count},
+            {'name': 'Out of Stocks', 'value': out_of_stock_count},
+        ]
+
+        # ── Monthly New Customer Reports (last 12 months) ──
+        monthly_new_customers = []
+        month_names = ['Jan', 'Feb', 'Mar', 'April', 'May', 'June',
+                       'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        monthly_data = (
+            User.objects.filter(date_joined__gte=now - timedelta(days=365))
+            .annotate(month=ExtractMonth('date_joined'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        month_dict = {item['month']: item['count'] for item in monthly_data}
+        for m in range(1, 13):
+            monthly_new_customers.append({
+                'name': month_names[m - 1],
+                'value': month_dict.get(m, 0),
+            })
+
+        # ── Alerts ──
+        # Low inventory alerts (stock between 1 and 10)
+        low_inventory_products = list(
+            Product.objects.filter(
+                stock_quantity__gt=0,
+                stock_quantity__lte=10,
+                is_infinite_stock=False,
+                is_active=True
+            ).values_list('sku', flat=True)[:10]
+        )
+
+        # Out of stock alerts
+        out_of_stock_products = list(
+            Product.objects.filter(
+                stock_quantity=0,
+                is_infinite_stock=False,
+                is_active=True
+            ).values_list('sku', flat=True)[:10]
+        )
+
+        # Slow moving SKUs (active products with very few orders)
+        slow_moving_skus = list(
+            Product.objects.filter(
+                is_active=True, order_count__lte=2
+            ).exclude(is_infinite_stock=True)
+            .order_by('order_count')
+            .values_list('sku', flat=True)[:5]
+        )
+
+        # ── Most & Least Selling Products (legacy support) ──
         most_selling = list(
             OrderItem.objects.filter(order__is_paid=True)
             .values('product__name')
@@ -340,7 +529,7 @@ class DashboardAnalyticsView(APIView):
             item['date'] = str(item['date'])
             item['revenue'] = str(item['revenue'])
 
-        # ── Low Stock Products ──
+        # ── Low Stock Products (legacy) ──
         low_stock_products = list(
             Product.objects.filter(
                 stock_quantity__lt=10,
@@ -350,15 +539,28 @@ class DashboardAnalyticsView(APIView):
         )
 
         return Response({
-            # Stat cards
+            # Row 1: Top stat cards
             'total_orders': total_orders,
             'pending_orders': pending_orders,
-            'avg_order_value': str(round(avg_order_value, 2)),
-            'cancellation_rate': cancellation_rate,
             'total_revenue': str(total_revenue),
             'revenue_growth': revenue_growth,
             'total_users': total_users,
             'new_users_this_month': new_users_this_month,
+            'total_reviews': total_reviews,
+
+            # Row 2: Secondary stat cards
+            'current_month_orders': current_month_orders,
+            'total_payments': str(total_payments),
+            'expense_payment': str(total_expense),
+            'avg_order_value': str(round(avg_order_value, 2)),
+            'cancellation_rate': cancellation_rate,
+
+            # Product Performance
+            'total_active_skus': total_active_skus,
+            'top_selling_sku': top_selling_sku,
+            'low_performing_sku_count': low_performing_sku_count,
+            'stock_alerts_count': stock_alerts_count,
+            'product_details': product_details,
 
             # Charts
             'status_distribution': status_distribution,
@@ -368,11 +570,303 @@ class DashboardAnalyticsView(APIView):
                 'repeated': repeated_customers,
             },
             'daily_revenue': daily_revenue,
+            'stocks_chart': stocks_chart,
+            'monthly_new_customers': monthly_new_customers,
 
-            # Tables
+            # Alerts
+            'alerts': {
+                'low_inventory': low_inventory_products,
+                'out_of_stock': out_of_stock_products,
+                'slow_moving': slow_moving_skus,
+            },
+
+            # Tables (legacy)
             'most_selling': most_selling,
             'least_selling': least_selling,
             'low_stock_products': low_stock_products,
+        })
+
+
+class SalesOrderAnalyticsView(APIView):
+    """
+    Comprehensive Sales & Order Analytics endpoint.
+    Returns data for the Sales Order Analytics admin page:
+    - Stat cards (Total Sales, Total Orders, Avg Order Value, Cancellation Rate)
+    - Chart Insights (Order by dates bar, Product by category pie, New vs Repeated donut)
+    - Monthly Sales Trend (12 months revenue + orders)
+    - Order Fulfillment Status breakdown
+    - Monthly Targets & Performance
+    - Most & Least Selling Products with details
+    - Recent Orders table
+    - Top insights (categories, payment methods)
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+
+    def get(self, request):
+        from django.contrib.auth import get_user_model
+        from apps.catalog.models import Product, Category
+        User = get_user_model()
+
+        now = timezone.now()
+        today = now.date()
+        thirty_days_ago = now - timedelta(days=30)
+        prev_thirty_days = now - timedelta(days=60)
+        one_year_ago = now - timedelta(days=365)
+
+        # ── Stat Cards ──
+        total_orders = Order.objects.count()
+        total_revenue = Order.objects.filter(is_paid=True).aggregate(
+            total=Coalesce(Sum('total_amount'), Decimal('0'))
+        )['total']
+        avg_order_value = Order.objects.filter(is_paid=True).aggregate(
+            avg=Coalesce(Avg('total_amount'), Decimal('0'))
+        )['avg']
+        pending_orders = Order.objects.filter(status='Pending').count()
+        cancelled_orders = Order.objects.filter(status='Cancelled').count()
+        cancellation_rate = round((cancelled_orders / total_orders * 100), 1) if total_orders > 0 else 0
+        delivered_orders = Order.objects.filter(status='Delivered').count()
+        total_customers = User.objects.filter(orders__isnull=False).distinct().count()
+
+        # Revenue growth
+        current_month_revenue = Order.objects.filter(
+            is_paid=True, paid_at__gte=thirty_days_ago
+        ).aggregate(total=Coalesce(Sum('total_amount'), Decimal('0')))['total']
+        prev_month_revenue = Order.objects.filter(
+            is_paid=True, paid_at__gte=prev_thirty_days, paid_at__lt=thirty_days_ago
+        ).aggregate(total=Coalesce(Sum('total_amount'), Decimal('0')))['total']
+        revenue_growth = 0
+        if prev_month_revenue and prev_month_revenue > 0:
+            revenue_growth = round(((current_month_revenue - prev_month_revenue) / prev_month_revenue * 100), 1)
+
+        # Orders this month
+        orders_this_month = Order.objects.filter(created_at__gte=thirty_days_ago).count()
+
+        # ── Chart Insight 1: Orders by Date (last 30 days) ──
+        orders_by_date = list(
+            Order.objects.filter(created_at__gte=thirty_days_ago)
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(count=Count('id'))
+            .order_by('date')
+        )
+        for item in orders_by_date:
+            item['date'] = str(item['date'])
+
+        # ── Chart Insight 2: Products by Category (pie) ──
+        category_distribution = list(
+            Product.objects.filter(is_active=True)
+            .values(category_name=F('subcategory__category__name'))
+            .annotate(value=Count('id'))
+            .order_by('-value')[:8]
+        )
+        category_distribution = [
+            {'name': item['category_name'] or 'Uncategorized', 'value': item['value']}
+            for item in category_distribution
+        ]
+
+        # ── Chart Insight 3: New vs Repeated Customers (donut) ──
+        users_with_orders = Order.objects.values('user').annotate(order_count=Count('id'))
+        new_customers = users_with_orders.filter(order_count=1).count()
+        repeated_customers = users_with_orders.filter(order_count__gt=1).count()
+
+        # ── Monthly Sales Trend (last 12 months) ──
+        month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        monthly_sales_data = list(
+            Order.objects.filter(created_at__gte=one_year_ago)
+            .annotate(month=ExtractMonth('created_at'), year=ExtractYear('created_at'))
+            .values('month', 'year')
+            .annotate(
+                orders=Count('id'),
+                revenue=Coalesce(Sum('total_amount', filter=Q(is_paid=True)), Decimal('0'))
+            )
+            .order_by('year', 'month')
+        )
+        monthly_sales_trend = []
+        for item in monthly_sales_data:
+            monthly_sales_trend.append({
+                'name': month_names[item['month'] - 1],
+                'month': item['month'],
+                'year': item['year'],
+                'orders': item['orders'],
+                'revenue': str(item['revenue']),
+            })
+        # If no data, fill with empty months
+        if not monthly_sales_trend:
+            current_month = now.month
+            for i in range(12):
+                m = ((current_month - 12 + i) % 12) + 1
+                monthly_sales_trend.append({
+                    'name': month_names[m - 1],
+                    'month': m,
+                    'year': now.year if m <= current_month else now.year - 1,
+                    'orders': 0,
+                    'revenue': '0',
+                })
+
+        # ── Order Fulfillment Status (pie) ──
+        fulfillment_status = list(
+            Order.objects.values('status')
+            .annotate(value=Count('id'))
+            .order_by('status')
+        )
+
+        # ── Monthly Targets ──
+        # Set a base target (e.g., previous month orders * 1.1 or minimum 10)
+        prev_month_orders = Order.objects.filter(
+            created_at__gte=prev_thirty_days, created_at__lt=thirty_days_ago
+        ).count()
+        order_target = max(int(prev_month_orders * 1.1), 10)
+        revenue_target = max(float(prev_month_revenue) * 1.1, 1000) if prev_month_revenue else 1000
+
+        monthly_targets = {
+            'order_target': order_target,
+            'orders_achieved': orders_this_month,
+            'order_progress': min(round((orders_this_month / order_target * 100), 1), 100) if order_target > 0 else 0,
+            'revenue_target': str(round(Decimal(str(revenue_target)), 2)),
+            'revenue_achieved': str(current_month_revenue),
+            'revenue_progress': min(round((float(current_month_revenue) / float(revenue_target) * 100), 1), 100) if revenue_target > 0 else 0,
+        }
+
+        # ── Most Selling Products (top 5) ──
+        most_selling = list(
+            OrderItem.objects.filter(order__is_paid=True)
+            .values('product__id', 'product__name', 'product__sku',
+                    'product__base_price', 'product__primary_image')
+            .annotate(
+                total_qty=Sum('quantity'),
+                total_revenue=Sum('total_price')
+            )
+            .order_by('-total_qty')[:5]
+        )
+        for item in most_selling:
+            item['total_revenue'] = str(item['total_revenue'])
+            item['product__base_price'] = str(item['product__base_price'] or '0')
+
+        # If no order-based data, fall back to active products
+        if not most_selling:
+            fallback_products = list(
+                Product.objects.filter(is_active=True)
+                .order_by('-order_count')[:5]
+                .values('id', 'name', 'sku', 'base_price', 'primary_image', 'order_count')
+            )
+            most_selling = [{
+                'product__id': p['id'],
+                'product__name': p['name'],
+                'product__sku': p['sku'],
+                'product__base_price': str(p['base_price']),
+                'product__primary_image': p['primary_image'],
+                'total_qty': p['order_count'],
+                'total_revenue': '0',
+            } for p in fallback_products]
+
+        # ── Least Selling Products (bottom 5) ──
+        least_selling = list(
+            OrderItem.objects.filter(order__is_paid=True)
+            .values('product__id', 'product__name', 'product__sku',
+                    'product__base_price', 'product__primary_image')
+            .annotate(
+                total_qty=Sum('quantity'),
+                total_revenue=Sum('total_price')
+            )
+            .order_by('total_qty')[:5]
+        )
+        for item in least_selling:
+            item['total_revenue'] = str(item['total_revenue'])
+            item['product__base_price'] = str(item['product__base_price'] or '0')
+
+        # ── Recent Orders Table (last 20) ──
+        recent_orders = list(
+            Order.objects.select_related('user', 'shipping_address')
+            .order_by('-created_at')[:20]
+            .values(
+                'id', 'status', 'total_amount', 'is_paid', 'payment_method',
+                'created_at', 'user__username', 'user__email',
+            )
+        )
+        for order in recent_orders:
+            order['total_amount'] = str(order['total_amount'])
+            order['created_at'] = str(order['created_at'])
+            # Get item count for this order
+            order['item_count'] = OrderItem.objects.filter(order_id=order['id']).aggregate(
+                total=Coalesce(Sum('quantity'), 0)
+            )['total']
+
+        # ── Order Status Distribution (for bar chart) ──
+        status_distribution = list(
+            Order.objects.values('status')
+            .annotate(value=Count('id'))
+            .order_by('status')
+        )
+
+        # ── Top Categories by Revenue ──
+        top_categories = list(
+            OrderItem.objects.filter(order__is_paid=True)
+            .values(category=F('product__subcategory__category__name'))
+            .annotate(
+                total_orders=Sum('quantity'),
+                total_revenue=Sum('total_price')
+            )
+            .order_by('-total_revenue')[:5]
+        )
+        for item in top_categories:
+            item['total_revenue'] = str(item['total_revenue'])
+
+        # If no order data, fall back to category product counts
+        if not top_categories:
+            top_categories = [
+                {'category': cat['name'] or 'Uncategorized', 'total_orders': 0, 'total_revenue': '0'}
+                for cat in category_distribution[:5]
+            ]
+
+        # ── Payment Method Distribution ──
+        payment_methods = list(
+            Order.objects.exclude(payment_method='')
+            .values('payment_method')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:5]
+        )
+
+        return Response({
+            # Stat cards
+            'total_orders': total_orders,
+            'total_revenue': str(total_revenue),
+            'avg_order_value': str(round(avg_order_value, 2)),
+            'pending_orders': pending_orders,
+            'delivered_orders': delivered_orders,
+            'cancellation_rate': cancellation_rate,
+            'total_customers': total_customers,
+            'orders_this_month': orders_this_month,
+            'revenue_growth': revenue_growth,
+
+            # Chart insights
+            'orders_by_date': orders_by_date,
+            'category_distribution': category_distribution,
+            'new_vs_repeated': {
+                'new': new_customers,
+                'repeated': repeated_customers,
+            },
+            'status_distribution': status_distribution,
+
+            # Monthly sales trend
+            'monthly_sales_trend': monthly_sales_trend,
+
+            # Order fulfillment
+            'fulfillment_status': fulfillment_status,
+
+            # Monthly targets
+            'monthly_targets': monthly_targets,
+
+            # Products
+            'most_selling': most_selling,
+            'least_selling': least_selling,
+
+            # Recent orders
+            'recent_orders': recent_orders,
+
+            # Insights
+            'top_categories': top_categories,
+            'payment_methods': payment_methods,
         })
 
 
@@ -634,3 +1128,103 @@ class StockAlertView(APIView):
                 updated += 1
 
         return Response({'status': 'success', 'updated': updated})
+
+
+class CourierDashboardView(APIView):
+    """Operational courier dashboard — shipment metrics, tracking, and management."""
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+
+    def get(self, request):
+        """Return courier dashboard metrics and shipment list."""
+        now = timezone.now()
+        thirty_days_ago = now - timedelta(days=30)
+
+        # All shipments
+        shipments = Shipment.objects.all().select_related('order')
+        recent_shipments = shipments.filter(created_at__gte=thirty_days_ago)
+
+        total_shipments = shipments.count()
+        in_transit = shipments.filter(status__in=['shipped', 'in_transit']).count()
+        delivered = shipments.filter(status='delivered').count()
+        processing = shipments.filter(status__in=['created', 'processing', 'pickup_scheduled']).count()
+
+        # Dispatch SLA: % shipped within 48h of order creation
+        on_time = 0
+        total_checked = 0
+        for s in recent_shipments:
+            if s.order and s.shipped_at:
+                total_checked += 1
+                diff = (s.shipped_at - s.order.created_at).total_seconds() / 3600
+                if diff <= 48:
+                    on_time += 1
+        sla_pct = round((on_time / max(total_checked, 1)) * 100)
+
+        # Average delivery time
+        delivered_shipments = shipments.filter(
+            status='delivered', shipped_at__isnull=False, delivered_at__isnull=False
+        )
+        avg_delivery_days = 0
+        if delivered_shipments.exists():
+            total_days = sum(
+                (s.delivered_at - s.shipped_at).days
+                for s in delivered_shipments if s.delivered_at and s.shipped_at
+            )
+            avg_delivery_days = round(total_days / max(delivered_shipments.count(), 1), 1)
+
+        # Shipment list
+        shipment_list = []
+        for s in shipments.order_by('-created_at')[:50]:
+            shipment_list.append({
+                'id': s.id,
+                'order_id': s.order_id,
+                'order_display': f'ORD{str(s.order_id).zfill(5)}',
+                'tracking_number': s.tracking_number or '',
+                'awb_code': s.awb_code or '',
+                'carrier': s.carrier or 'ShipMozo',
+                'status': s.status,
+                'shipped_at': str(s.shipped_at) if s.shipped_at else None,
+                'delivered_at': str(s.delivered_at) if s.delivered_at else None,
+                'estimated_delivery': str(s.estimated_delivery) if s.estimated_delivery else None,
+                'created_at': str(s.created_at) if s.created_at else None,
+                'product_name': '',  # Would need OrderItem lookup
+                'shiprocket_order_id': s.shiprocket_order_id or '',
+            })
+
+        return Response({
+            'metrics': {
+                'total_shipments': total_shipments,
+                'in_transit': in_transit,
+                'delivered': delivered,
+                'processing': processing,
+                'dispatch_sla': sla_pct,
+                'avg_delivery_days': avg_delivery_days,
+            },
+            'shipments': shipment_list,
+        })
+
+
+class ShipmentTrackAdminView(APIView):
+    """Track a single shipment via ShipMozo AWB."""
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+
+    def get(self, request, shipment_id):
+        try:
+            shipment = Shipment.objects.get(id=shipment_id)
+        except Shipment.DoesNotExist:
+            return Response({'error': 'Shipment not found'}, status=404)
+
+        tracking_data = {}
+        if shipment.awb_code:
+            try:
+                from . import shipmozo_service
+                result = shipmozo_service.track_order(shipment.awb_code)
+                if result.get('success'):
+                    tracking_data = result
+            except Exception as e:
+                tracking_data = {'error': str(e)}
+
+        return Response({
+            'shipment': ShipmentSerializer(shipment).data,
+            'tracking': tracking_data,
+        })
+

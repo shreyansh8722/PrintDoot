@@ -5,6 +5,21 @@ const DataCacheContext = createContext(null);
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+/**
+ * Helper to extract array data from DRF responses.
+ * DRF PageNumberPagination returns { count, next, previous, results }.
+ * This function handles both paginated and non-paginated responses.
+ */
+const extractResults = (responseData) => {
+    if (!responseData) return [];
+    // If it's already an array, return as-is
+    if (Array.isArray(responseData)) return responseData;
+    // DRF paginated response — extract results
+    if (responseData.results && Array.isArray(responseData.results)) return responseData.results;
+    // Fallback
+    return [];
+};
+
 export const DataCacheProvider = ({ children }) => {
     const cacheRef = useRef({
         users: { data: null, timestamp: null, loading: false },
@@ -36,7 +51,7 @@ export const DataCacheProvider = ({ children }) => {
 
         try {
             const response = await adminUserAPI.getUsers(params);
-            const data = response.data || [];
+            const data = extractResults(response.data);
 
             cacheRef.current[cacheKey] = {
                 data,
@@ -66,17 +81,33 @@ export const DataCacheProvider = ({ children }) => {
         forceUpdate({});
 
         try {
-            const response = await adminCatalogAPI.getProducts(params);
-            const data = response.data || [];
+            // Fetch ALL products by auto-paginating through all pages
+            let allProducts = [];
+            let page = 1;
+            let hasMore = true;
+            while (hasMore) {
+                const response = await adminCatalogAPI.getProducts({ ...params, page, page_size: 100 });
+                const responseData = response.data;
+                if (Array.isArray(responseData)) {
+                    allProducts = responseData;
+                    hasMore = false;
+                } else if (responseData.results) {
+                    allProducts = [...allProducts, ...responseData.results];
+                    hasMore = !!responseData.next;
+                    page++;
+                } else {
+                    hasMore = false;
+                }
+            }
 
             cacheRef.current[cacheKey] = {
-                data,
+                data: allProducts,
                 timestamp: Date.now(),
                 loading: false
             };
             forceUpdate({});
 
-            return { data, fromCache: false };
+            return { data: allProducts, fromCache: false };
         } catch (error) {
             cacheRef.current[cacheKey].loading = false;
             forceUpdate({});
@@ -98,7 +129,7 @@ export const DataCacheProvider = ({ children }) => {
 
         try {
             const response = await adminCatalogAPI.getCategories(params);
-            const data = response.data || [];
+            const data = extractResults(response.data);
 
             cacheRef.current[cacheKey] = {
                 data,
@@ -129,7 +160,7 @@ export const DataCacheProvider = ({ children }) => {
 
         try {
             const response = await adminCatalogAPI.getSubcategories(params);
-            const data = response.data || [];
+            const data = extractResults(response.data);
 
             cacheRef.current[cacheKey] = {
                 data,

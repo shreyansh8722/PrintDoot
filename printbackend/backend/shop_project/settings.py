@@ -263,20 +263,20 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
+    'DEFAULT_THROTTLE_CLASSES': [] if DEBUG else [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/hour',        # Anonymous users — 100 requests/hour
-        'user': '1000/hour',       # Authenticated users — 1000 requests/hour
-        'register': '5/hour',      # Registration — 5 per hour per IP
-        'login': '10/minute',      # Login attempts — 10 per minute
-        'password_reset': '3/hour',  # Password reset — 3 per hour
-        'contact': '5/hour',       # Contact form — 5 per hour
-        'order_create': '20/hour', # Order creation — 20 per hour
-        'payment': '30/hour',      # Payment operations — 30 per hour
-        'shipping': '30/minute',   # Shipping rate lookups — 30 per minute per IP
+        'anon': '10000/hour' if DEBUG else '100/hour',
+        'user': '50000/hour' if DEBUG else '1000/hour',
+        'register': '100/hour' if DEBUG else '5/hour',
+        'login': '100/minute' if DEBUG else '10/minute',
+        'password_reset': '50/hour' if DEBUG else '3/hour',
+        'contact': '50/hour' if DEBUG else '5/hour',
+        'order_create': '200/hour' if DEBUG else '20/hour',
+        'payment': '200/hour' if DEBUG else '30/hour',
+        'shipping': '200/minute' if DEBUG else '30/minute',
     },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
