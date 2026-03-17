@@ -166,6 +166,7 @@ class OrderSerializer(serializers.ModelSerializer):
     return_requests = ReturnRequestSerializer(many=True, read_only=True)
     refunds = RefundSerializer(many=True, read_only=True)
     allowed_transitions = serializers.SerializerMethodField()
+    promo_code = serializers.CharField(max_length=30, required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Order
@@ -173,7 +174,7 @@ class OrderSerializer(serializers.ModelSerializer):
             'id', 'status', 'allowed_transitions', 'total_amount', 'currency',
             'subtotal', 'tax_total', 'shipping_total', 'discount_total',
             'shipping_address', 'shipping_address_details',
-            'payment_method', 'customer_notes',
+            'payment_method', 'customer_notes', 'promo_code',
             'is_paid', 'paid_at', 'transaction_id',
             'estimated_delivery_date',
             'items', 'shipment', 'invoice', 'status_history',
@@ -233,7 +234,21 @@ class OrderSerializer(serializers.ModelSerializer):
         tax_rate = Decimal('0.18')  # GST 18%
         tax_total = round(subtotal * tax_rate, 2)
         shipping_total = validated_data.get('shipping_total', 0) or 0
-        discount_total = validated_data.get('discount_total', 0) or 0
+        discount_total = Decimal('0.00')
+
+        # ── Promo code handling ──
+        promo_code_str = validated_data.pop('promo_code', None)
+        applied_promo = None
+        if promo_code_str:
+            from apps.pages.models import PromoCode
+            try:
+                promo = PromoCode.objects.get(code=promo_code_str.upper().strip())
+                if promo.is_valid():
+                    discount_total = promo.apply_discount(subtotal)
+                    applied_promo = promo
+            except PromoCode.DoesNotExist:
+                pass  # Invalid code — silently ignore, order still goes through
+
         total_amount = subtotal + tax_total + Decimal(str(shipping_total)) - Decimal(str(discount_total))
 
         # Anti-fraud: Reject unreasonably large orders
@@ -289,8 +304,13 @@ class OrderSerializer(serializers.ModelSerializer):
             old_status='',
             new_status='Pending',
             changed_by=self.context['request'].user,
-            note='Order placed'
+            note='Order placed' + (f' (Promo: {applied_promo.code})' if applied_promo else '')
         )
+
+        # Increment promo code usage
+        if applied_promo:
+            applied_promo.times_used += 1
+            applied_promo.save(update_fields=['times_used'])
 
         # Send order confirmation email
         try:

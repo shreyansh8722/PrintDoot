@@ -56,6 +56,7 @@
 .ua-date { font-size:.82rem; color:#6b7280; white-space:nowrap; }
 .ua-checkbox { width:18px; height:18px; accent-color:#00897b; cursor:default; }
 .ua-empty { text-align:center; padding:40px !important; color:#9ca3af; }
+.ua-no-data { text-align:center; padding:20px; color:#9ca3af; font-size:.88rem; font-style:italic; }
 
 @media (max-width:1024px) { .ua-stats-row { grid-template-columns:repeat(2,1fr); } .ua-mid-grid { grid-template-columns:1fr; } .ua-insights-grid { grid-template-columns:1fr; } }
 @media (max-width:640px) { .ua-stats-row { grid-template-columns:1fr; } }

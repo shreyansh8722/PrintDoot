@@ -1,21 +1,306 @@
-.reviews-page {
-    padding-bottom: 40px;
+/* ═══════════════════════════════════════════════════════════════
+   CUSTOMER REVIEWS PAGE
+   ═══════════════════════════════════════════════════════════════ */
+
+.rv-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; gap:16px; color:#6b7280; }
+.rv-spinner { width:36px; height:36px; border:4px solid #e5e7eb; border-top-color:#00897b; border-radius:50%; animation:rvSpin .7s linear infinite; }
+@keyframes rvSpin { to { transform:rotate(360deg); } }
+
+.rv-page { padding-bottom:40px; }
+
+.rv-page-title {
+    font-size:1.55rem;
+    font-weight:700;
+    color:#111;
+    margin-bottom:24px;
 }
 
-.page-title {
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: #111;
+/* ═══ STAT CARDS ═══ */
+.rv-stats-grid {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:32px;
 }
 
-.reviews-list-section {
-    margin-top: 40px;
+.rv-stat-card {
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:22px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
 }
 
-.reviews-container {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
+.rv-stat-label {
+    font-size:.82rem;
+    font-weight:500;
+    color:#6b7280;
+}
+
+.rv-stat-value {
+    font-size:1.75rem;
+    font-weight:700;
+    color:#111;
+}
+
+/* ═══ REVIEWS SECTION ═══ */
+.rv-reviews-section {
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);
+    overflow:hidden;
+}
+
+.rv-section-title {
+    font-size:1.05rem;
+    font-weight:700;
+    color:#111;
+    padding:22px 28px 0;
+    margin:0 0 4px;
+}
+
+/* ═══ REVIEW CARDS ═══ */
+.rv-reviews-list {
+    padding:0;
+}
+
+.rv-review-card {
+    padding:24px 28px;
+    border-bottom:1px solid #f0f0f0;
+}
+
+.rv-review-card:last-child {
+    border-bottom:none;
+}
+
+.rv-review-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:12px;
+}
+
+.rv-reviewer-info {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.rv-avatar {
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:1.1rem;
+    flex-shrink:0;
+}
+
+.rv-reviewer-name {
+    font-size:.95rem;
+    font-weight:600;
+    color:#1f2937;
+    margin:0 0 4px;
+}
+
+.rv-stars {
+    display:flex;
+    gap:2px;
+}
+
+.rv-review-date {
+    font-size:.82rem;
+    color:#9ca3af;
+    white-space:nowrap;
+}
+
+.rv-review-text {
+    font-size:.9rem;
+    color:#4b5563;
+    line-height:1.65;
+    margin:0;
+}
+
+/* ═══ REPLY BOX (Addressed) ═══ */
+.rv-reply-box {
+    background:#f8f9fa;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    padding:16px 18px;
+    margin-top:16px;
+}
+
+.rv-reply-header {
+    font-size:.72rem;
+    font-weight:700;
+    color:#6b7280;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+}
+
+.rv-reply-text {
+    font-size:.88rem;
+    color:#374151;
+    line-height:1.6;
+    margin:0 0 12px;
+}
+
+.rv-reply-footer {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.rv-reply-date {
+    font-size:.78rem;
+    color:#9ca3af;
+}
+
+/* ═══ BADGES ═══ */
+.rv-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:3px 10px;
+    border-radius:12px;
+    font-size:.74rem;
+    font-weight:600;
+}
+
+.rv-badge-addressed {
+    background:#ecfdf5;
+    color:#059669;
+}
+
+.rv-badge-pending {
+    background:#fff7ed;
+    color:#ea580c;
+}
+
+/* ═══ REPLY FORM (Pending) ═══ */
+.rv-reply-form {
+    margin-top:14px;
+}
+
+.rv-reply-textarea {
+    width:100%;
+    padding:10px 14px;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    font-size:.88rem;
+    color:#374151;
+    resize:vertical;
+    font-family:inherit;
+    background:#fff;
+    transition:border-color .15s;
+    min-height:48px;
+    box-sizing:border-box;
+}
+
+.rv-reply-textarea:focus {
+    outline:none;
+    border-color:#00897b;
+    box-shadow:0 0 0 3px rgba(0,137,123,.08);
+}
+
+.rv-reply-textarea::placeholder {
+    color:#9ca3af;
+}
+
+.rv-reply-form-footer {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:10px;
+}
+
+.rv-reply-btn {
+    padding:8px 24px;
+    background:#00897b;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    font-size:.84rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .2s;
+}
+
+.rv-reply-btn:hover {
+    background:#00695c;
+}
+
+/* ═══ EMPTY STATE ═══ */
+.rv-empty {
+    text-align:center;
+    padding:40px;
+    color:#9ca3af;
+    font-size:.9rem;
+}
+
+/* ═══ PAGINATION ═══ */
+.rv-pagination {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    padding:20px 28px;
+    border-top:1px solid #f0f0f0;
+}
+
+.rv-page-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    border:1px solid #e5e7eb;
+    border-radius:8px;
+    background:#fff;
+    font-size:.84rem;
+    font-weight:500;
+    color:#374151;
+    cursor:pointer;
+    transition:all .15s;
+}
+
+.rv-page-btn:hover:not(:disabled):not(.rv-page-active) {
+    border-color:#00897b;
+    color:#00897b;
+}
+
+.rv-page-btn:disabled {
+    opacity:.4;
+    cursor:not-allowed;
+}
+
+.rv-page-active {
+    background:#00897b;
+    color:#fff;
+    border-color:#00897b;
+}
+
+.rv-page-arrow {
+    width:34px;
+    height:34px;
+}
+
+.rv-page-dots {
+    padding:0 6px;
+    color:#9ca3af;
+    font-size:.84rem;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:768px) {
+    .rv-stats-grid { grid-template-columns:1fr; }
+    .rv-review-card { padding:18px 16px; }
+    .rv-pagination { padding:16px; }
 }

@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+// Smart API URL: env var > production detection > localhost fallback
+const getApiBaseUrl = () => {
+    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+    const host = typeof window !== 'undefined' ? window.location.hostname : '';
+    if (host.includes('printdoot.com')) return 'https://api.printdoot.com/api/v1';
+    return 'http://localhost:8000/api/v1';
+};
+const API_BASE_URL = getApiBaseUrl();
 
 // Create axios instance with default config
 const api = axios.create({
@@ -89,13 +96,23 @@ export const adminCatalogAPI = {
     getProductStats: () => api.get('/admin/products/stats/'),
 };
 
-// Admin Offers Management APIs
+// Admin Offers Management APIs (marquee text offers)
 export const adminOffersAPI = {
     getOffers: (params) => api.get('/admin/offers/', { params }),
     getOffer: (id) => api.get(`/admin/offers/${id}/`),
     createOffer: (data) => api.post('/admin/offers/', data),
     updateOffer: (id, data) => api.patch(`/admin/offers/${id}/`, data),
     deleteOffer: (id) => api.delete(`/admin/offers/${id}/`),
+};
+
+// Admin Promo Code Management APIs
+export const adminPromoCodeAPI = {
+    getPromoCodes: (params) => api.get('/admin/promo-codes/', { params }),
+    getPromoCode: (id) => api.get(`/admin/promo-codes/${id}/`),
+    createPromoCode: (data) => api.post('/admin/promo-codes/', data),
+    updatePromoCode: (id, data) => api.patch(`/admin/promo-codes/${id}/`, data),
+    deletePromoCode: (id) => api.delete(`/admin/promo-codes/${id}/`),
+    getStats: () => api.get('/admin/promo-codes/stats/'),
 };
 
 // Admin Orders Management APIs
@@ -169,7 +186,7 @@ export const adminUploadAPI = {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('folder', folder);
-        return api.post('/admin/catalog/upload/', formData, {
+        return api.post('/admin/upload/', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
         });
     },

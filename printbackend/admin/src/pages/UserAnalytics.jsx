@@ -18,6 +18,7 @@ const UserAnalytics = () => {
     const [userAnalytics, setUserAnalytics] = useState(null);
     const [users, setUsers] = useState([]);
     const [orderStats, setOrderStats] = useState(null);
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => { fetchAll(); }, []);
@@ -25,15 +26,18 @@ const UserAnalytics = () => {
     const fetchAll = async () => {
         try {
             setLoading(true);
-            const [userAnalRes, usersRes, orderRes] = await Promise.all([
+            const [userAnalRes, usersRes, orderRes, ordersRes] = await Promise.all([
                 adminDashboardAPI.getUserAnalytics(),
-                adminUserAPI.getUsers({ page_size: 50 }),
+                adminUserAPI.getUsers({ page_size: 100 }),
                 adminOrdersAPI.getOrderStats(),
+                adminOrdersAPI.getOrders({ page_size: 100 }).catch(() => ({ data: [] })),
             ]);
             setUserAnalytics(userAnalRes.data);
             const ud = usersRes.data;
             setUsers(Array.isArray(ud) ? ud : (ud.results || []));
             setOrderStats(orderRes.data);
+            const od = ordersRes.data;
+            setOrders(Array.isArray(od) ? od : (od.results || []));
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -45,7 +49,7 @@ const UserAnalytics = () => {
         return <div className="ua-loading"><div className="ua-spinner"></div><p>Loading user analytics...</p></div>;
     }
 
-    const totalCustomers = userAnalytics?.total_users || 0;
+    const totalCustomers = userAnalytics?.total_users || users.length || 0;
     const newCustomersMonth = userAnalytics?.registrations_daily?.length || 0;
     const growthRate = userAnalytics?.growth_rate || 0;
     const segments = userAnalytics?.segments || {};
@@ -54,7 +58,7 @@ const UserAnalytics = () => {
     const churnPct = totalCustomers > 0
         ? Math.round((segments.no_orders || 0) / totalCustomers * 100) : 0;
 
-    // Monthly sales data from registrations
+    // Monthly registration data from real API
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthlySales = (userAnalytics?.registrations_monthly || []).map((item, idx) => {
         const d = new Date(item.month);
@@ -65,26 +69,56 @@ const UserAnalytics = () => {
         };
     });
 
-    // Segmentation data for pie
+    // Segmentation data for pie — from real segments
     const segData = [
         { name: 'New', value: (segments.no_orders || 0) + (segments.one_order || 0), color: '#00897b' },
         { name: 'Repeat', value: (segments.two_to_five || 0) + (segments.six_plus || 0), color: '#f59e0b' },
         { name: 'Dormant', value: segments.no_orders || 0, color: '#ef4444' },
     ].filter(d => d.value > 0);
 
-    // Abandoned carts bar chart (deterministic monthly data)
-    const abandonedData = monthNames.map((m, i) => ({
+    // Abandoned vs Converted carts — derive from real order data
+    const ordersByMonth = {};
+    orders.forEach(o => {
+        const d = new Date(o.created_at);
+        const m = monthNames[d.getMonth()];
+        if (!ordersByMonth[m]) ordersByMonth[m] = { converted: 0, abandoned: 0 };
+        if (o.status === 'cancelled' || o.status === 'failed') {
+            ordersByMonth[m].abandoned++;
+        } else {
+            ordersByMonth[m].converted++;
+        }
+    });
+    const abandonedData = monthNames.map(m => ({
         month: m,
-        converted: [12, 15, 10, 18, 14, 20, 16, 22, 19, 11, 13, 17][i],
-        abandoned: [7, 9, 6, 11, 8, 5, 10, 7, 6, 12, 8, 9][i],
-    }));
+        converted: ordersByMonth[m]?.converted || 0,
+        abandoned: ordersByMonth[m]?.abandoned || 0,
+    })).filter(d => d.converted > 0 || d.abandoned > 0);
+    // If no real data, show a placeholder message
+    const hasAbandonedData = abandonedData.length > 0;
+
+    // Top cities from real user data
+    const cityCount = {};
+    users.forEach(u => {
+        const city = u.city || u.address_city || '';
+        if (city) cityCount[city] = (cityCount[city] || 0) + 1;
+    });
+    const topCities = Object.entries(cityCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([city]) => city);
+    const topCitiesStr = topCities.length > 0 ? topCities.join(', ') : 'No city data yet';
+
+    // Channel split — real orders don't have a "channel" field yet, 
+    // so show based on order count vs user count for now
+    const usersWithOrders = users.filter(u => (u.total_orders ?? 0) > 0).length;
+    const onlinePct = totalCustomers > 0 ? Math.round((usersWithOrders / totalCustomers) * 100) : 0;
 
     // Customer details from real users
     const customerDetails = users.slice(0, 10).map((u, idx) => ({
         id: `CUST${String(u.id).padStart(3, '0')}`,
         name: u.full_name || u.username || u.email?.split('@')[0] || '—',
         contact: u.phone || u.email || '—',
-        city: u.city || ['Delhi', 'Mumbai', 'Bengaluru', 'Chennai', 'Jaipur'][idx % 5],
+        city: u.city || u.address_city || '—',
         firstOrder: u.date_joined ? new Date(u.date_joined).toLocaleDateString('en-CA') : '—',
         lastOrder: u.last_login ? new Date(u.last_login).toLocaleDateString('en-CA') : '—',
         totalOrders: u.total_orders ?? 0,
@@ -123,21 +157,25 @@ const UserAnalytics = () => {
 
             {/* ═══ SALES REPORT CHART ═══ */}
             <section className="ua-chart-section">
-                <h2 className="ua-chart-title">Sales Report</h2>
+                <h2 className="ua-chart-title">Registration Report</h2>
                 <div className="ua-chart-wrap">
-                    <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={monthlySales} barSize={40}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} />
-                            <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} />
-                            <Tooltip />
-                            <Bar dataKey="value" name="Registrations" radius={[6, 6, 0, 0]}>
-                                {monthlySales.map((entry, index) => (
-                                    <Cell key={index} fill={entry.fill} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
+                    {monthlySales.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={240}>
+                            <BarChart data={monthlySales} barSize={40}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} />
+                                <YAxis tick={{ fontSize: 12, fill: '#6b7280' }} />
+                                <Tooltip />
+                                <Bar dataKey="value" name="Registrations" radius={[6, 6, 0, 0]}>
+                                    {monthlySales.map((entry, index) => (
+                                        <Cell key={index} fill={entry.fill} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <p className="ua-no-data">No registration data available yet.</p>
+                    )}
                 </div>
             </section>
 
@@ -146,38 +184,48 @@ const UserAnalytics = () => {
                 <div className="ua-seg-card">
                     <h3 className="ua-seg-title">Customer Segmentation</h3>
                     <div className="ua-seg-chart">
-                        <ResponsiveContainer width={120} height={120}>
-                            <PieChart>
-                                <Pie data={segData} cx="50%" cy="50%" outerRadius={50} dataKey="value" paddingAngle={2}>
-                                    {segData.map((entry, i) => (
-                                        <Cell key={i} fill={entry.color} />
+                        {segData.length > 0 ? (
+                            <>
+                                <ResponsiveContainer width={120} height={120}>
+                                    <PieChart>
+                                        <Pie data={segData} cx="50%" cy="50%" outerRadius={50} dataKey="value" paddingAngle={2}>
+                                            {segData.map((entry, i) => (
+                                                <Cell key={i} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                <div className="ua-seg-legend">
+                                    {segData.map((s, i) => (
+                                        <div key={i} className="ua-seg-item">
+                                            <span className="ua-seg-dot" style={{ background: s.color }}></span>
+                                            {s.name} ({s.value})
+                                        </div>
                                     ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="ua-seg-legend">
-                            {segData.map((s, i) => (
-                                <div key={i} className="ua-seg-item">
-                                    <span className="ua-seg-dot" style={{ background: s.color }}></span>
-                                    {s.name}
                                 </div>
-                            ))}
-                        </div>
+                            </>
+                        ) : (
+                            <p className="ua-no-data">No segment data available.</p>
+                        )}
                     </div>
                 </div>
 
                 <div className="ua-abandoned-card">
-                    <h3 className="ua-seg-title">Abandoned vs Converted Carts</h3>
+                    <h3 className="ua-seg-title">Order Outcomes by Month</h3>
                     <div className="ua-abandoned-chart">
-                        <ResponsiveContainer width="100%" height={140}>
-                            <BarChart data={abandonedData} barSize={12}>
-                                <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                                <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                                <Tooltip />
-                                <Bar dataKey="converted" fill="#00897b" radius={[3, 3, 0, 0]} />
-                                <Bar dataKey="abandoned" fill="#f59e0b" radius={[3, 3, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {hasAbandonedData ? (
+                            <ResponsiveContainer width="100%" height={140}>
+                                <BarChart data={abandonedData} barSize={12}>
+                                    <XAxis dataKey="month" tick={{ fontSize: 10, fill: '#9ca3af' }} />
+                                    <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} />
+                                    <Tooltip />
+                                    <Bar dataKey="converted" fill="#00897b" name="Completed" radius={[3, 3, 0, 0]} />
+                                    <Bar dataKey="abandoned" fill="#f59e0b" name="Cancelled/Failed" radius={[3, 3, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <p className="ua-no-data">No order data to show outcomes.</p>
+                        )}
                     </div>
                 </div>
             </div>
@@ -189,16 +237,20 @@ const UserAnalytics = () => {
                     <div className="ua-insight-card">
                         <div className="ua-insight-icon ua-icon-blue"><MapPin size={20} /></div>
                         <h4>Top Cities by Customers</h4>
-                        <p>Delhi, Mumbai, Bengaluru</p>
+                        <p>{topCitiesStr}</p>
                     </div>
                     <div className="ua-insight-card">
                         <div className="ua-insight-icon ua-icon-teal"><Globe size={20} /></div>
-                        <h4>Channel Split</h4>
-                        <p>Online: 70%, Offline: 30%</p>
+                        <h4>Active Buyers</h4>
+                        <p>{usersWithOrders} of {totalCustomers} customers have placed orders ({onlinePct}%)</p>
                     </div>
                     <div className="ua-insight-card">
-                        <h4>Loyalty Touch</h4>
-                        <p><strong>60% Online</strong>&nbsp;&nbsp;&nbsp;<strong>20% Offline</strong></p>
+                        <h4>Customer Segments</h4>
+                        <p>
+                            <strong>{segments.one_order || 0} one-time</strong>&nbsp;•&nbsp;
+                            <strong>{(segments.two_to_five || 0) + (segments.six_plus || 0)} repeat</strong>&nbsp;•&nbsp;
+                            <strong>{segments.no_orders || 0} no orders</strong>
+                        </p>
                     </div>
                 </div>
             </section>

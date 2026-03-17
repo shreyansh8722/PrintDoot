@@ -103,11 +103,14 @@ const TABS = [
 
 const POSITION_MAP = {
     hero: [
-        { value: 'hero_primary', label: 'Hero Primary' },
-        { value: 'hero_secondary', label: 'Hero Secondary' },
-        { value: 'homepage', label: 'Homepage General' },
+        { value: 'hero', label: 'Hero Banner (Homepage)' },
+        { value: 'promo', label: 'Promotional Banner' },
+        { value: 'popup', label: 'Popup Banner' },
     ],
-    category: [{ value: 'category', label: 'Category Page' }],
+    category: [
+        { value: 'category', label: 'Category Page Banner' },
+        { value: 'sidebar', label: 'Sidebar Banner' },
+    ],
 };
 
 const Banners = () => {
@@ -122,7 +125,7 @@ const Banners = () => {
     // Banner form
     const emptyBanner = {
         title: '', subtitle: '', image_url: '', mobile_image_url: '',
-        link: '', position: 'hero_primary', is_active: true, display_order: 0,
+        link: '', position: 'hero', is_active: true, display_order: 0,
     };
     const [form, setForm] = useState(emptyBanner);
 
@@ -158,7 +161,7 @@ const Banners = () => {
         setForm(banner ? {
             title: banner.title || '', subtitle: banner.subtitle || '',
             image_url: banner.image_url || '', mobile_image_url: banner.mobile_image_url || '',
-            link: banner.link || '', position: banner.position || 'hero_primary',
+            link: banner.link || '', position: banner.position || 'hero',
             is_active: banner.is_active ?? true, display_order: banner.display_order || 0,
         } : emptyBanner);
         setShowModal(true);
@@ -370,10 +373,11 @@ const Banners = () => {
                                 <div className="si-form-group">
                                     <label>Position</label>
                                     <select value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })}>
-                                        <option value="hero_primary">Hero Primary</option>
-                                        <option value="hero_secondary">Hero Secondary</option>
-                                        <option value="homepage">Homepage General</option>
-                                        <option value="category">Category Page</option>
+                                        <option value="hero">Hero Banner (Homepage)</option>
+                                        <option value="promo">Promotional Banner</option>
+                                        <option value="sidebar">Sidebar Banner</option>
+                                        <option value="category">Category Page Banner</option>
+                                        <option value="popup">Popup Banner</option>
                                     </select>
                                 </div>
                                 <div className="si-form-group">

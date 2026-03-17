@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Offer, Banner
-from .serializers import OfferSerializer, BannerSerializer
+from .models import Offer, Banner, PromoCode
+from .serializers import OfferSerializer, BannerSerializer, PromoCodeSerializer
 from apps.users.permissions import IsAdminOrStaff
 
 
@@ -63,4 +63,33 @@ class AdminBannerViewSet(viewsets.ModelViewSet):
             'scheduled': scheduled,
             'expired': expired,
             'by_position': position_counts,
+        })
+
+
+class AdminPromoCodeViewSet(viewsets.ModelViewSet):
+    """
+    Admin-only ViewSet for managing promo / discount codes.
+    """
+    queryset = PromoCode.objects.all()
+    serializer_class = PromoCodeSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['code', 'description']
+    ordering_fields = ['created_at', 'valid_to', 'discount_value']
+    ordering = ['-created_at']
+
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Get promo code statistics."""
+        from django.utils import timezone
+        now = timezone.now()
+        total = PromoCode.objects.count()
+        active = PromoCode.objects.filter(is_active=True).count()
+        expired = PromoCode.objects.filter(valid_to__lt=now, valid_to__isnull=False).count()
+        total_used = sum(p.times_used for p in PromoCode.objects.all())
+        return Response({
+            'total': total,
+            'active': active,
+            'expired': expired,
+            'total_used': total_used,
         })

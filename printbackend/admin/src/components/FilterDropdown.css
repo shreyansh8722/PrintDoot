@@ -1,0 +1,94 @@
+/* ═══════════════════════════════════════════════════════════════
+   FILTER DROPDOWN — Reusable dropdown pill
+   ═══════════════════════════════════════════════════════════════ */
+
+.fd-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.fd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: #00897b;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.fd-pill:hover {
+    background: #00695c;
+}
+
+.fd-pill-open {
+    background: #00695c;
+    box-shadow: 0 2px 8px rgba(0, 137, 123, 0.25);
+}
+
+.fd-chevron {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.fd-chevron-up {
+    transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.fd-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 180px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    padding: 4px 0;
+    animation: fd-slide-in 0.15s ease-out;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+@keyframes fd-slide-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fd-option {
+    display: block;
+    width: 100%;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-size: 0.82rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+}
+
+.fd-option:hover {
+    background: #f0fdfa;
+    color: #00897b;
+}
+
+.fd-option-active {
+    background: #e0f2f1;
+    color: #00695c;
+    font-weight: 600;
+}
+
+/* Scrollbar */
+.fd-menu::-webkit-scrollbar { width: 5px; }
+.fd-menu::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+.fd-menu::-webkit-scrollbar-track { background: transparent; }

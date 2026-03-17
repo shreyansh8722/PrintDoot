@@ -31,6 +31,8 @@
 .ca-product { color:#00897b; font-weight:500; }
 .ca-value { font-weight:600; }
 .ca-status-badge { display:inline-flex; padding:5px 14px; border-radius:20px; font-size:.78rem; font-weight:600; white-space:nowrap; }
+.ca-empty { text-align:center; padding:40px !important; color:#9ca3af; }
+.ca-no-data { text-align:center; padding:20px; color:#9ca3af; font-size:.88rem; font-style:italic; }
 
 /* Filter pills */
 .ca-filter-row { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }

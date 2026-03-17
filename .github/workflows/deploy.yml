@@ -157,6 +157,8 @@ jobs:
       - name: 🔨 Build
         working-directory: printbackend/admin
         run: npm run build
+        env:
+          VITE_API_URL: https://api.printdoot.com/api/v1
 
       - name: 🔑 Setup SSH
         run: |

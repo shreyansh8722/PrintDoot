@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+from django.utils import timezone
 
 
 class Offer(models.Model):
@@ -21,6 +22,82 @@ class Offer(models.Model):
 
     def __str__(self):
         return self.text[:60]
+
+
+class PromoCode(models.Model):
+    """
+    Real promo / discount codes that users can apply at checkout.
+    """
+    DISCOUNT_TYPE_CHOICES = [
+        ('percentage', 'Percentage Discount'),
+        ('flat', 'Flat Amount Discount'),
+    ]
+
+    code = models.CharField(max_length=30, unique=True, help_text="Promo code (e.g. WELCOME20)")
+    description = models.CharField(max_length=200, blank=True, default="", help_text="Human-readable description")
+    discount_type = models.CharField(max_length=12, choices=DISCOUNT_TYPE_CHOICES, default='percentage')
+    discount_value = models.DecimalField(max_digits=10, decimal_places=2, help_text="Discount value (percentage 0-100 or flat amount in ₹)")
+    min_order_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Minimum order subtotal to use this code")
+    max_discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Max discount cap for percentage codes (₹)")
+    usage_limit = models.PositiveIntegerField(default=0, help_text="Max total uses (0 = unlimited)")
+    times_used = models.PositiveIntegerField(default=0, help_text="How many times this code has been used")
+    valid_from = models.DateTimeField(null=True, blank=True, help_text="Code becomes active after this datetime")
+    valid_to = models.DateTimeField(null=True, blank=True, help_text="Code expires after this datetime")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Promo Code'
+        verbose_name_plural = 'Promo Codes'
+
+    def __str__(self):
+        return f"{self.code} ({self.get_discount_type_display()} — {self.discount_value})"
+
+    @property
+    def is_expired(self):
+        now = timezone.now()
+        if self.valid_to and now > self.valid_to:
+            return True
+        return False
+
+    @property
+    def is_started(self):
+        now = timezone.now()
+        if self.valid_from and now < self.valid_from:
+            return False
+        return True
+
+    @property
+    def is_usage_exceeded(self):
+        if self.usage_limit > 0 and self.times_used >= self.usage_limit:
+            return True
+        return False
+
+    def is_valid(self):
+        """Check if the promo code can be used right now."""
+        return self.is_active and self.is_started and not self.is_expired and not self.is_usage_exceeded
+
+    def apply_discount(self, subtotal):
+        """
+        Calculate the discount amount for a given subtotal.
+        Returns Decimal discount amount (capped if applicable).
+        """
+        from decimal import Decimal, ROUND_HALF_UP
+
+        subtotal = Decimal(str(subtotal))
+        if subtotal < self.min_order_amount:
+            return Decimal('0.00')
+
+        if self.discount_type == 'percentage':
+            discount = (subtotal * self.discount_value / Decimal('100')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            if self.max_discount and discount > self.max_discount:
+                discount = self.max_discount
+        else:
+            discount = min(self.discount_value, subtotal)
+
+        return discount
 
 
 class Banner(models.Model):

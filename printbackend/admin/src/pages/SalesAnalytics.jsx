@@ -4,10 +4,10 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import {
-    DollarSign, ShoppingCart, TrendingUp,
-    ArrowUpRight, ArrowDownRight,
-    Clock, MapPin, Share2, ChevronDown, Star
+    DollarSign, TrendingUp, BarChart3, Users, Package, Clock,
+    ShoppingCart, ArrowUpRight, ArrowDownRight, MapPin, Share2, Star
 } from 'lucide-react';
+import FilterDropdown from '../components/FilterDropdown';
 import { adminDashboardAPI } from '../services/api';
 import './SalesAnalytics.css';
 
@@ -143,24 +143,21 @@ const SalesAnalytics = () => {
                 <div className="sa2-charts-header">
                     <h2 className="sa2-section-title">Charts</h2>
                     <div className="sa2-chart-filters">
-                        <div className="sa2-filter-pill" onClick={() => {
-                            const opts = ['Product Category', 'Electronics', 'Apparel', 'Home & Kitchen', 'Custom Prints', 'Stationery'];
-                            setCategoryFilter(opts[(opts.indexOf(categoryFilter) + 1) % opts.length]);
-                        }}>
-                            {categoryFilter} <ChevronDown size={14} />
-                        </div>
-                        <div className="sa2-filter-pill" onClick={() => {
-                            const opts = ['Region', 'North India', 'South India', 'East India', 'West India', 'Central India'];
-                            setRegionFilter(opts[(opts.indexOf(regionFilter) + 1) % opts.length]);
-                        }}>
-                            {regionFilter} <ChevronDown size={14} />
-                        </div>
-                        <div className="sa2-filter-pill" onClick={() => {
-                            const opts = ['Channel', 'Online', 'Offline', 'Wholesale', 'Marketplace'];
-                            setChannelFilter(opts[(opts.indexOf(channelFilter) + 1) % opts.length]);
-                        }}>
-                            {channelFilter} <ChevronDown size={14} />
-                        </div>
+                        <FilterDropdown
+                            value={categoryFilter}
+                            options={['Product Category', 'Electronics', 'Apparel', 'Home & Kitchen', 'Custom Prints', 'Stationery']}
+                            onChange={setCategoryFilter}
+                        />
+                        <FilterDropdown
+                            value={regionFilter}
+                            options={['Region', 'North India', 'South India', 'East India', 'West India', 'Central India']}
+                            onChange={setRegionFilter}
+                        />
+                        <FilterDropdown
+                            value={channelFilter}
+                            options={['Channel', 'Online', 'Offline', 'Wholesale', 'Marketplace']}
+                            onChange={setChannelFilter}
+                        />
                     </div>
                 </div>
 

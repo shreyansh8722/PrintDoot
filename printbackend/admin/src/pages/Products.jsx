@@ -292,7 +292,8 @@ const Products = () => {
             setShowModal(false);
             invalidateCache(['products']);
             fetchProductsData(true);
-            fetchStats();
+            // Small delay to ensure DB has committed before re-fetching stats
+            setTimeout(() => fetchStats(), 500);
         } catch (error) {
             console.error('Error saving product:', error);
             alert('Failed to save product: ' + (error.response?.data?.detail || JSON.stringify(error.response?.data) || error.message));
@@ -306,7 +307,7 @@ const Products = () => {
                 alert('Product deleted successfully');
                 invalidateCache(['products']);
                 fetchProductsData(true);
-                fetchStats();
+                setTimeout(() => fetchStats(), 500);
             } catch (error) {
                 console.error('Error deleting product:', error);
                 alert('Failed to delete product');

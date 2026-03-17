@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Search, Plus, Pencil, Trash2, X, ChevronDown
+    Search, Plus, Pencil, Trash2, X, ChevronDown, Tag, Percent, Calendar
 } from 'lucide-react';
-import { adminOffersAPI } from '../services/api';
+import { adminPromoCodeAPI } from '../services/api';
+import FilterDropdown from '../components/FilterDropdown';
 import './Offers.css';
 
 const STATUS_BADGE = {
-    Active:  { bg: '#dcfce7', color: '#15803d' },
-    Expired: { bg: '#fee2e2', color: '#991b1b' },
-    Inactive:{ bg: '#f3f4f6', color: '#6b7280' },
+    Active:        { bg: '#dcfce7', color: '#15803d' },
+    Expired:       { bg: '#fee2e2', color: '#991b1b' },
+    Inactive:      { bg: '#f3f4f6', color: '#6b7280' },
+    Scheduled:     { bg: '#dbeafe', color: '#1e40af' },
+    'Limit Reached': { bg: '#fef3c7', color: '#92400e' },
 };
 
 const Offers = () => {
@@ -18,21 +21,31 @@ const Offers = () => {
     const [editing, setEditing] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All Statuses');
+    const [stats, setStats] = useState({ total: 0, active: 0, expired: 0, total_used: 0 });
 
     const emptyForm = {
-        text: '', icon: '', link: '',
-        is_active: true, display_order: 0,
+        code: '', description: '', discount_type: 'percentage',
+        discount_value: '', min_order_amount: '0', max_discount: '',
+        usage_limit: 0, valid_from: '', valid_to: '', is_active: true,
     };
     const [form, setForm] = useState(emptyForm);
 
-    useEffect(() => { fetchCodes(); }, []);
+    useEffect(() => { fetchAll(); }, []);
 
-    const fetchCodes = async () => {
+    const fetchAll = async () => {
         try {
             setLoading(true);
-            const res = await adminOffersAPI.getOffers();
-            const data = res.data;
-            setCodes(Array.isArray(data) ? data : (data.results || []));
+            const [codesRes, statsRes] = await Promise.allSettled([
+                adminPromoCodeAPI.getPromoCodes(),
+                adminPromoCodeAPI.getStats(),
+            ]);
+            if (codesRes.status === 'fulfilled') {
+                const data = codesRes.value.data;
+                setCodes(Array.isArray(data) ? data : (data.results || []));
+            }
+            if (statsRes.status === 'fulfilled') {
+                setStats(statsRes.value.data);
+            }
         } catch (err) {
             console.error('Error:', err);
             setCodes([]);
@@ -43,20 +56,44 @@ const Offers = () => {
 
     const openModal = (code = null) => {
         setEditing(code);
-        setForm(code
-            ? { text: code.text || '', icon: code.icon || '', link: code.link || '', is_active: code.is_active, display_order: code.display_order || 0 }
-            : emptyForm
-        );
+        if (code) {
+            setForm({
+                code: code.code || '',
+                description: code.description || '',
+                discount_type: code.discount_type || 'percentage',
+                discount_value: code.discount_value || '',
+                min_order_amount: code.min_order_amount || '0',
+                max_discount: code.max_discount || '',
+                usage_limit: code.usage_limit || 0,
+                valid_from: code.valid_from ? code.valid_from.slice(0, 16) : '',
+                valid_to: code.valid_to ? code.valid_to.slice(0, 16) : '',
+                is_active: code.is_active ?? true,
+            });
+        } else {
+            setForm(emptyForm);
+        }
         setShowModal(true);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            if (editing) { await adminOffersAPI.updateOffer(editing.id, form); }
-            else { await adminOffersAPI.createOffer(form); }
+            const submitData = {
+                ...form,
+                code: form.code.toUpperCase().trim(),
+                discount_value: parseFloat(form.discount_value) || 0,
+                min_order_amount: parseFloat(form.min_order_amount) || 0,
+                max_discount: form.max_discount ? parseFloat(form.max_discount) : null,
+                valid_from: form.valid_from || null,
+                valid_to: form.valid_to || null,
+            };
+            if (editing) {
+                await adminPromoCodeAPI.updatePromoCode(editing.id, submitData);
+            } else {
+                await adminPromoCodeAPI.createPromoCode(submitData);
+            }
             setShowModal(false);
-            fetchCodes();
+            fetchAll();
         } catch (err) {
             const detail = err.response?.data;
             alert('Failed: ' + (typeof detail === 'object' ? JSON.stringify(detail) : detail || err.message));
@@ -65,38 +102,13 @@ const Offers = () => {
 
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this promo code?')) return;
-        try { await adminOffersAPI.deleteOffer(id); fetchCodes(); }
+        try { await adminPromoCodeAPI.deletePromoCode(id); fetchAll(); }
         catch (err) { alert('Failed to delete'); }
     };
 
-    // Map offers to promo-code-like display
-    const promoList = codes.map((code, idx) => {
-        const discounts = [20, 15, 25, 10, 30, 12, 5, 35, 18, 8];
-        const minOrders = [50, 30, 100, 20, 150, 40, 25, 200, 60, 35];
-        const discount = discounts[idx % discounts.length];
-        const minOrder = minOrders[idx % minOrders.length];
-        const status = code.is_active ? 'Active' : 'Expired';
-        return {
-            ...code,
-            codeDisplay: code.text?.toUpperCase().replace(/\s+/g, '').slice(0, 16) || `CODE${code.id}`,
-            discount: `${discount}%`,
-            minOrder: `$${minOrder}`,
-            maxDiscount: '₹50',
-            expiryDate: code.end_date
-                ? new Date(code.end_date).toLocaleDateString('en-CA')
-                : '—',
-            status,
-        };
-    });
-
-    // Stats
-    const totalCodes = promoList.length;
-    const activeCodes = promoList.filter(c => c.status === 'Active').length;
-    const expiredCodes = promoList.filter(c => c.status === 'Expired').length;
-
     // Filter
-    const filteredCodes = promoList.filter(c => {
-        const matchSearch = !searchTerm || c.codeDisplay.toLowerCase().includes(searchTerm.toLowerCase());
+    const filteredCodes = codes.filter(c => {
+        const matchSearch = !searchTerm || c.code.toLowerCase().includes(searchTerm.toLowerCase()) || (c.description || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchStatus = statusFilter === 'All Statuses' || c.status === statusFilter;
         return matchSearch && matchStatus;
     });
@@ -119,19 +131,19 @@ const Offers = () => {
             <div className="promo-stats-row">
                 <div className="promo-stat-card">
                     <span className="promo-stat-label">Total Promo Codes</span>
-                    <span className="promo-stat-value">{totalCodes}</span>
+                    <span className="promo-stat-value">{stats.total}</span>
                 </div>
                 <div className="promo-stat-card">
                     <span className="promo-stat-label">Active Promo Codes</span>
-                    <span className="promo-stat-value promo-val-green">{activeCodes}</span>
+                    <span className="promo-stat-value promo-val-green">{stats.active}</span>
                 </div>
                 <div className="promo-stat-card">
                     <span className="promo-stat-label">Expired Codes</span>
-                    <span className="promo-stat-value promo-val-red">{expiredCodes}</span>
+                    <span className="promo-stat-value promo-val-red">{stats.expired}</span>
                 </div>
                 <div className="promo-stat-card">
-                    <span className="promo-stat-label">Discount % Range</span>
-                    <span className="promo-stat-value">5-35%</span>
+                    <span className="promo-stat-label">Total Uses</span>
+                    <span className="promo-stat-value">{stats.total_used}</span>
                 </div>
             </div>
 
@@ -147,13 +159,11 @@ const Offers = () => {
                         className="promo-search-input"
                     />
                 </div>
-                <div className="promo-filter-pill" onClick={() => {
-                    const opts = ['All Statuses', 'Active', 'Expired'];
-                    const idx = opts.indexOf(statusFilter);
-                    setStatusFilter(opts[(idx + 1) % opts.length]);
-                }}>
-                    {statusFilter} <ChevronDown size={14} />
-                </div>
+                <FilterDropdown
+                    label={statusFilter}
+                    options={['All Statuses', 'Active', 'Expired', 'Inactive', 'Scheduled', 'Limit Reached']}
+                    onSelect={setStatusFilter}
+                />
             </div>
 
             {/* ═══ TABLE ═══ */}
@@ -165,6 +175,7 @@ const Offers = () => {
                             <th>DISCOUNT</th>
                             <th>MIN ORDER</th>
                             <th>MAX DISCOUNT</th>
+                            <th>USES</th>
                             <th>EXPIRY DATE</th>
                             <th>STATUS</th>
                             <th>ACTION</th>
@@ -172,17 +183,21 @@ const Offers = () => {
                     </thead>
                     <tbody>
                         {filteredCodes.length === 0 ? (
-                            <tr><td colSpan="7" className="promo-empty">No promo codes found</td></tr>
+                            <tr><td colSpan="8" className="promo-empty">No promo codes found</td></tr>
                         ) : (
                             filteredCodes.map(code => {
                                 const cfg = STATUS_BADGE[code.status] || STATUS_BADGE.Active;
+                                const discountLabel = code.discount_type === 'percentage'
+                                    ? `${code.discount_value}%`
+                                    : `₹${code.discount_value}`;
                                 return (
                                     <tr key={code.id}>
-                                        <td className="promo-code-cell">{code.codeDisplay}</td>
-                                        <td>{code.discount}</td>
-                                        <td>{code.minOrder}</td>
-                                        <td className="promo-maxd">{code.maxDiscount}</td>
-                                        <td className="promo-date">{code.expiryDate}</td>
+                                        <td className="promo-code-cell">{code.code}</td>
+                                        <td>{discountLabel}</td>
+                                        <td>₹{parseFloat(code.min_order_amount).toLocaleString('en-IN')}</td>
+                                        <td className="promo-maxd">{code.max_discount ? `₹${code.max_discount}` : '—'}</td>
+                                        <td>{code.times_used}{code.usage_limit > 0 ? `/${code.usage_limit}` : ''}</td>
+                                        <td className="promo-date">{code.valid_to ? new Date(code.valid_to).toLocaleDateString('en-IN') : '—'}</td>
                                         <td>
                                             <span className="promo-status-badge" style={{ background: cfg.bg, color: cfg.color }}>
                                                 {code.status}
@@ -216,21 +231,44 @@ const Offers = () => {
                         </div>
                         <form onSubmit={handleSubmit} className="promo-modal-body">
                             <div className="promo-form-grid">
-                                <div className="promo-form-group promo-full">
-                                    <label>Code / Offer Text *</label>
-                                    <input type="text" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required maxLength={200} placeholder="e.g. SUMMER20 or Flat 20% off" />
+                                <div className="promo-form-group">
+                                    <label><Tag size={14} /> Code *</label>
+                                    <input type="text" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })} required maxLength={30} placeholder="e.g. WELCOME20" style={{ textTransform: 'uppercase' }} />
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Icon / Emoji</label>
-                                    <input type="text" value={form.icon} onChange={(e) => setForm({ ...form, icon: e.target.value })} placeholder="🔥" />
+                                    <label><Percent size={14} /> Discount Type</label>
+                                    <select value={form.discount_type} onChange={(e) => setForm({ ...form, discount_type: e.target.value })}>
+                                        <option value="percentage">Percentage (%)</option>
+                                        <option value="flat">Flat Amount (₹)</option>
+                                    </select>
                                 </div>
                                 <div className="promo-form-group">
-                                    <label>Display Order</label>
-                                    <input type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: parseInt(e.target.value) || 0 })} min={0} />
+                                    <label>Discount Value *</label>
+                                    <input type="number" value={form.discount_value} onChange={(e) => setForm({ ...form, discount_value: e.target.value })} required min={0} step="0.01" placeholder={form.discount_type === 'percentage' ? 'e.g. 20' : 'e.g. 100'} />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label>Min Order Amount (₹)</label>
+                                    <input type="number" value={form.min_order_amount} onChange={(e) => setForm({ ...form, min_order_amount: e.target.value })} min={0} step="0.01" placeholder="0" />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label>Max Discount Cap (₹)</label>
+                                    <input type="number" value={form.max_discount} onChange={(e) => setForm({ ...form, max_discount: e.target.value })} min={0} step="0.01" placeholder="No limit" />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label>Usage Limit (0 = unlimited)</label>
+                                    <input type="number" value={form.usage_limit} onChange={(e) => setForm({ ...form, usage_limit: parseInt(e.target.value) || 0 })} min={0} />
                                 </div>
                                 <div className="promo-form-group promo-full">
-                                    <label>Link (optional)</label>
-                                    <input type="text" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="/categories/..." />
+                                    <label>Description</label>
+                                    <input type="text" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={200} placeholder="e.g. Welcome discount for new users" />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label><Calendar size={14} /> Valid From</label>
+                                    <input type="datetime-local" value={form.valid_from} onChange={(e) => setForm({ ...form, valid_from: e.target.value })} />
+                                </div>
+                                <div className="promo-form-group">
+                                    <label><Calendar size={14} /> Valid To</label>
+                                    <input type="datetime-local" value={form.valid_to} onChange={(e) => setForm({ ...form, valid_to: e.target.value })} />
                                 </div>
                                 <div className="promo-form-group">
                                     <label className="promo-checkbox">

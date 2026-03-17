@@ -3,9 +3,10 @@ import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip
 } from 'recharts';
 import {
-    Download, FileSpreadsheet, Printer, ChevronDown,
+    Download, FileSpreadsheet, Printer,
     ChevronLeft, ChevronRight
 } from 'lucide-react';
+import FilterDropdown from '../components/FilterDropdown';
 import { adminDashboardAPI, adminOrdersAPI } from '../services/api';
 import './Finance.css';
 
@@ -143,8 +144,16 @@ const Finance = () => {
             <div className="fin-header-row">
                 <h1 className="fin-page-title">Finance & Compliance Overview</h1>
                 <div className="fin-header-pills">
-                    <div className="fin-pill" onClick={cyclePeriod}>{periodFilter} <ChevronDown size={14} /></div>
-                    <div className="fin-pill" onClick={cycleBU}>{buFilter} <ChevronDown size={14} /></div>
+                    <FilterDropdown
+                        value={periodFilter}
+                        options={PERIOD_OPTIONS}
+                        onChange={setPeriodFilter}
+                    />
+                    <FilterDropdown
+                        value={buFilter}
+                        options={BU_OPTIONS}
+                        onChange={setBuFilter}
+                    />
                 </div>
             </div>
 

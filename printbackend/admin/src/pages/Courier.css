@@ -67,3 +67,34 @@
 .cr-page-dots { font-size:.85rem; color:#9ca3af; padding:0 4px; }
 
 @media (max-width:768px) { .cr-metrics-row { grid-template-columns:1fr; } .cr-filter-bar { flex-direction:column; align-items:stretch; } }
+
+/* ═══ MODALS ═══ */
+.cr-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:1000; animation:cr-fade-in .15s ease-out; }
+@keyframes cr-fade-in { from { opacity:0; } to { opacity:1; } }
+.cr-modal { background:#fff; border-radius:14px; width:90%; max-width:680px; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 12px 40px rgba(0,0,0,.2); animation:cr-slide-up .2s ease-out; }
+@keyframes cr-slide-up { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.cr-modal-header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid #f0f0f0; }
+.cr-modal-header h2 { font-size:1.1rem; font-weight:700; color:#1f2937; }
+.cr-modal-close { background:none; border:none; padding:6px; cursor:pointer; color:#6b7280; border-radius:6px; }
+.cr-modal-close:hover { background:#f3f4f6; color:#1f2937; }
+.cr-modal-body { padding:20px 24px; overflow-y:auto; flex:1; }
+.cr-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; padding-top:14px; border-top:1px solid #f0f0f0; }
+
+/* Logs list */
+.cr-logs-list { display:flex; flex-direction:column; gap:8px; }
+.cr-log-entry { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f8fafb; border-radius:8px; gap:12px; }
+.cr-log-left { display:flex; flex-direction:column; gap:2px; }
+.cr-log-order { font-weight:600; font-size:.88rem; color:#1f2937; }
+.cr-log-carrier { font-size:.78rem; color:#6b7280; }
+.cr-log-center { display:flex; align-items:center; gap:8px; }
+.cr-log-tracking { font-size:.75rem; color:#9ca3af; font-family:monospace; }
+.cr-log-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.cr-log-date { font-size:.78rem; color:#6b7280; }
+.cr-empty-logs { text-align:center; padding:24px; color:#9ca3af; }
+
+/* Inventory modal */
+.cr-inventory-info { font-size:.88rem; color:#6b7280; margin-bottom:14px; }
+.cr-inventory-list { display:flex; flex-direction:column; gap:8px; }
+.cr-inventory-item { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:#f8fafb; border-radius:8px; }
+.cr-inv-select { padding:6px 12px; border:1px solid #e5e7eb; border-radius:6px; font-size:.82rem; background:#fff; }
+

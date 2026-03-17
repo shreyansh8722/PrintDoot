@@ -4,6 +4,7 @@ import { useShop } from '../../context/ShopContext';
 import userService from '../../services/userService';
 import orderService from '../../services/orderService';
 import paymentService from '../../services/paymentService';
+import apiHook from '../../services/apiConfig';
 import CheckoutSteps from './CheckoutSteps';
 import {
     FaMapMarkerAlt,
@@ -14,6 +15,9 @@ import {
     FaPen,
     FaPaintBrush,
     FaSpinner,
+    FaTag,
+    FaTimes,
+    FaCheck,
 } from 'react-icons/fa';
 
 const GST_RATE = 0.18;
@@ -42,6 +46,15 @@ const CheckoutReview = () => {
     const [customerNotes, setCustomerNotes] = useState('');
     const [paymentStage, setPaymentStage] = useState(''); // '', 'creating_order', 'initiating_payment', 'verifying'
 
+    // Promo code state
+    const [promoInput, setPromoInput] = useState('');
+    const [promoApplied, setPromoApplied] = useState(null); // { code, discount_amount, discount_type, discount_value, description }
+    const [promoLoading, setPromoLoading] = useState(false);
+    const [promoError, setPromoError] = useState('');
+    const [promoSuccess, setPromoSuccess] = useState('');
+    const [availableCodes, setAvailableCodes] = useState([]);
+    const [showAvailableCodes, setShowAvailableCodes] = useState(false);
+
     const addressId = location.state?.shippingAddress;
     const paymentMethod = location.state?.paymentMethod;
     const shippingMethod = location.state?.shippingMethod;
@@ -54,7 +67,47 @@ const CheckoutReview = () => {
             return;
         }
         loadAddress(addressId);
+        fetchAvailablePromoCodes();
     }, [addressId, paymentMethod, shippingMethod, navigate]);
+
+    const fetchAvailablePromoCodes = async () => {
+        try {
+            const res = await apiHook.get('/pages/promo-codes/');
+            setAvailableCodes(res.data || []);
+        } catch (e) { /* ignore */ }
+    };
+
+    const handleApplyPromo = async () => {
+        if (!promoInput.trim()) return;
+        setPromoLoading(true);
+        setPromoError('');
+        setPromoSuccess('');
+        try {
+            const res = await apiHook.post('/pages/promo-codes/validate/', {
+                code: promoInput.trim().toUpperCase(),
+                subtotal: subtotal,
+            });
+            if (res.data.valid) {
+                setPromoApplied(res.data);
+                setPromoSuccess(`Code ${res.data.code} applied! You save ₹${parseFloat(res.data.discount_amount).toFixed(2)}`);
+                setPromoError('');
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Invalid promo code';
+            setPromoError(msg);
+            setPromoApplied(null);
+            setPromoSuccess('');
+        } finally {
+            setPromoLoading(false);
+        }
+    };
+
+    const handleRemovePromo = () => {
+        setPromoApplied(null);
+        setPromoInput('');
+        setPromoError('');
+        setPromoSuccess('');
+    };
 
     const loadAddress = async (id) => {
         try {
@@ -76,7 +129,8 @@ const CheckoutReview = () => {
         return acc + price * qty;
     }, 0);
     const taxes = +(subtotal * GST_RATE).toFixed(2);
-    const total = +(subtotal + taxes + shippingCost).toFixed(2);
+    const discount = promoApplied ? parseFloat(promoApplied.discount_amount) : 0;
+    const total = +(subtotal + taxes + shippingCost - discount).toFixed(2);
 
     /* ── Determine if online payment ── */
     const isOnlinePayment = paymentMethod !== 'cod';
@@ -93,6 +147,7 @@ const CheckoutReview = () => {
                 payment_method: paymentMethod,
                 customer_notes: customerNotes,
                 shipping_total: shippingCost,
+                promo_code: promoApplied?.code || '',
                 items: cartItems.map((item) => ({
                     product: item.id,
                     design: item.backendDesignId || null,
@@ -330,6 +385,76 @@ const CheckoutReview = () => {
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h3 className="text-lg font-bold text-gray-900 mb-5">Price Details</h3>
 
+                            {/* Promo code input */}
+                            <div className="mb-5">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <FaTag className="text-gray-400 text-xs" />
+                                    <span className="text-sm font-semibold text-gray-700">Promo Code</span>
+                                </div>
+                                {promoApplied ? (
+                                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                                        <div className="flex items-center gap-2">
+                                            <FaCheck className="text-green-600 text-xs" />
+                                            <span className="text-sm font-bold text-green-700">{promoApplied.code}</span>
+                                        </div>
+                                        <button onClick={handleRemovePromo} className="text-red-500 hover:text-red-700 transition">
+                                            <FaTimes className="text-xs" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={promoInput}
+                                            onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(''); }}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                                            placeholder="Enter code"
+                                            className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-mono tracking-wide uppercase focus:outline-none focus:ring-2 focus:ring-black/20 focus:border-black transition"
+                                        />
+                                        <button
+                                            onClick={handleApplyPromo}
+                                            disabled={promoLoading || !promoInput.trim()}
+                                            className="px-4 py-2.5 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-900 transition disabled:opacity-50"
+                                        >
+                                            {promoLoading ? <FaSpinner className="animate-spin text-xs" /> : 'Apply'}
+                                        </button>
+                                    </div>
+                                )}
+                                {promoError && <p className="text-xs text-red-500 mt-1.5">{promoError}</p>}
+                                {promoSuccess && <p className="text-xs text-green-600 mt-1.5">{promoSuccess}</p>}
+
+                                {/* Available promo codes */}
+                                {availableCodes.length > 0 && !promoApplied && (
+                                    <div className="mt-2">
+                                        <button
+                                            onClick={() => setShowAvailableCodes(!showAvailableCodes)}
+                                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
+                                        >
+                                            {showAvailableCodes ? 'Hide' : 'View'} Available Codes ({availableCodes.length})
+                                        </button>
+                                        {showAvailableCodes && (
+                                            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                                                {availableCodes.map((c, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-100 transition"
+                                                        onClick={() => { setPromoInput(c.code); setShowAvailableCodes(false); }}
+                                                    >
+                                                        <div>
+                                                            <span className="text-xs font-bold font-mono text-gray-900">{c.code}</span>
+                                                            {c.description && <p className="text-[10px] text-gray-500">{c.description}</p>}
+                                                        </div>
+                                                        <span className="text-xs font-bold text-green-700">
+                                                            {c.discount_type === 'percentage' ? `${c.discount_value}% off` : `₹${c.discount_value} off`}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
                             <div className="space-y-3 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">
@@ -349,6 +474,12 @@ const CheckoutReview = () => {
                                         <span className="font-medium">₹{shippingCost.toFixed(2)}</span>
                                     )}
                                 </div>
+                                {discount > 0 && (
+                                    <div className="flex justify-between">
+                                        <span className="text-green-600 font-medium">Discount ({promoApplied?.code})</span>
+                                        <span className="font-bold text-green-600">-₹{discount.toFixed(2)}</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="border-t-2 border-gray-100 mt-4 pt-4 mb-6">
