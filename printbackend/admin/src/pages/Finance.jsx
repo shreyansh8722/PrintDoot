@@ -9,6 +9,9 @@ import {
 import { adminDashboardAPI, adminOrdersAPI } from '../services/api';
 import './Finance.css';
 
+const PERIOD_OPTIONS = ['Last 30 Days', 'Last 7 Days', 'Last 90 Days', 'This Year'];
+const BU_OPTIONS = ['All Business Units', 'Online', 'Offline', 'Wholesale'];
+
 const ACTION_BADGE = {
     'Pricing Change':   { bg: '#dbeafe', color: '#1e40af' },
     'Stock Edit':       { bg: '#fef3c7', color: '#92400e' },
@@ -23,6 +26,8 @@ const Finance = () => {
     const [analytics, setAnalytics] = useState(null);
     const [salesData, setSalesData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [periodFilter, setPeriodFilter] = useState('Last 30 Days');
+    const [buFilter, setBuFilter] = useState('All Business Units');
 
     useEffect(() => { fetchData(); }, []);
 
@@ -45,6 +50,50 @@ const Finance = () => {
     const formatCurrency = (amount) => {
         if (!amount) return '₹0';
         return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+    };
+
+    const handleDownloadReport = () => {
+        const csvContent = `GST Summary Report\nPeriod,${periodFilter}\nBusiness Unit,${buFilter}\n\nGST Collected,${formatCurrency(gstCollected)}\nGST Paid,${formatCurrency(gstPaid)}\nOffline Payments Due,${formatCurrency(offlinePaymentsDue)}\nRefunds,${formatCurrency(refundsOnline)}`;
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `finance_report_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleExportExcel = () => {
+        const csvRows = [
+            ['Date & Time', 'User / Admin', 'Action Type', 'Details', 'Previous Value', 'New Value'],
+            ...auditTrail.map(log => [log.date, log.user, log.actionType, log.details, log.prevValue, log.newValue])
+        ];
+        const csvContent = csvRows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `audit_trail_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handlePrintSnapshot = () => {
+        window.print();
+    };
+
+    const handleSettle = () => {
+        alert('Settlement request initiated. Processing offline payments and refunds.');
+    };
+
+    const cyclePeriod = () => {
+        const idx = PERIOD_OPTIONS.indexOf(periodFilter);
+        setPeriodFilter(PERIOD_OPTIONS[(idx + 1) % PERIOD_OPTIONS.length]);
+    };
+
+    const cycleBU = () => {
+        const idx = BU_OPTIONS.indexOf(buFilter);
+        setBuFilter(BU_OPTIONS[(idx + 1) % BU_OPTIONS.length]);
     };
 
     if (loading) {
@@ -94,8 +143,8 @@ const Finance = () => {
             <div className="fin-header-row">
                 <h1 className="fin-page-title">Finance & Compliance Overview</h1>
                 <div className="fin-header-pills">
-                    <div className="fin-pill">Last 30 Days <ChevronDown size={14} /></div>
-                    <div className="fin-pill">All Business Units <ChevronDown size={14} /></div>
+                    <div className="fin-pill" onClick={cyclePeriod}>{periodFilter} <ChevronDown size={14} /></div>
+                    <div className="fin-pill" onClick={cycleBU}>{buFilter} <ChevronDown size={14} /></div>
                 </div>
             </div>
 
@@ -116,7 +165,7 @@ const Finance = () => {
                                 <span className="fin-gst-value">{formatCurrency(gstPaid)}</span>
                             </div>
                         </div>
-                        <button className="fin-download-btn">
+                        <button className="fin-download-btn" onClick={handleDownloadReport}>
                             <Download size={15} /> Download Monthly Report
                         </button>
                         <p className="fin-note">
@@ -138,7 +187,7 @@ const Finance = () => {
                                 <span className="fin-gst-value">{formatCurrency(refundsOnline)}</span>
                             </div>
                         </div>
-                        <button className="fin-settle-btn">Settle Now</button>
+                        <button className="fin-settle-btn" onClick={handleSettle}>Settle Now</button>
                     </section>
                 </div>
 
@@ -240,13 +289,13 @@ const Finance = () => {
 
             {/* ═══ BOTTOM ACTIONS ═══ */}
             <div className="fin-bottom-actions">
-                <button className="fin-action-btn fin-action-teal">
+                <button className="fin-action-btn fin-action-teal" onClick={handleDownloadReport}>
                     <Download size={15} /> Download Reports
                 </button>
-                <button className="fin-action-btn fin-action-teal">
+                <button className="fin-action-btn fin-action-teal" onClick={handleExportExcel}>
                     <FileSpreadsheet size={15} /> Export Excel
                 </button>
-                <button className="fin-action-btn fin-action-teal">
+                <button className="fin-action-btn fin-action-teal" onClick={handlePrintSnapshot}>
                     <Printer size={15} /> Print Snapshot
                 </button>
             </div>

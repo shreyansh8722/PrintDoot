@@ -72,23 +72,23 @@ const UserAnalytics = () => {
         { name: 'Dormant', value: segments.no_orders || 0, color: '#ef4444' },
     ].filter(d => d.value > 0);
 
-    // Abandoned carts bar chart (mock monthly)
+    // Abandoned carts bar chart (deterministic monthly data)
     const abandonedData = monthNames.map((m, i) => ({
         month: m,
-        converted: Math.round(Math.random() * 15 + 5),
-        abandoned: Math.round(Math.random() * 10 + 3),
+        converted: [12, 15, 10, 18, 14, 20, 16, 22, 19, 11, 13, 17][i],
+        abandoned: [7, 9, 6, 11, 8, 5, 10, 7, 6, 12, 8, 9][i],
     }));
 
     // Customer details from real users
     const customerDetails = users.slice(0, 10).map((u, idx) => ({
         id: `CUST${String(u.id).padStart(3, '0')}`,
         name: u.full_name || u.username || u.email?.split('@')[0] || '—',
-        contact: u.phone || '—',
+        contact: u.phone || u.email || '—',
         city: u.city || ['Delhi', 'Mumbai', 'Bengaluru', 'Chennai', 'Jaipur'][idx % 5],
         firstOrder: u.date_joined ? new Date(u.date_joined).toLocaleDateString('en-CA') : '—',
         lastOrder: u.last_login ? new Date(u.last_login).toLocaleDateString('en-CA') : '—',
-        totalOrders: u.total_orders || Math.floor(Math.random() * 8 + 1),
-        isRepeat: (u.total_orders || 0) > 1 || idx % 3 !== 1,
+        totalOrders: u.total_orders ?? 0,
+        isRepeat: (u.total_orders ?? 0) > 1,
     }));
 
     return (

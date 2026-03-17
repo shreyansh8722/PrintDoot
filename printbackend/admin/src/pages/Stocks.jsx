@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search, Filter, Plus, Package, ArrowUp, ArrowDown,
     AlertTriangle, ChevronLeft, ChevronRight
@@ -13,6 +14,7 @@ const STATUS_BADGE = {
 };
 
 const Stocks = () => {
+    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [stockData, setStockData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -124,7 +126,7 @@ const Stocks = () => {
                         ))}
                     </div>
                     <button className="stk-filter-btn"><Filter size={15} /> Filter</button>
-                    <button className="stk-add-btn" onClick={() => {}}>
+                    <button className="stk-add-btn" onClick={() => navigate('/products')}>
                         <Plus size={15} /> Add Product
                     </button>
                 </div>
@@ -174,9 +176,17 @@ const Stocks = () => {
                                             <td>
                                                 <button
                                                     className="stk-adjust-btn"
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                         const newQty = prompt(`New stock quantity for ${product.name}:`, product.stock_quantity);
-                                                        if (newQty !== null) handleStockChange(product.id, newQty);
+                                                        if (newQty !== null && newQty !== '') {
+                                                            try {
+                                                                await adminCatalogAPI.patchProduct(product.id, { stock_quantity: parseInt(newQty) || 0 });
+                                                                alert(`Stock updated for ${product.name}`);
+                                                                fetchAll();
+                                                            } catch (err) {
+                                                                alert('Failed to update stock: ' + (err.response?.data?.detail || err.message));
+                                                            }
+                                                        }
                                                     }}
                                                 >
                                                     Adjust

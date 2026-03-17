@@ -94,10 +94,10 @@
 .si-cat-existing .si-card-actions,
 .si-overlay-replace {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    opacity: 0; transition: opacity .2s; pointer-events: none;
+    opacity: 0; transition: opacity .2s; pointer-events: auto;
 }
-.si-card:hover .si-overlay-replace { opacity: 1; pointer-events: auto; }
-.si-card:hover .si-cat-existing .si-card-actions { opacity: 1; pointer-events: auto; }
+.si-card:hover .si-overlay-replace { opacity: 1; }
+.si-card:hover .si-cat-existing .si-card-actions { opacity: 1; }
 .si-overlay-replace .dd-zone { background: rgba(0,0,0,.45); backdrop-filter: blur(3px); border: none; }
 .si-overlay-replace .dd-placeholder { color: #fff; }
 .si-overlay-replace .dd-upload-icon { color: #fff; }

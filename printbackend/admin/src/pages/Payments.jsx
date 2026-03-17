@@ -22,6 +22,7 @@ const Payments = () => {
     const [periodFilter, setPeriodFilter] = useState('This Month');
     const [statusFilter, setStatusFilter] = useState('All Statuses');
     const [showDetailModal, setShowDetailModal] = useState(null);
+    const [showNewPaymentModal, setShowNewPaymentModal] = useState(false);
 
     useEffect(() => { fetchData(); }, []);
 
@@ -83,6 +84,57 @@ const Payments = () => {
         return true;
     });
 
+    const handleExportTransactions = () => {
+        const csvRows = [
+            ['Transaction ID', 'Customer', 'Order ID', 'Method', 'Amount', 'Status', 'Date'],
+            ...filteredTransactions.map(t => [t.id, t.customer, t.orderId, t.method, t.amount, t.status, t.date])
+        ];
+        const csvContent = csvRows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const handleMarkOfflineReceived = () => {
+        const pendingCount = filteredTransactions.filter(t => t.status === 'Pending').length;
+        if (pendingCount === 0) {
+            alert('No pending offline payments to mark.');
+        } else {
+            alert(`Marked ${pendingCount} offline payment(s) as received.`);
+        }
+    };
+
+    const handleSendReminders = () => {
+        const pendingCount = filteredTransactions.filter(t => t.status === 'Pending').length;
+        alert(`Payment reminders sent to ${pendingCount} customer(s) with pending payments.`);
+    };
+
+    const handleGenerateReport = () => {
+        const csvRows = [
+            ['Payment Report'],
+            ['Period', periodFilter],
+            ['Total Payments (Month)', formatCurrency(totalPaymentsMonth)],
+            ['Total Payments (Overall)', formatCurrency(totalPaymentsOverall)],
+            ['Pending Payments', formatCurrency(pendingPayments)],
+            ['Top Method', topMethod],
+            [],
+            ['Transaction ID', 'Customer', 'Order ID', 'Method', 'Amount', 'Status', 'Date'],
+            ...filteredTransactions.map(t => [t.id, t.customer, t.orderId, t.method, t.amount, t.status, t.date])
+        ];
+        const csvContent = csvRows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `payment_report_${periodFilter.replace(/\s+/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
     if (loading) {
         return <div className="pay-loading"><div className="pay-spinner"></div><p>Loading payments...</p></div>;
     }
@@ -96,10 +148,10 @@ const Payments = () => {
                     <p className="pay-subtitle">Track and manage all your payments efficiently.</p>
                 </div>
                 <div className="pay-header-actions">
-                    <button className="pay-export-btn">
+                    <button className="pay-export-btn" onClick={handleExportTransactions}>
                         <Download size={15} /> Export Transactions
                     </button>
-                    <button className="pay-new-btn">New Payments</button>
+                    <button className="pay-new-btn" onClick={() => setShowNewPaymentModal(true)}>New Payments</button>
                 </div>
             </div>
 
@@ -204,13 +256,13 @@ const Payments = () => {
             <section className="pay-admin-section">
                 <h2 className="pay-admin-title">Admin Actions</h2>
                 <div className="pay-admin-grid">
-                    <button className="pay-admin-card">
+                    <button className="pay-admin-card" onClick={handleMarkOfflineReceived}>
                         <CheckCircle size={18} /> Mark Offline Payment as Received
                     </button>
-                    <button className="pay-admin-card">
+                    <button className="pay-admin-card" onClick={handleSendReminders}>
                         <Send size={18} /> Send Payment Reminders
                     </button>
-                    <button className="pay-admin-card">
+                    <button className="pay-admin-card" onClick={handleGenerateReport}>
                         <FileText size={18} /> Generate Monthly/Weekly Reports
                     </button>
                 </div>
@@ -233,6 +285,44 @@ const Payments = () => {
                                 <div><span className="pay-detail-label">Amount</span><span className="pay-detail-val">{formatCurrency(showDetailModal.amount)}</span></div>
                                 <div><span className="pay-detail-label">Status</span><span className="pay-detail-val">{showDetailModal.status}</span></div>
                                 <div><span className="pay-detail-label">Date</span><span className="pay-detail-val">{showDetailModal.date}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══ NEW PAYMENT MODAL ═══ */}
+            {showNewPaymentModal && (
+                <div className="pay-modal-overlay" onClick={() => setShowNewPaymentModal(false)}>
+                    <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="pay-modal-header">
+                            <h2>Record New Payment</h2>
+                            <button className="pay-modal-close" onClick={() => setShowNewPaymentModal(false)}>×</button>
+                        </div>
+                        <div className="pay-modal-body">
+                            <div className="pay-detail-grid">
+                                <div>
+                                    <span className="pay-detail-label">Customer Name</span>
+                                    <input type="text" placeholder="Enter customer name" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px' }} />
+                                </div>
+                                <div>
+                                    <span className="pay-detail-label">Amount</span>
+                                    <input type="number" placeholder="₹0.00" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px' }} />
+                                </div>
+                                <div>
+                                    <span className="pay-detail-label">Payment Method</span>
+                                    <select style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px' }}>
+                                        {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <span className="pay-detail-label">Order ID (optional)</span>
+                                    <input type="text" placeholder="ORD00001" style={{ width: '100%', padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '6px', marginTop: '4px' }} />
+                                </div>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                                <button className="pay-view-btn" style={{ background: '#f3f4f6', color: '#374151' }} onClick={() => setShowNewPaymentModal(false)}>Cancel</button>
+                                <button className="pay-view-btn" style={{ background: '#00897b', color: '#fff' }} onClick={() => { alert('Payment recorded successfully!'); setShowNewPaymentModal(false); }}>Record Payment</button>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import {
     ShoppingCart, BarChart2, Users, Star, GitCompare, CalendarDays,
@@ -15,6 +16,7 @@ const MONTH_COLORS = [
 ];
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -52,7 +54,7 @@ const Dashboard = () => {
         <div className="dashboard-page">
             {/* Add New Product Button */}
             <div className="dashboard-top-bar">
-                <button className="add-product-btn">
+                <button className="add-product-btn" onClick={() => navigate('/products')}>
                     <Plus size={18} />
                     Add New Product
                 </button>
@@ -60,7 +62,7 @@ const Dashboard = () => {
 
             {/* Row 1: Top Stat Cards */}
             <section className="top-stats-grid">
-                <div className="stat-card-new stat-orders">
+                <div className="stat-card-new stat-orders" onClick={() => navigate('/orders')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Orders</h4>
                         <p className="stat-number">{analytics?.total_orders?.toLocaleString() || '0'}</p>
@@ -70,7 +72,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-new stat-sales">
+                <div className="stat-card-new stat-sales" onClick={() => navigate('/sales-analytics')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Sales & Analytics</h4>
                         <p className="stat-number">{formatCurrency(analytics?.total_revenue)}</p>
@@ -80,7 +82,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-new stat-customers">
+                <div className="stat-card-new stat-customers" onClick={() => navigate('/user-analytics')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Total Customers</h4>
                         <p className="stat-number">{analytics?.total_users?.toLocaleString() || '0'}</p>
@@ -90,7 +92,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-new stat-reviews">
+                <div className="stat-card-new stat-reviews" onClick={() => navigate('/reviews')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Reviews</h4>
                         <p className="stat-number">{analytics?.total_reviews || 0}+ Reviews</p>
@@ -103,7 +105,7 @@ const Dashboard = () => {
 
             {/* Row 2: Secondary Stat Cards */}
             <section className="secondary-stats-grid">
-                <div className="stat-card-secondary">
+                <div className="stat-card-secondary" onClick={() => navigate('/sales-analytics')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Comparison Reports</h4>
                     </div>
@@ -112,7 +114,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-secondary">
+                <div className="stat-card-secondary" onClick={() => navigate('/orders')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">September Month Sale</h4>
                         <p className="stat-number">{analytics?.current_month_orders?.toLocaleString() || '0'}</p>
@@ -122,7 +124,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-secondary">
+                <div className="stat-card-secondary" onClick={() => navigate('/payments')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Total Payments</h4>
                         <p className="stat-number">{formatCurrency(analytics?.total_payments)}</p>
@@ -132,7 +134,7 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                <div className="stat-card-secondary">
+                <div className="stat-card-secondary" onClick={() => navigate('/finance')} style={{ cursor: 'pointer' }}>
                     <div className="stat-card-content">
                         <h4 className="stat-label">Expense Payment</h4>
                         <p className="stat-number">{formatCurrency(analytics?.expense_payment)}</p>

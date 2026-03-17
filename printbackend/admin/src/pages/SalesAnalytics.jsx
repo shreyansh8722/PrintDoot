@@ -38,6 +38,9 @@ const STATUS_CONFIG = {
 const SalesAnalytics = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [categoryFilter, setCategoryFilter] = useState('Product Category');
+    const [regionFilter, setRegionFilter] = useState('Region');
+    const [channelFilter, setChannelFilter] = useState('Channel');
 
     useEffect(() => {
         fetchData();
@@ -140,14 +143,23 @@ const SalesAnalytics = () => {
                 <div className="sa2-charts-header">
                     <h2 className="sa2-section-title">Charts</h2>
                     <div className="sa2-chart-filters">
-                        <div className="sa2-filter-pill">
-                            Product Category <ChevronDown size={14} />
+                        <div className="sa2-filter-pill" onClick={() => {
+                            const opts = ['Product Category', 'Electronics', 'Apparel', 'Home & Kitchen', 'Custom Prints', 'Stationery'];
+                            setCategoryFilter(opts[(opts.indexOf(categoryFilter) + 1) % opts.length]);
+                        }}>
+                            {categoryFilter} <ChevronDown size={14} />
                         </div>
-                        <div className="sa2-filter-pill">
-                            Region <ChevronDown size={14} />
+                        <div className="sa2-filter-pill" onClick={() => {
+                            const opts = ['Region', 'North India', 'South India', 'East India', 'West India', 'Central India'];
+                            setRegionFilter(opts[(opts.indexOf(regionFilter) + 1) % opts.length]);
+                        }}>
+                            {regionFilter} <ChevronDown size={14} />
                         </div>
-                        <div className="sa2-filter-pill">
-                            Channel <ChevronDown size={14} />
+                        <div className="sa2-filter-pill" onClick={() => {
+                            const opts = ['Channel', 'Online', 'Offline', 'Wholesale', 'Marketplace'];
+                            setChannelFilter(opts[(opts.indexOf(channelFilter) + 1) % opts.length]);
+                        }}>
+                            {channelFilter} <ChevronDown size={14} />
                         </div>
                     </div>
                 </div>

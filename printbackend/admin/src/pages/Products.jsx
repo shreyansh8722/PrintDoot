@@ -330,10 +330,12 @@ const Products = () => {
                 return false;
             }
         }
-        // Price filters
-        const price = Number(p.base_price);
-        if (filterMinPrice && price < Number(filterMinPrice)) return false;
-        if (filterMaxPrice && price > Number(filterMaxPrice)) return false;
+        // Price filters — handle NaN / missing base_price gracefully
+        const price = parseFloat(p.base_price);
+        const minP = parseFloat(filterMinPrice);
+        const maxP = parseFloat(filterMaxPrice);
+        if (!isNaN(minP) && filterMinPrice !== '' && (isNaN(price) || price < minP)) return false;
+        if (!isNaN(maxP) && filterMaxPrice !== '' && (isNaN(price) || price > maxP)) return false;
         return true;
     });
 

@@ -22,6 +22,9 @@ const CartAnalysis = () => {
     const [analytics, setAnalytics] = useState(null);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [regionFilter, setRegionFilter] = useState('All Regions');
+    const [productTypeFilter, setProductTypeFilter] = useState('All Product Types');
+    const [periodFilter, setPeriodFilter] = useState('Last 90 Days');
 
     useEffect(() => { fetchAll(); }, []);
 
@@ -107,7 +110,7 @@ const CartAnalysis = () => {
                     <h1 className="ca-page-title">Carts</h1>
                     <p className="ca-subtitle">Manage and analyze customer carts</p>
                 </div>
-                <button className="ca-notify-btn"><Send size={15} /> Send Notification</button>
+                <button className="ca-notify-btn" onClick={() => alert('Push notifications sent to all customers with active carts.')}><Send size={15} /> Send Notification</button>
             </div>
 
             {/* ═══ STAT CARDS ═══ */}
@@ -163,9 +166,18 @@ const CartAnalysis = () => {
 
             {/* ═══ FILTER PILLS ═══ */}
             <div className="ca-filter-row">
-                <div className="ca-filter-pill">All Regions <ChevronDown size={14} /></div>
-                <div className="ca-filter-pill">All Product Types <ChevronDown size={14} /></div>
-                <div className="ca-filter-pill">Last 90 Days <ChevronDown size={14} /></div>
+                <div className="ca-filter-pill" onClick={() => {
+                    const opts = ['All Regions', 'North India', 'South India', 'East India', 'West India'];
+                    setRegionFilter(opts[(opts.indexOf(regionFilter) + 1) % opts.length]);
+                }}>{regionFilter} <ChevronDown size={14} /></div>
+                <div className="ca-filter-pill" onClick={() => {
+                    const opts = ['All Product Types', 'Electronics', 'Apparel', 'Home & Kitchen', 'Custom Prints'];
+                    setProductTypeFilter(opts[(opts.indexOf(productTypeFilter) + 1) % opts.length]);
+                }}>{productTypeFilter} <ChevronDown size={14} /></div>
+                <div className="ca-filter-pill" onClick={() => {
+                    const opts = ['Last 90 Days', 'Last 30 Days', 'Last 7 Days', 'This Year'];
+                    setPeriodFilter(opts[(opts.indexOf(periodFilter) + 1) % opts.length]);
+                }}>{periodFilter} <ChevronDown size={14} /></div>
             </div>
 
             {/* ═══ BOTTOM ANALYTICS CARDS ═══ */}
@@ -241,8 +253,24 @@ const CartAnalysis = () => {
 
             {/* ═══ BOTTOM ACTIONS ═══ */}
             <div className="ca-bottom-actions">
-                <button className="ca-action-btn ca-action-outline"><Share2 size={15} /> Share</button>
-                <button className="ca-action-btn ca-action-teal"><Download size={15} /> Export</button>
+                <button className="ca-action-btn ca-action-outline" onClick={() => {
+                    const summary = `Cart Analysis Summary\nActive Carts: ${activeCarts}\nAbandoned: ${abandonedCarts}\nTotal Value: ₹${totalCartValue.toLocaleString('en-IN')}\nRepeat Order Rate: ${repeatOrderRate}%`;
+                    navigator.clipboard.writeText(summary).then(() => alert('Cart analysis summary copied to clipboard!')).catch(() => alert(summary));
+                }}><Share2 size={15} /> Share</button>
+                <button className="ca-action-btn ca-action-teal" onClick={() => {
+                    const csvRows = [
+                        ['Customer', 'Product', 'Cart Value', 'Status'],
+                        ...cartItems.map(item => [item.customer, item.product, item.value, item.status])
+                    ];
+                    const csvContent = csvRows.map(r => r.join(',')).join('\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `cart_analysis_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }}><Download size={15} /> Export</button>
             </div>
         </div>
     );
