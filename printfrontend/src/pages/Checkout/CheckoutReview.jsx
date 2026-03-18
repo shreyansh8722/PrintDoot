@@ -423,34 +423,30 @@ const CheckoutReview = () => {
                                 {promoError && <p className="text-xs text-red-500 mt-1.5">{promoError}</p>}
                                 {promoSuccess && <p className="text-xs text-green-600 mt-1.5">{promoSuccess}</p>}
 
-                                {/* Available promo codes */}
+                                {/* Available promo codes list */}
                                 {availableCodes.length > 0 && !promoApplied && (
-                                    <div className="mt-2">
-                                        <button
-                                            onClick={() => setShowAvailableCodes(!showAvailableCodes)}
-                                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition"
-                                        >
-                                            {showAvailableCodes ? 'Hide' : 'View'} Available Codes ({availableCodes.length})
-                                        </button>
-                                        {showAvailableCodes && (
-                                            <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                                                {availableCodes.map((c, i) => (
-                                                    <div
-                                                        key={i}
-                                                        className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-100 transition"
-                                                        onClick={() => { setPromoInput(c.code); setShowAvailableCodes(false); }}
-                                                    >
-                                                        <div>
-                                                            <span className="text-xs font-bold font-mono text-gray-900">{c.code}</span>
-                                                            {c.description && <p className="text-[10px] text-gray-500">{c.description}</p>}
-                                                        </div>
-                                                        <span className="text-xs font-bold text-green-700">
+                                    <div className="mt-3">
+                                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Available Offers</p>
+                                        <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                            {availableCodes.map((c, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="flex items-center justify-between bg-blue-50/50 border border-blue-100 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-blue-50 transition shadow-sm group"
+                                                    onClick={() => { setPromoInput(c.code); handleApplyPromo(); }}
+                                                >
+                                                    <div>
+                                                        <span className="text-xs font-bold font-mono text-blue-700 bg-white px-1.5 py-0.5 rounded shadow-sm group-hover:bg-blue-100 border border-blue-200">{c.code}</span>
+                                                        {c.description && <p className="text-[10px] text-gray-500 mt-1">{c.description}</p>}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="block text-xs font-bold text-green-700">
                                                             {c.discount_type === 'percentage' ? `${c.discount_value}% off` : `₹${c.discount_value} off`}
                                                         </span>
+                                                        <span className="text-[9px] text-gray-400 uppercase font-semibold">Tap to apply</span>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>

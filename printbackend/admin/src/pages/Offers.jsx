@@ -89,8 +89,8 @@ const Offers = () => {
             };
             // Only include optional fields if they have values
             if (form.max_discount) submitData.max_discount = parseFloat(form.max_discount);
-            if (form.valid_from) submitData.valid_from = form.valid_from;
-            if (form.valid_to) submitData.valid_to = form.valid_to;
+            if (form.valid_from) submitData.valid_from = new Date(form.valid_from).toISOString();
+            if (form.valid_to) submitData.valid_to = new Date(form.valid_to).toISOString();
 
             if (editing) {
                 await adminPromoCodeAPI.updatePromoCode(editing.id, submitData);

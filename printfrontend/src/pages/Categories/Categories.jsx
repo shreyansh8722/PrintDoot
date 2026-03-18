@@ -184,7 +184,6 @@ function Categories() {
   const handleFilterChange = (newFilters) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
     setCurrentPage(1); // Reset to page 1 on filter change
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   /* ── Handle page change ── */
