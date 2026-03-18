@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
     BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -9,6 +9,7 @@ import {
     CheckCircle2, XCircle, Truck, Printer, CreditCard, RotateCcw,
     Users, Percent
 } from 'lucide-react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { adminOrdersAPI, adminDashboardAPI } from '../services/api';
 import './Orders.css';
 
@@ -61,19 +62,44 @@ const Orders = () => {
     const [transitionOrder, setTransitionOrder] = useState(null);
     const [transitionNote, setTransitionNote] = useState('');
     const [newStatus, setNewStatus] = useState('');
+    const [searchParams] = useSearchParams();
+    const location = useLocation();
+
+    // Pick up search from URL params (set by Header global search)
+    useEffect(() => {
+        const urlSearch = searchParams.get('search');
+        if (urlSearch) {
+            setSearchTerm(urlSearch);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
-        fetchOrders();
         fetchStats();
         fetchAnalytics();
     }, []);
 
-    const fetchOrders = async () => {
+    // Re-fetch orders whenever searchTerm or statusFilter changes
+    useEffect(() => {
+        fetchOrders(searchTerm, statusFilter);
+    }, [searchTerm, statusFilter]);
+
+    // Listen for global adminSearch event from Header
+    useEffect(() => {
+        const handleGlobalSearch = (e) => {
+            if (location.pathname.includes('orders')) {
+                setSearchTerm(e.detail.term);
+            }
+        };
+        window.addEventListener('adminSearch', handleGlobalSearch);
+        return () => window.removeEventListener('adminSearch', handleGlobalSearch);
+    }, [location.pathname]);
+
+    const fetchOrders = async (search = '', status = '') => {
         try {
             setLoading(true);
             const params = {};
-            if (searchTerm) params.search = searchTerm;
-            if (statusFilter) params.status = statusFilter;
+            if (search) params.search = search;
+            if (status) params.status = status;
             const response = await adminOrdersAPI.getOrders(params);
             setOrders(response.data?.results || response.data || []);
         } catch (error) {
@@ -104,12 +130,8 @@ const Orders = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        fetchOrders();
+        fetchOrders(searchTerm, statusFilter);
     };
-
-    useEffect(() => {
-        fetchOrders();
-    }, [statusFilter]);
 
     const openOrderDetail = (order) => {
         setSelectedOrder(order);

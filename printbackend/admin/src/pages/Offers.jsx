@@ -79,14 +79,19 @@ const Offers = () => {
         e.preventDefault();
         try {
             const submitData = {
-                ...form,
                 code: form.code.toUpperCase().trim(),
+                description: form.description || '',
+                discount_type: form.discount_type,
                 discount_value: parseFloat(form.discount_value) || 0,
                 min_order_amount: parseFloat(form.min_order_amount) || 0,
-                max_discount: form.max_discount ? parseFloat(form.max_discount) : null,
-                valid_from: form.valid_from || null,
-                valid_to: form.valid_to || null,
+                usage_limit: parseInt(form.usage_limit, 10) || 0,
+                is_active: form.is_active,
             };
+            // Only include optional fields if they have values
+            if (form.max_discount) submitData.max_discount = parseFloat(form.max_discount);
+            if (form.valid_from) submitData.valid_from = form.valid_from;
+            if (form.valid_to) submitData.valid_to = form.valid_to;
+
             if (editing) {
                 await adminPromoCodeAPI.updatePromoCode(editing.id, submitData);
             } else {
@@ -94,9 +99,15 @@ const Offers = () => {
             }
             setShowModal(false);
             fetchAll();
+            alert(editing ? 'Promo code updated!' : 'Promo code created!');
         } catch (err) {
             const detail = err.response?.data;
-            alert('Failed: ' + (typeof detail === 'object' ? JSON.stringify(detail) : detail || err.message));
+            if (detail && typeof detail === 'object') {
+                const msgs = Object.entries(detail).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`);
+                alert('Failed to save promo code:\n' + msgs.join('\n'));
+            } else {
+                alert('Network error: ' + (err.message || 'Please check your connection'));
+            }
         }
     };
 

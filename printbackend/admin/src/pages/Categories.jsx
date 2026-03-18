@@ -96,7 +96,13 @@ const Categories = () => {
             fetchData(true);
         } catch (error) {
             console.error('Error saving category:', error);
-            alert('Failed to save category');
+            const detail = error.response?.data;
+            if (detail && typeof detail === 'object') {
+                const msgs = Object.entries(detail).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`);
+                alert('Failed to save category:\n' + msgs.join('\n'));
+            } else {
+                alert('Failed to save category: ' + (error.message || 'Unknown error'));
+            }
         }
     };
 

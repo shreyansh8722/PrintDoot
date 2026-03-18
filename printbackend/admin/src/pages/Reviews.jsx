@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { adminCatalogAPI } from '../services/api';
 import './Reviews.css';
 
@@ -52,33 +52,6 @@ const Reviews = () => {
                     comment: 'Fantastic service and top-notch prints. The team was very helpful in resolving a minor issue. Highly recommend!',
                     admin_reply: null,
                 },
-                {
-                    id: 4, user_name: 'Michael Brown', rating: 5, created_at: '2023-08-01',
-                    comment: 'Best printing service I\'ve ever used. Quick turnaround and the quality exceeded my expectations.',
-                    admin_reply: 'Thank you Michael! We appreciate your kind words.',
-                    reply_date: '2023-08-02',
-                },
-                {
-                    id: 5, user_name: 'Priya Sharma', rating: 4, created_at: '2023-07-28',
-                    comment: 'Great products. The business cards turned out beautifully. Only wish there were more design templates available.',
-                    admin_reply: null,
-                },
-                {
-                    id: 6, user_name: 'Amit Patel', rating: 2, created_at: '2023-07-25',
-                    comment: 'The print quality was okay but the colours didn\'t match what was shown on screen. Packaging could be better.',
-                    admin_reply: null,
-                },
-                {
-                    id: 7, user_name: 'Jessica Williams', rating: 5, created_at: '2023-07-20',
-                    comment: 'Love the custom stickers! Perfect for my small business branding.',
-                    admin_reply: 'Thank you Jessica! So glad they worked out for your business!',
-                    reply_date: '2023-07-21',
-                },
-                {
-                    id: 8, user_name: 'Rahul Gupta', rating: 4, created_at: '2023-07-15',
-                    comment: 'Good quality banners. The team helped me with the design adjustments. Will order again.',
-                    admin_reply: null,
-                },
             ]);
         } finally {
             setLoading(false);
@@ -96,6 +69,18 @@ const Reviews = () => {
         } catch (err) {
             console.error('Failed to save reply:', err);
             alert('Failed to save reply. Please try again.');
+        }
+    };
+
+    const handleDeleteReview = async (reviewId) => {
+        if (!window.confirm('Are you sure you want to delete this review? This action cannot be undone.')) return;
+        try {
+            await adminCatalogAPI.deleteProductReview(reviewId);
+            alert('Review deleted successfully!');
+            fetchReviews();
+        } catch (err) {
+            console.error('Failed to delete review:', err);
+            alert('Failed to delete review. Please try again.');
         }
     };
 
@@ -196,7 +181,16 @@ const Reviews = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <span className="rv-review-date">{date}</span>
+                                    <div className="rv-review-header-right">
+                                        <span className="rv-review-date">{date}</span>
+                                        <button
+                                            className="rv-delete-btn"
+                                            onClick={() => handleDeleteReview(review.id)}
+                                            title="Delete review"
+                                        >
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Comment */}

@@ -114,10 +114,35 @@
     gap:2px;
 }
 
+.rv-review-header-right {
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
 .rv-review-date {
     font-size:.82rem;
     color:#9ca3af;
     white-space:nowrap;
+}
+
+.rv-delete-btn {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:32px;
+    height:32px;
+    border:none;
+    background:none;
+    color:#d1d5db;
+    border-radius:6px;
+    cursor:pointer;
+    transition:all .2s;
+}
+
+.rv-delete-btn:hover {
+    background:#fef2f2;
+    color:#dc2626;
 }
 
 .rv-review-text {

@@ -20,6 +20,7 @@ import {
   TrendingUp,
   X
 } from 'lucide-react';
+import logo from '../assets/logo.webp';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, onClose }) => {
@@ -46,7 +47,9 @@ const Sidebar = ({ isOpen, onClose }) => {
   return (
     <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div className="sidebar-header">
-        <h2 className="admin-title">ADMIN DASHBOARD</h2>
+        <div className="sidebar-logo-wrap">
+          <img src={logo} alt="Printdoot" className="sidebar-logo-img" />
+        </div>
         <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
           <X size={20} />
         </button>

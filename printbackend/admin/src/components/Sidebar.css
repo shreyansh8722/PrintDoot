@@ -20,12 +20,16 @@
     justify-content: space-between;
 }
 
-.admin-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.9);
+.sidebar-logo-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-logo-img {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
 }
 
 /* Close button — hidden on desktop */

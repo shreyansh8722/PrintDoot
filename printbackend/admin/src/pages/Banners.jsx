@@ -171,12 +171,17 @@ const Banners = () => {
         e.preventDefault();
         try {
             const submitData = { ...form };
-            if (!submitData.mobile_image_url) submitData.mobile_image_url = '';
+            // Django URLField rejects empty strings — omit optional URL fields if empty
+            if (!submitData.mobile_image_url) delete submitData.mobile_image_url;
+            if (!submitData.link) delete submitData.link;
             if (editing) await adminBannerAPI.updateBanner(editing.id, submitData);
             else await adminBannerAPI.createBanner(submitData);
             setShowModal(false); fetchAll();
+            alert(editing ? 'Banner updated!' : 'Banner created!');
         } catch (err) {
-            alert('Failed: ' + JSON.stringify(err.response?.data || err.message));
+            const errData = err.response?.data;
+            const msg = errData ? Object.entries(errData).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join('\n') : err.message;
+            alert('Failed to save banner:\n' + msg);
         }
     };
 

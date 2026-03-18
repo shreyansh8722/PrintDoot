@@ -14,14 +14,14 @@ class SubcategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Subcategory
-        fields = ['id', 'name', 'slug', 'description', 'image', 'category', 'products']
+        fields = ['id', 'name', 'slug', 'description', 'image', 'is_active', 'category', 'products']
 
 class CategorySerializer(serializers.ModelSerializer):
     subcategories = SubcategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Category
-        fields = ['id', 'name', 'slug', 'description', 'image', 'subcategories']
+        fields = ['id', 'name', 'slug', 'description', 'image', 'is_active', 'subcategories']
 
 
 
