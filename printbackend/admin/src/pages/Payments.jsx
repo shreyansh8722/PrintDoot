@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Download, ChevronDown, Eye, CheckCircle, Send, FileText, Plus, Trash2
+    Download, ChevronDown, CheckCircle, Send, FileText, Plus, Trash2
 } from 'lucide-react';
-import { adminOrdersAPI, adminDashboardAPI } from '../services/api';
+import { adminOrdersAPI, adminDashboardAPI, adminOfflinePaymentAPI } from '../services/api';
 import './Payments.css';
 
 const STATUS_BADGE = {
@@ -11,35 +11,34 @@ const STATUS_BADGE = {
     Failed:  { bg: '#fee2e2', color: '#991b1b' },
     Paid:    { bg: '#dcfce7', color: '#15803d' },
     Refunded:{ bg: '#f3e8ff', color: '#7c3aed' },
+    received:{ bg: '#dcfce7', color: '#15803d' },
+    pending: { bg: '#fef3c7', color: '#92400e' },
 };
 
-const PAYMENT_METHODS = ['Cash', 'UPI', 'Bank Transfer', 'Credit Card', 'Debit Card', 'PayPal', 'COD', 'Other'];
-
-const OFFLINE_STORAGE_KEY = 'printdoot_offline_payments';
-
-const getOfflinePayments = () => {
-    try {
-        return JSON.parse(localStorage.getItem(OFFLINE_STORAGE_KEY) || '[]');
-    } catch { return []; }
-};
-
-const saveOfflinePayments = (payments) => {
-    localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(payments));
-};
+const PAYMENT_METHODS = [
+    { value: 'cash', label: 'Cash' },
+    { value: 'upi', label: 'UPI' },
+    { value: 'bank_transfer', label: 'Bank Transfer' },
+    { value: 'credit_card', label: 'Credit Card' },
+    { value: 'debit_card', label: 'Debit Card' },
+    { value: 'cheque', label: 'Cheque' },
+    { value: 'other', label: 'Other' },
+];
 
 const Payments = () => {
     const [orders, setOrders] = useState([]);
+    const [offlinePayments, setOfflinePayments] = useState([]);
     const [analytics, setAnalytics] = useState(null);
+    const [offlineStats, setOfflineStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [periodFilter, setPeriodFilter] = useState('This Month');
     const [statusFilter, setStatusFilter] = useState('All Statuses');
     const [showDetailModal, setShowDetailModal] = useState(null);
     const [showNewPaymentModal, setShowNewPaymentModal] = useState(false);
-    const [offlinePayments, setOfflinePayments] = useState(getOfflinePayments());
+    const [saving, setSaving] = useState(false);
 
-    // New payment form
     const [newPayment, setNewPayment] = useState({
-        customer: '', amount: '', method: 'Cash', note: '', status: 'Success',
+        customer_name: '', amount: '', payment_method: 'cash', note: '', status: 'received',
     });
 
     useEffect(() => { fetchData(); }, []);
@@ -47,13 +46,18 @@ const Payments = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [ordersRes, analyticsRes] = await Promise.all([
+            const [ordersRes, analyticsRes, offlineRes, offlineStatsRes] = await Promise.all([
                 adminOrdersAPI.getOrders({ page_size: 50 }),
                 adminDashboardAPI.getAnalytics(),
+                adminOfflinePaymentAPI.getPayments(),
+                adminOfflinePaymentAPI.getStats(),
             ]);
             const data = ordersRes.data;
             setOrders(Array.isArray(data) ? data : (data.results || []));
             setAnalytics(analyticsRes.data);
+            const offData = offlineRes.data;
+            setOfflinePayments(Array.isArray(offData) ? offData : (offData.results || []));
+            setOfflineStats(offlineStatsRes.data);
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -66,56 +70,59 @@ const Payments = () => {
         return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
     };
 
-    // Record a new offline payment
-    const handleRecordPayment = () => {
-        if (!newPayment.customer.trim()) return alert('Please enter customer name');
+    const handleRecordPayment = async () => {
+        if (!newPayment.customer_name.trim()) return alert('Please enter customer name');
         if (!newPayment.amount || parseFloat(newPayment.amount) <= 0) return alert('Please enter a valid amount');
 
-        const payment = {
-            id: `OFL${Date.now().toString().slice(-7)}`,
-            customer: newPayment.customer.trim(),
-            amount: parseFloat(newPayment.amount),
-            method: newPayment.method,
-            note: newPayment.note.trim(),
-            status: newPayment.status,
-            date: new Date().toISOString(),
-            type: 'offline',
-        };
-
-        const updated = [payment, ...offlinePayments];
-        setOfflinePayments(updated);
-        saveOfflinePayments(updated);
-        setNewPayment({ customer: '', amount: '', method: 'Cash', note: '', status: 'Success' });
-        setShowNewPaymentModal(false);
-        alert('Offline payment recorded successfully!');
+        try {
+            setSaving(true);
+            await adminOfflinePaymentAPI.createPayment({
+                customer_name: newPayment.customer_name.trim(),
+                amount: parseFloat(newPayment.amount),
+                payment_method: newPayment.payment_method,
+                status: newPayment.status,
+                note: newPayment.note.trim(),
+            });
+            setNewPayment({ customer_name: '', amount: '', payment_method: 'cash', note: '', status: 'received' });
+            setShowNewPaymentModal(false);
+            fetchData();
+            alert('Offline payment recorded successfully!');
+        } catch (error) {
+            console.error('Error recording payment:', error);
+            alert('Failed to record payment: ' + (error.response?.data?.detail || error.message));
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const handleDeleteOfflinePayment = (id) => {
+    const handleDeleteOfflinePayment = async (id) => {
         if (!window.confirm('Delete this offline payment record?')) return;
-        const updated = offlinePayments.filter(p => p.id !== id);
-        setOfflinePayments(updated);
-        saveOfflinePayments(updated);
+        try {
+            await adminOfflinePaymentAPI.deletePayment(id);
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+            alert('Failed to delete payment');
+        }
     };
 
-    // Compute stats from real data
+    // Stats
     const totalRevenue = parseFloat(analytics?.total_revenue || 0);
-    const offlineTotal = offlinePayments.reduce((s, p) => s + (p.status === 'Success' ? p.amount : 0), 0);
+    const offlineTotal = parseFloat(offlineStats?.total_amount || 0);
     const totalPaymentsOverall = totalRevenue + offlineTotal;
     const totalPaymentsMonth = parseFloat(analytics?.revenue_this_month || totalRevenue) + offlineTotal;
     const pendingPayments = orders.filter(o => o.status === 'Pending').reduce((s, o) => s + parseFloat(o.total_amount || 0), 0)
-        + offlinePayments.filter(p => p.status === 'Pending').reduce((s, p) => s + p.amount, 0);
+        + offlinePayments.filter(p => p.status === 'pending').reduce((s, p) => s + parseFloat(p.amount || 0), 0);
     const topMethod = (() => {
         const methods = {};
         orders.forEach(o => { const m = o.payment_method || 'UPI'; methods[m] = (methods[m] || 0) + 1; });
-        offlinePayments.forEach(p => { methods[p.method] = (methods[p.method] || 0) + 1; });
+        offlinePayments.forEach(p => { const m = p.method_display || p.payment_method; methods[m] = (methods[m] || 0) + 1; });
         const sorted = Object.entries(methods).sort((a, b) => b[1] - a[1]);
         return sorted[0]?.[0] || 'Cash';
     })();
-    const suspenseCount = orders.filter(o => o.status === 'Pending').length
-        + offlinePayments.filter(p => p.status === 'Pending').length;
 
-    // Build transaction list from orders + offline payments
-    const orderTransactions = orders.map((order) => ({
+    // Build unified transaction list
+    const orderTransactions = orders.map(order => ({
         id: `TXN${String(order.id).padStart(5, '0')}`,
         customer: order.customer_name || order.email || '—',
         orderId: `ORD${String(order.id).padStart(5, '0')}`,
@@ -131,17 +138,17 @@ const Payments = () => {
             hour: '2-digit', minute: '2-digit', hour12: true
         }) : '—',
         type: 'online',
-        order,
     }));
 
     const offlineTransactions = offlinePayments.map(p => ({
         id: p.id,
-        customer: p.customer,
+        customer: p.customer_name,
         orderId: p.note || 'Offline Store',
-        method: p.method,
-        amount: p.amount,
-        status: p.status,
-        date: new Date(p.date).toLocaleString('en-US', {
+        method: p.method_display || p.payment_method,
+        amount: parseFloat(p.amount),
+        status: p.status_display || (p.status === 'received' ? 'Success' : 'Pending'),
+        rawStatus: p.status,
+        date: new Date(p.created_at).toLocaleString('en-US', {
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit', hour12: true
         }),
@@ -149,7 +156,6 @@ const Payments = () => {
     }));
 
     const allTransactions = [...offlineTransactions, ...orderTransactions];
-
     const filteredTransactions = allTransactions.filter(t => {
         if (statusFilter !== 'All Statuses' && t.status !== statusFilter) return false;
         return true;
@@ -170,31 +176,13 @@ const Payments = () => {
         URL.revokeObjectURL(url);
     };
 
-    const handleMarkOfflineReceived = () => {
-        const pendingCount = filteredTransactions.filter(t => t.status === 'Pending').length;
-        if (pendingCount === 0) {
-            alert('No pending offline payments to mark.');
-        } else {
-            const updated = offlinePayments.map(p => p.status === 'Pending' ? { ...p, status: 'Success' } : p);
-            setOfflinePayments(updated);
-            saveOfflinePayments(updated);
-            alert(`Marked ${pendingCount} offline payment(s) as received.`);
-        }
-    };
-
-    const handleSendReminders = () => {
-        const pendingCount = filteredTransactions.filter(t => t.status === 'Pending').length;
-        alert(`Payment reminders sent to ${pendingCount} customer(s) with pending payments.`);
-    };
-
     const handleGenerateReport = () => {
         const csvRows = [
             ['Payment Report'],
             ['Period', periodFilter],
-            ['Total Payments (Month)', formatCurrency(totalPaymentsMonth)],
-            ['Total Payments (Overall)', formatCurrency(totalPaymentsOverall)],
+            ['Total Payments', formatCurrency(totalPaymentsOverall)],
+            ['Offline Payments', formatCurrency(offlineTotal)],
             ['Pending Payments', formatCurrency(pendingPayments)],
-            ['Top Method', topMethod],
             [],
             ['Transaction ID', 'Customer', 'Order/Note', 'Method', 'Amount', 'Status', 'Type', 'Date'],
             ...filteredTransactions.map(t => [t.id, t.customer, t.orderId, t.method, t.amount, t.status, t.type, t.date])
@@ -204,7 +192,7 @@ const Payments = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `payment_report_${periodFilter.replace(/\s+/g, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.csv`;
+        link.download = `payment_report_${new Date().toISOString().split('T')[0]}.csv`;
         link.click();
         URL.revokeObjectURL(url);
     };
@@ -215,15 +203,14 @@ const Payments = () => {
 
     return (
         <div className="pay-page">
-            {/* ═══ HEADER ═══ */}
             <div className="pay-header-row">
                 <div>
                     <h1 className="pay-page-title">Payment Dashboard</h1>
-                    <p className="pay-subtitle">Track and manage all your payments — online orders & offline store sales.</p>
+                    <p className="pay-subtitle">Track and manage all payments — online orders & offline store sales.</p>
                 </div>
                 <div className="pay-header-actions">
                     <button className="pay-export-btn" onClick={handleExportTransactions}>
-                        <Download size={15} /> Export Transactions
+                        <Download size={15} /> Export
                     </button>
                     <button className="pay-new-btn" onClick={() => setShowNewPaymentModal(true)}>
                         <Plus size={15} /> Record Offline Payment
@@ -231,10 +218,9 @@ const Payments = () => {
                 </div>
             </div>
 
-            {/* ═══ STAT CARDS ═══ */}
             <div className="pay-stats-row">
                 <div className="pay-stat-card">
-                    <span className="pay-stat-label">Total Payments (Current Month)</span>
+                    <span className="pay-stat-label">Total Payments (Month)</span>
                     <span className="pay-stat-value">{formatCurrency(totalPaymentsMonth)}</span>
                 </div>
                 <div className="pay-stat-card">
@@ -246,23 +232,19 @@ const Payments = () => {
                     <span className="pay-stat-value">{formatCurrency(pendingPayments)}</span>
                 </div>
                 <div className="pay-stat-card">
-                    <span className="pay-stat-label">Top Payment Method</span>
+                    <span className="pay-stat-label">Top Method</span>
                     <span className="pay-stat-value pay-stat-text">{topMethod}</span>
                 </div>
                 <div className="pay-stat-card">
-                    <span className="pay-stat-label">Offline Payments</span>
-                    <span className="pay-stat-value">{offlinePayments.length}</span>
+                    <span className="pay-stat-label">Offline Records</span>
+                    <span className="pay-stat-value">{offlineStats?.total || offlinePayments.length}</span>
                 </div>
             </div>
 
-            {/* ═══ TRANSACTIONS TABLE ═══ */}
             <section className="pay-txn-section">
                 <div className="pay-txn-header">
                     <h2 className="pay-txn-title">Transactions</h2>
                     <div className="pay-txn-filters">
-                        <div className="pay-filter-pill">
-                            {periodFilter} <ChevronDown size={14} />
-                        </div>
                         <div className="pay-filter-pill" onClick={() => {
                             const opts = ['All Statuses', 'Success', 'Pending', 'Failed'];
                             const idx = opts.indexOf(statusFilter);
@@ -277,14 +259,14 @@ const Payments = () => {
                     <table className="pay-table">
                         <thead>
                             <tr>
-                                <th>TRANSACTION ID</th>
-                                <th>CUSTOMER NAME</th>
+                                <th>ID</th>
+                                <th>CUSTOMER</th>
                                 <th>ORDER / NOTE</th>
                                 <th>METHOD</th>
                                 <th>AMOUNT</th>
                                 <th>STATUS</th>
                                 <th>TYPE</th>
-                                <th>DATE & TIME</th>
+                                <th>DATE</th>
                                 <th>ACTION</th>
                             </tr>
                         </thead>
@@ -293,10 +275,10 @@ const Payments = () => {
                                 <tr><td colSpan="9" className="pay-empty">No transactions found</td></tr>
                             ) : (
                                 filteredTransactions.map(txn => {
-                                    const cfg = STATUS_BADGE[txn.status] || STATUS_BADGE.Pending;
+                                    const cfg = STATUS_BADGE[txn.status] || STATUS_BADGE[txn.rawStatus] || STATUS_BADGE.Pending;
                                     return (
-                                        <tr key={txn.id}>
-                                            <td className="pay-txn-id">{txn.id}</td>
+                                        <tr key={`${txn.type}-${txn.id}`}>
+                                            <td className="pay-txn-id">{txn.type === 'offline' ? `OFL-${txn.id}` : txn.id}</td>
                                             <td className="pay-customer">{txn.customer}</td>
                                             <td className="pay-order-id">{txn.orderId}</td>
                                             <td>{txn.method}</td>
@@ -329,31 +311,20 @@ const Payments = () => {
                         </tbody>
                     </table>
                 </div>
-
-                <div className="pay-pagination">
-                    <span className="pay-page-info">
-                        Showing {Math.min(filteredTransactions.length, 1)} to {Math.min(filteredTransactions.length, 10)} of {filteredTransactions.length} results
-                    </span>
-                </div>
             </section>
 
-            {/* ═══ ADMIN ACTIONS ═══ */}
             <section className="pay-admin-section">
                 <h2 className="pay-admin-title">Admin Actions</h2>
                 <div className="pay-admin-grid">
-                    <button className="pay-admin-card" onClick={handleMarkOfflineReceived}>
-                        <CheckCircle size={18} /> Mark Offline Payment as Received
-                    </button>
-                    <button className="pay-admin-card" onClick={handleSendReminders}>
-                        <Send size={18} /> Send Payment Reminders
+                    <button className="pay-admin-card" onClick={handleExportTransactions}>
+                        <Send size={18} /> Export All Transactions
                     </button>
                     <button className="pay-admin-card" onClick={handleGenerateReport}>
-                        <FileText size={18} /> Generate Monthly/Weekly Reports
+                        <FileText size={18} /> Generate Report
                     </button>
                 </div>
             </section>
 
-            {/* ═══ DETAIL MODAL ═══ */}
             {showDetailModal && (
                 <div className="pay-modal-overlay" onClick={() => setShowDetailModal(null)}>
                     <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
@@ -363,7 +334,7 @@ const Payments = () => {
                         </div>
                         <div className="pay-modal-body">
                             <div className="pay-detail-grid">
-                                <div><span className="pay-detail-label">Transaction ID</span><span className="pay-detail-val">{showDetailModal.id}</span></div>
+                                <div><span className="pay-detail-label">ID</span><span className="pay-detail-val">{showDetailModal.type === 'offline' ? `OFL-${showDetailModal.id}` : showDetailModal.id}</span></div>
                                 <div><span className="pay-detail-label">Order / Note</span><span className="pay-detail-val">{showDetailModal.orderId}</span></div>
                                 <div><span className="pay-detail-label">Customer</span><span className="pay-detail-val">{showDetailModal.customer}</span></div>
                                 <div><span className="pay-detail-label">Method</span><span className="pay-detail-val">{showDetailModal.method}</span></div>
@@ -377,7 +348,6 @@ const Payments = () => {
                 </div>
             )}
 
-            {/* ═══ NEW OFFLINE PAYMENT MODAL ═══ */}
             {showNewPaymentModal && (
                 <div className="pay-modal-overlay" onClick={() => setShowNewPaymentModal(false)}>
                     <div className="pay-modal" onClick={(e) => e.stopPropagation()}>
@@ -389,61 +359,40 @@ const Payments = () => {
                             <div className="pay-form-grid">
                                 <div className="pay-form-group">
                                     <label className="pay-form-label">Customer Name *</label>
-                                    <input
-                                        type="text"
-                                        className="pay-form-input"
-                                        placeholder="Enter customer name"
-                                        value={newPayment.customer}
-                                        onChange={e => setNewPayment(f => ({ ...f, customer: e.target.value }))}
-                                    />
+                                    <input type="text" className="pay-form-input" placeholder="Enter customer name"
+                                        value={newPayment.customer_name} onChange={e => setNewPayment(f => ({ ...f, customer_name: e.target.value }))} />
                                 </div>
                                 <div className="pay-form-group">
                                     <label className="pay-form-label">Amount (₹) *</label>
-                                    <input
-                                        type="number"
-                                        className="pay-form-input"
-                                        placeholder="0.00"
-                                        min="0"
-                                        step="0.01"
-                                        value={newPayment.amount}
-                                        onChange={e => setNewPayment(f => ({ ...f, amount: e.target.value }))}
-                                    />
+                                    <input type="number" className="pay-form-input" placeholder="0.00" min="0" step="0.01"
+                                        value={newPayment.amount} onChange={e => setNewPayment(f => ({ ...f, amount: e.target.value }))} />
                                 </div>
                                 <div className="pay-form-group">
                                     <label className="pay-form-label">Payment Method</label>
-                                    <select
-                                        className="pay-form-input"
-                                        value={newPayment.method}
-                                        onChange={e => setNewPayment(f => ({ ...f, method: e.target.value }))}
-                                    >
-                                        {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                                    <select className="pay-form-input" value={newPayment.payment_method}
+                                        onChange={e => setNewPayment(f => ({ ...f, payment_method: e.target.value }))}>
+                                        {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                                     </select>
                                 </div>
                                 <div className="pay-form-group">
                                     <label className="pay-form-label">Status</label>
-                                    <select
-                                        className="pay-form-input"
-                                        value={newPayment.status}
-                                        onChange={e => setNewPayment(f => ({ ...f, status: e.target.value }))}
-                                    >
-                                        <option value="Success">Received</option>
-                                        <option value="Pending">Pending</option>
+                                    <select className="pay-form-input" value={newPayment.status}
+                                        onChange={e => setNewPayment(f => ({ ...f, status: e.target.value }))}>
+                                        <option value="received">Received</option>
+                                        <option value="pending">Pending</option>
                                     </select>
                                 </div>
                                 <div className="pay-form-group pay-form-full">
                                     <label className="pay-form-label">Note / Description</label>
-                                    <input
-                                        type="text"
-                                        className="pay-form-input"
-                                        placeholder="e.g. Walk-in customer, Invoice #123"
-                                        value={newPayment.note}
-                                        onChange={e => setNewPayment(f => ({ ...f, note: e.target.value }))}
-                                    />
+                                    <input type="text" className="pay-form-input" placeholder="e.g. Walk-in customer, Invoice #123"
+                                        value={newPayment.note} onChange={e => setNewPayment(f => ({ ...f, note: e.target.value }))} />
                                 </div>
                             </div>
                             <div className="pay-form-actions">
                                 <button className="pay-form-cancel" onClick={() => setShowNewPaymentModal(false)}>Cancel</button>
-                                <button className="pay-form-submit" onClick={handleRecordPayment}>Record Payment</button>
+                                <button className="pay-form-submit" onClick={handleRecordPayment} disabled={saving}>
+                                    {saving ? 'Saving...' : 'Record Payment'}
+                                </button>
                             </div>
                         </div>
                     </div>

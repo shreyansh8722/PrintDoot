@@ -211,5 +211,14 @@ export const authAPI = {
         return localStorage.getItem('adminUser');
     },
 };
+// Offline Payments API
+export const adminOfflinePaymentAPI = {
+    getPayments: (params = {}) => api.get('/admin/pages/offline-payments/', { params }),
+    getPayment: (id) => api.get(`/admin/pages/offline-payments/${id}/`),
+    createPayment: (data) => api.post('/admin/pages/offline-payments/', data),
+    updatePayment: (id, data) => api.patch(`/admin/pages/offline-payments/${id}/`, data),
+    deletePayment: (id) => api.delete(`/admin/pages/offline-payments/${id}/`),
+    getStats: () => api.get('/admin/pages/offline-payments/stats/'),
+};
 
 export default api;

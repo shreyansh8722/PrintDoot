@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import LegalPage, Offer, Banner, PromoCode
+from .models import LegalPage, Offer, Banner, PromoCode, OfflinePayment
 
 
 class OfferSerializer(serializers.ModelSerializer):
@@ -73,3 +73,16 @@ class LegalPageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = LegalPage
         fields = ['id', 'title', 'slug', 'page_type', 'page_type_display', 'content', 'meta_description', 'updated_at']
+
+
+class OfflinePaymentSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    method_display = serializers.CharField(source='get_payment_method_display', read_only=True)
+
+    class Meta:
+        model = OfflinePayment
+        fields = [
+            'id', 'customer_name', 'amount', 'payment_method', 'method_display',
+            'status', 'status_display', 'note', 'created_at', 'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']

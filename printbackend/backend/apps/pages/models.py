@@ -173,3 +173,39 @@ class LegalPage(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.get_page_type_display()})"
+
+
+class OfflinePayment(models.Model):
+    """
+    Offline store payments recorded by admin for tracking purposes.
+    """
+    STATUS_CHOICES = [
+        ('received', 'Received'),
+        ('pending', 'Pending'),
+    ]
+
+    METHOD_CHOICES = [
+        ('cash', 'Cash'),
+        ('upi', 'UPI'),
+        ('bank_transfer', 'Bank Transfer'),
+        ('credit_card', 'Credit Card'),
+        ('debit_card', 'Debit Card'),
+        ('cheque', 'Cheque'),
+        ('other', 'Other'),
+    ]
+
+    customer_name = models.CharField(max_length=200, help_text="Customer name")
+    amount = models.DecimalField(max_digits=12, decimal_places=2, help_text="Payment amount (₹)")
+    payment_method = models.CharField(max_length=20, choices=METHOD_CHOICES, default='cash')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='received')
+    note = models.CharField(max_length=500, blank=True, default="", help_text="Invoice number, description, etc.")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Offline Payment'
+        verbose_name_plural = 'Offline Payments'
+
+    def __str__(self):
+        return f"{self.customer_name} — ₹{self.amount} ({self.get_status_display()})"

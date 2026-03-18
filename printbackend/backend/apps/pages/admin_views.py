@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Offer, Banner, PromoCode
-from .serializers import OfferSerializer, BannerSerializer, PromoCodeSerializer
+from .models import Offer, Banner, PromoCode, OfflinePayment
+from .serializers import OfferSerializer, BannerSerializer, PromoCodeSerializer, OfflinePaymentSerializer
 from apps.users.permissions import IsAdminOrStaff
 
 
@@ -110,4 +110,32 @@ class AdminPromoCodeViewSet(viewsets.ModelViewSet):
             'active': active,
             'expired': expired,
             'total_used': total_used,
+        })
+
+
+class AdminOfflinePaymentViewSet(viewsets.ModelViewSet):
+    """
+    Admin-only ViewSet for managing offline store payments.
+    """
+    queryset = OfflinePayment.objects.all()
+    serializer_class = OfflinePaymentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['customer_name', 'note']
+    ordering_fields = ['created_at', 'amount']
+    ordering = ['-created_at']
+
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Get offline payment statistics."""
+        from django.db.models import Sum
+        total = OfflinePayment.objects.count()
+        received = OfflinePayment.objects.filter(status='received').count()
+        pending = OfflinePayment.objects.filter(status='pending').count()
+        total_amount = OfflinePayment.objects.filter(status='received').aggregate(total=Sum('amount'))['total'] or 0
+        return Response({
+            'total': total,
+            'received': received,
+            'pending': pending,
+            'total_amount': float(total_amount),
         })
