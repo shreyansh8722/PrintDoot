@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Offer, Banner, PromoCode
@@ -77,6 +77,24 @@ class AdminPromoCodeViewSet(viewsets.ModelViewSet):
     search_fields = ['code', 'description']
     ordering_fields = ['created_at', 'valid_to', 'discount_value']
     ordering = ['-created_at']
+
+    def perform_create(self, serializer):
+        from django.db import IntegrityError
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            if 'code' in str(e).lower():
+                raise serializers.ValidationError({'code': 'A promo code with this code already exists.'})
+            raise serializers.ValidationError({'error': f'Database error: {str(e)}'})
+
+    def perform_update(self, serializer):
+        from django.db import IntegrityError
+        try:
+            serializer.save()
+        except IntegrityError as e:
+            if 'code' in str(e).lower():
+                raise serializers.ValidationError({'code': 'A promo code with this code already exists.'})
+            raise serializers.ValidationError({'error': f'Database error: {str(e)}'})
 
     @action(detail=False, methods=['get'])
     def stats(self, request):

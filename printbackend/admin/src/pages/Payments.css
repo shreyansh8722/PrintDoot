@@ -81,3 +81,26 @@
 @media (max-width:1100px) { .pay-stats-row { grid-template-columns:repeat(3,1fr); } }
 @media (max-width:768px) { .pay-stats-row { grid-template-columns:1fr 1fr; } .pay-admin-grid { grid-template-columns:1fr; } }
 @media (max-width:480px) { .pay-stats-row { grid-template-columns:1fr; } }
+
+/* Type badges */
+.pay-type-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:12px; font-size:.72rem; font-weight:600; white-space:nowrap; }
+.pay-type-online { background:#e0f2f1; color:#00796b; }
+.pay-type-offline { background:#fff3e0; color:#e65100; }
+
+/* Action buttons cell */
+.pay-action-btns { display:flex; align-items:center; gap:6px; }
+.pay-delete-btn { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:none; background:none; color:#d1d5db; cursor:pointer; border-radius:6px; transition:all .15s; }
+.pay-delete-btn:hover { background:#fef2f2; color:#dc2626; }
+
+/* Payment Form */
+.pay-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.pay-form-group { display:flex; flex-direction:column; gap:6px; }
+.pay-form-full { grid-column:1/-1; }
+.pay-form-label { font-size:.8rem; font-weight:600; color:#374151; }
+.pay-form-input { width:100%; padding:10px 14px; border:1px solid #e5e7eb; border-radius:8px; font-size:.88rem; color:#1f2937; font-family:inherit; transition:border-color .2s; box-sizing:border-box; }
+.pay-form-input:focus { outline:none; border-color:#00897b; box-shadow:0 0 0 3px rgba(0,137,123,.1); }
+.pay-form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+.pay-form-cancel { padding:10px 20px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#374151; font-size:.85rem; font-weight:500; cursor:pointer; }
+.pay-form-cancel:hover { border-color:#00897b; }
+.pay-form-submit { padding:10px 24px; border:none; border-radius:8px; background:#00897b; color:#fff; font-size:.85rem; font-weight:600; cursor:pointer; transition:background .2s; }
+.pay-form-submit:hover { background:#00695c; }

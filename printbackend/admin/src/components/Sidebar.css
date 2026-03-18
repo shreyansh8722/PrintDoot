@@ -14,22 +14,15 @@
 }
 
 .sidebar-header {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: none;
 }
 
 .sidebar-logo-wrap {
-    display: flex;
-    align-items: center;
+    display: none;
 }
 
 .sidebar-logo-img {
-    height: 32px;
-    width: auto;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
+    display: none;
 }
 
 /* Close button — hidden on desktop */

@@ -29,6 +29,8 @@
 /* Page */
 .sa2-page {
     padding: 0 0 40px 0;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 .sa2-page-title {
@@ -46,6 +48,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 28px;
+    overflow: hidden;
 }
 
 .sa2-stat-card {
@@ -146,7 +149,7 @@
 
 .sa2-charts-grid {
     display: grid;
-    grid-template-columns: 1.6fr 1fr;
+    grid-template-columns: 1fr;
     gap: 16px;
 }
 
@@ -295,6 +298,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-top: 14px;
+    overflow: hidden;
 }
 
 .sa2-insight-card {
@@ -360,7 +364,7 @@
     border-radius: 12px;
     border: 1px solid #f0f0f0;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-    overflow: hidden;
+    overflow-x: auto;
     margin-top: 14px;
 }
 
