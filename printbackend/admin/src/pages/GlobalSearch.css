@@ -1,0 +1,260 @@
+/* ═══ Global Search Page ═══ */
+.gs-page {
+    padding: 24px;
+    max-width: 1000px;
+}
+
+.gs-header {
+    margin-bottom: 20px;
+}
+
+.gs-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 4px 0;
+}
+
+.gs-subtitle {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Tabs */
+.gs-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.gs-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.gs-tab:hover {
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+.gs-tab-active {
+    background: #1f2937;
+    color: white;
+    border-color: #1f2937;
+}
+
+.gs-tab-count {
+    font-size: 0.7rem;
+    background: rgba(0,0,0,0.08);
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.gs-tab-active .gs-tab-count {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Loading */
+.gs-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    padding: 60px 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.gs-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Empty */
+.gs-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.gs-empty h3 {
+    font-size: 1.1rem;
+    color: #6b7280;
+    margin: 12px 0 4px;
+}
+
+.gs-empty p {
+    font-size: 0.85rem;
+}
+
+/* Results sections */
+.gs-results {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.gs-section {
+    background: white;
+    border: 1px solid #f3f4f6;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.gs-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #fafbfc;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.gs-section-header h2 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.gs-see-all {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: #3b82f6;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.gs-see-all:hover {
+    text-decoration: underline;
+}
+
+/* Cards */
+.gs-cards {
+    display: flex;
+    flex-direction: column;
+}
+
+.gs-card {
+    padding: 14px 18px;
+    border-bottom: 1px solid #f9fafb;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.1s;
+    display: block;
+}
+
+.gs-card:hover {
+    background: #fafbfc;
+}
+
+.gs-card:last-child {
+    border-bottom: none;
+}
+
+.gs-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.gs-card-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1f2937;
+}
+
+.gs-card-amount {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #1f2937;
+}
+
+.gs-card-meta {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+/* Product thumb */
+.gs-product-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gs-product-thumb {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #f3f4f6;
+}
+
+/* Customer info */
+.gs-customer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gs-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #374151;
+}
+
+/* Badges */
+.gs-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.gs-badge-pending { background: #fef3c7; color: #92400e; }
+.gs-badge-processing { background: #dbeafe; color: #1d4ed8; }
+.gs-badge-shipped { background: #e0e7ff; color: #3730a3; }
+.gs-badge-delivered { background: #dcfce7; color: #15803d; }
+.gs-badge-cancelled { background: #fee2e2; color: #991b1b; }
+.gs-badge-active { background: #dcfce7; color: #15803d; }
+.gs-badge-inactive { background: #fee2e2; color: #991b1b; }
+
+/* Stars */
+.gs-stars {
+    color: #f59e0b;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}

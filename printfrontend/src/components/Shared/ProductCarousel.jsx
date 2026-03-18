@@ -96,6 +96,7 @@ const ProductCarousel = ({ title, items, type = "product", className = "" }) => 
 
         try {
             await catalogService.toggleFavorite(productId);
+            window.dispatchEvent(new Event('favoritesChanged'));
         } catch {
             // Revert on error
             setFavoriteIds(prev => {

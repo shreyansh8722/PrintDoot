@@ -5,6 +5,7 @@ import AccountDropdown from "./AccountDropdown";
 import SignInDropdown from "./SignInDropdown";
 import NavBar from "./NavBar";
 import userService from "../../../services/userService";
+import catalogService from "../../../services/catalogService";
 import { useShop } from "../../../context/ShopContext";
 import logoImg from "../../../assets/logo.webp";
 
@@ -23,6 +24,24 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const { cartItems } = useShop();
   const cartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const [favCount, setFavCount] = useState(0);
+
+  // Fetch favorites count
+  useEffect(() => {
+    const fetchFavCount = async () => {
+      if (userService.isAuthenticated()) {
+        try {
+          const ids = await catalogService.getFavoriteIds();
+          setFavCount(Array.isArray(ids) ? ids.length : 0);
+        } catch { setFavCount(0); }
+      }
+    };
+    fetchFavCount();
+    // Listen for favorites changes from other components
+    const handler = () => fetchFavCount();
+    window.addEventListener('favoritesChanged', handler);
+    return () => window.removeEventListener('favoritesChanged', handler);
+  }, []);
 
   const searchRef = useRef(null);
 
@@ -153,7 +172,7 @@ export default function Header() {
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
           </HeaderIconBtn>
 
-          <HeaderIconBtn to="/favorites" label="Wishlist">
+          <HeaderIconBtn to="/favorites" label="Wishlist" badge={favCount}>
             <svg className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
           </HeaderIconBtn>
 
@@ -348,10 +367,17 @@ export default function Header() {
 }
 
 /* ── Desktop icon + label button ── */
-function HeaderIconBtn({ to, label, children }) {
+function HeaderIconBtn({ to, label, children, badge = 0 }) {
   return (
     <Link to={to} className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-black hover:text-brand group">
-      <span className="group-hover:text-brand transition-colors">{children}</span>
+      <span className="group-hover:text-brand transition-colors relative">
+        {children}
+        {badge > 0 && (
+          <span className="absolute -top-2 -right-2 bg-brand text-white text-[10px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center leading-none">
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+      </span>
       <span className="text-[13px] font-medium hidden xl:block">{label}</span>
     </Link>
   );

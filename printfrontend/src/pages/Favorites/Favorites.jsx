@@ -36,6 +36,7 @@ const Favorites = () => {
         try {
             await catalogService.removeFavorite(productId);
             setFavorites(prev => prev.filter(f => f.product_id !== productId));
+            window.dispatchEvent(new Event('favoritesChanged'));
         } catch (err) {
             console.error('Error removing favorite:', err);
         } finally {

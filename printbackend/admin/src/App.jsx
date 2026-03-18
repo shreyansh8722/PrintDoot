@@ -21,6 +21,7 @@ import UserAnalytics from './pages/UserAnalytics';
 import OrderAnalytics from './pages/OrderAnalytics';
 import CartAnalysis from './pages/CartAnalysis';
 import Courier from './pages/Courier';
+import GlobalSearch from './pages/GlobalSearch';
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
             <Route path="order-analytics" element={<OrderAnalytics />} />
             <Route path="cart-analysis" element={<CartAnalysis />} />
             <Route path="courier" element={<Courier />} />
+            <Route path="search" element={<GlobalSearch />} />
             <Route path="*" element={<div className="p-4">Page Not Found</div>} />
           </Route>
           <Route path="*" element={<Navigate to="/login" replace />} />

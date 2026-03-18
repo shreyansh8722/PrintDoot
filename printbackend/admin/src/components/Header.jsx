@@ -28,25 +28,8 @@ const Header = ({ onToggleSidebar }) => {
         e.preventDefault();
         if (!searchTerm.trim()) return;
 
-        // Determine the best page to search based on current location
-        const path = location.pathname;
-        if (path.includes('orders')) {
-            navigate(`/orders?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else if (path.includes('products')) {
-            navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else if (path.includes('customers')) {
-            navigate(`/customers?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else if (path.includes('reviews')) {
-            navigate(`/reviews?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else if (path.includes('offers')) {
-            navigate(`/offers?search=${encodeURIComponent(searchTerm.trim())}`);
-        } else {
-            // Default: search orders
-            navigate(`/orders?search=${encodeURIComponent(searchTerm.trim())}`);
-        }
-
-        // Dispatch a custom event so page components can pick up the search
-        window.dispatchEvent(new CustomEvent('adminSearch', { detail: { term: searchTerm.trim() } }));
+        // Always navigate to the global search page
+        navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
     };
 
     const handleLogout = () => {
