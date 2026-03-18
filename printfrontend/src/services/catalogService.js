@@ -1,27 +1,35 @@
 import apiHook from './apiConfig';
 
+/* ── Simple in-memory cache to avoid refetching on page navigation ── */
+const _cache = {};
+function cached(key, ttlMs, fetchFn) {
+    const entry = _cache[key];
+    if (entry && Date.now() - entry.ts < ttlMs) return Promise.resolve(entry.data);
+    return fetchFn().then(data => { _cache[key] = { data, ts: Date.now() }; return data; });
+}
+function cacheKey(prefix, params) { return prefix + ':' + JSON.stringify(params || {}); }
+
+const FIVE_MIN = 5 * 60 * 1000;
+const TEN_MIN = 10 * 60 * 1000;
+
 const catalogService = {
     // Banners / Hero
     getBanners: async (placement) => {
-        try {
+        const key = cacheKey('banners', placement);
+        return cached(key, FIVE_MIN, async () => {
             const params = placement ? { placement } : {};
             const response = await apiHook.get('/banners/', { params });
             return response.data;
-        } catch (error) {
-            console.error('Error fetching banners:', error);
-            throw error;
-        }
+        });
     },
+
 
     // Categories
     getCategories: async () => {
-        try {
+        return cached('categories', TEN_MIN, async () => {
             const response = await apiHook.get('/categories/');
             return response.data.results || response.data;
-        } catch (error) {
-            console.error('Error fetching categories:', error);
-            throw error;
-        }
+        });
     },
 
     getCategoryBySlug: async (slug) => {
@@ -43,47 +51,35 @@ const catalogService = {
 
     // Products
     getProducts: async ({ category, subcategory, featured, search, page, page_size, min_price, max_price, min_rating, ordering } = {}) => {
-        try {
-            const params = {};
-            if (category) params.category = category;
-            if (subcategory) params.subcategory = subcategory;
-            if (featured) params.featured = 'true';
-            if (search) params.search = search;
-            if (page) params.page = page;
-            if (page_size) params.page_size = page_size;
-            if (min_price !== undefined && min_price !== '') params.min_price = min_price;
-            if (max_price !== undefined && max_price !== '') params.max_price = max_price;
-            if (min_rating !== undefined && min_rating !== '') params.min_rating = min_rating;
-            if (ordering) params.ordering = ordering;
+        const params = {};
+        if (category) params.category = category;
+        if (subcategory) params.subcategory = subcategory;
+        if (featured) params.featured = 'true';
+        if (search) params.search = search;
+        if (page) params.page = page;
+        if (page_size) params.page_size = page_size;
+        if (min_price !== undefined && min_price !== '') params.min_price = min_price;
+        if (max_price !== undefined && max_price !== '') params.max_price = max_price;
+        if (min_rating !== undefined && min_rating !== '') params.min_rating = min_rating;
+        if (ordering) params.ordering = ordering;
 
+        const key = cacheKey('products', params);
+        return cached(key, FIVE_MIN, async () => {
             const response = await apiHook.get('/products/', { params });
             const rawData = response.data;
-
-            // Handle paginated or non-paginated response
             let products = [];
             let pagination = null;
-
             if (rawData.results) {
-                // DRF PageNumberPagination response
                 products = rawData.results;
                 pagination = {
-                    count: rawData.count || 0,
-                    next: rawData.next,
-                    previous: rawData.previous,
-                    totalPages: Math.ceil((rawData.count || 0) / (page_size || 20)),
-                    currentPage: page || 1,
+                    count: rawData.count || 0, next: rawData.next, previous: rawData.previous,
+                    totalPages: Math.ceil((rawData.count || 0) / (page_size || 20)), currentPage: page || 1,
                 };
             } else if (Array.isArray(rawData)) {
                 products = rawData;
             }
-
-            const transformedProducts = products.map(transformProduct);
-
-            return { products: transformedProducts, pagination };
-        } catch (error) {
-            console.error('Error fetching products:', error);
-            throw error;
-        }
+            return { products: products.map(transformProduct), pagination };
+        });
     },
 
     getProductBySlug: async (slug) => {
@@ -249,14 +245,12 @@ const catalogService = {
      * GET /api/v1/products/new-arrivals/?limit=10
      */
     getNewArrivals: async (limit = 10) => {
-        try {
+        const key = cacheKey('newArrivals', limit);
+        return cached(key, FIVE_MIN, async () => {
             const response = await apiHook.get('/products/new-arrivals/', { params: { limit } });
             const products = Array.isArray(response.data) ? response.data : (response.data.results || []);
             return products.map(transformProduct);
-        } catch (error) {
-            console.error('Error fetching new arrivals:', error);
-            return [];
-        }
+        }).catch(() => []);
     },
 
     /**
@@ -264,14 +258,12 @@ const catalogService = {
      * GET /api/v1/products/trending/?limit=10
      */
     getTrending: async (limit = 10) => {
-        try {
+        const key = cacheKey('trending', limit);
+        return cached(key, FIVE_MIN, async () => {
             const response = await apiHook.get('/products/trending/', { params: { limit } });
             const products = Array.isArray(response.data) ? response.data : (response.data.results || []);
             return products.map(transformProduct);
-        } catch (error) {
-            console.error('Error fetching trending products:', error);
-            return [];
-        }
+        }).catch(() => []);
     },
 
     /**

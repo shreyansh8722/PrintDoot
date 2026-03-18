@@ -213,8 +213,10 @@ export default function Product() {
   const [quantity, setQuantity] = useState(1);
   const [imgZoom, setImgZoom] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [toast, setToast] = useState(null);
 
   const relatedScrollRef = useRef(null);
+  const toastTimer = useRef(null);
 
   /* ── Fetch product ── */
   useEffect(() => {
@@ -289,24 +291,6 @@ export default function Product() {
     return r;
   }, [product?.reviews, reviewSort]);
 
-  /* ── Loading / Not Found ── */
-  if (loading) return <ProductSkeleton />;
-  if (!product) {
-    return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl">🔍</div>
-        <p className="text-xl font-semibold text-gray-700">Product not found</p>
-        <Link to="/view-all" className="text-brand hover:underline font-medium">← Browse all products</Link>
-      </div>
-    );
-  }
-
-  const reviewCount = product.rating?.count || 0;
-  const avgRating = product.rating?.value || 0;
-
-  const [toast, setToast] = useState(null);
-  const toastTimer = useRef(null);
-
   const showToast = (message) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(message);
@@ -350,6 +334,21 @@ export default function Product() {
     const newIndex = currentImageIndex + dir;
     if (newIndex >= 0 && newIndex < imageList.length) setActiveImage(imageList[newIndex]);
   };
+
+  /* ── Loading / Not Found ── */
+  if (loading) return <ProductSkeleton />;
+  if (!product) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-3xl">🔍</div>
+        <p className="text-xl font-semibold text-gray-700">Product not found</p>
+        <Link to="/view-all" className="text-brand hover:underline font-medium">← Browse all products</Link>
+      </div>
+    );
+  }
+
+  const reviewCount = product.rating?.count || 0;
+  const avgRating = product.rating?.value || 0;
 
   return (
     <div className="bg-white min-h-screen">
