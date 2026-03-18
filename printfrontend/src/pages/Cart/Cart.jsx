@@ -8,7 +8,6 @@ import userService from '../../services/userService';
 /* ───── Constants ───── */
 const GST_RATE = 0.18; // 18% GST
 const FREE_SHIPPING_THRESHOLD = 999;
-const FLAT_SHIPPING = 99;
 
 /* ═══════════════════════════════════
    CartItem Component
@@ -145,11 +144,11 @@ const Cart = () => {
     const customizationTotal = 0; // Will be calculated when design details load
     const itemsTotal = subtotal + customizationTotal;
     const taxes = +(itemsTotal * GST_RATE).toFixed(2);
-    const shipping = itemsTotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING;
-    const total = +(itemsTotal + taxes + shipping).toFixed(2);
+    const isFreeShipping = itemsTotal >= FREE_SHIPPING_THRESHOLD;
+    const total = +(itemsTotal + taxes).toFixed(2);
     const totalItems = cartItems.reduce((a, i) => a + (i.quantity || 1), 0);
 
-    return { subtotal, customizationTotal, taxes, shipping, total, totalItems };
+    return { subtotal, customizationTotal, taxes, isFreeShipping, total, totalItems };
   }, [cartItems]);
 
   /* ── Empty cart ── */
@@ -244,14 +243,14 @@ const Cart = () => {
 
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Shipping</span>
-                  {pricing.shipping === 0 ? (
+                  {pricing.isFreeShipping ? (
                     <span className="font-medium text-green-600">FREE</span>
                   ) : (
-                    <span className="font-medium text-gray-900">₹{pricing.shipping.toFixed(2)}</span>
+                    <span className="font-medium text-gray-500 italic">Calculated at checkout</span>
                   )}
                 </div>
 
-                {pricing.shipping > 0 && (
+                {!pricing.isFreeShipping && (
                   <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
                     Add ₹{(FREE_SHIPPING_THRESHOLD - pricing.subtotal).toFixed(2)} more for free shipping
                   </p>

@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import apiHook from '../../../services/apiConfig';
 import promoCards from '../../../assets/promo-cards.webp';
 import promoGifts from '../../../assets/promo-gifts.webp';
 import promoPrints from '../../../assets/promo-prints.webp';
 
-const banners = [
+/* ── Default promo banners (always shown unless admin adds promo banners) ── */
+const DEFAULT_BANNERS = [
     {
-        id: 1,
+        id: 'default-1',
         title: "Custom Business Cards",
         subtitle: "Make a lasting first impression",
         cta: "Order Now",
@@ -15,7 +17,7 @@ const banners = [
         image: promoCards,
     },
     {
-        id: 2,
+        id: 'default-2',
         title: "Personalized Gift Hampers",
         subtitle: "Celebrate every occasion with love",
         cta: "Explore",
@@ -24,7 +26,7 @@ const banners = [
         image: promoGifts,
     },
     {
-        id: 3,
+        id: 'default-3',
         title: "Premium Photo Prints",
         subtitle: "Turn memories into masterpieces",
         cta: "Shop Now",
@@ -34,7 +36,39 @@ const banners = [
     },
 ];
 
+const GRADIENTS = [
+    "from-stone-900/80 via-stone-800/50 to-transparent",
+    "from-sky-900/80 via-sky-800/50 to-transparent",
+    "from-amber-900/70 via-amber-800/40 to-transparent",
+    "from-emerald-900/80 via-emerald-800/50 to-transparent",
+    "from-rose-900/80 via-rose-800/50 to-transparent",
+];
+
 const PromoBanners = () => {
+    const [banners, setBanners] = useState(DEFAULT_BANNERS);
+
+    useEffect(() => {
+        apiHook.get('/pages/banners/', { params: { position: 'promo' } })
+            .then(res => {
+                const data = res.data?.results || res.data || [];
+                if (data.length > 0) {
+                    const apiCards = data.map((b, i) => ({
+                        id: b.id || `api-${i}`,
+                        title: b.title,
+                        subtitle: b.subtitle || '',
+                        cta: 'Shop Now',
+                        link: b.link || '/view-all',
+                        gradient: GRADIENTS[i % GRADIENTS.length],
+                        image: b.image_url || b.mobile_image_url,
+                    }));
+                    // Fill remaining spots with defaults
+                    const combined = [...apiCards, ...DEFAULT_BANNERS.slice(apiCards.length)];
+                    setBanners(combined.slice(0, 3)); // Max 3 promo banners
+                }
+            })
+            .catch(() => { /* keep defaults */ });
+    }, []);
+
     return (
         <section className="w-full px-4 sm:px-6 py-6 sm:py-10">
             <div className="max-w-7xl mx-auto">

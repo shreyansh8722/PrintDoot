@@ -1,4 +1,4 @@
-﻿from django.db import models
+from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -130,6 +130,8 @@ class ProductReview(models.Model):
     comment = models.TextField()
     is_verified_purchase = models.BooleanField(default=False)
     helpful_count = models.IntegerField(default=0)
+    admin_reply = models.TextField(blank=True, null=True, help_text="Admin response to this review")
+    admin_reply_date = models.DateTimeField(blank=True, null=True, help_text="When the admin replied")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

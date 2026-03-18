@@ -11,18 +11,18 @@ import {
   Box,
   BarChart2,
   Star,
-  Gift,
   Image,
   Truck,
   Settings,
   PieChart,
   UserCheck,
   ShoppingBag,
-  TrendingUp
+  TrendingUp,
+  X
 } from 'lucide-react';
 import './Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: PieChart, label: 'Sales Analytics', path: '/sales-analytics' },
@@ -35,6 +35,7 @@ const Sidebar = () => {
     { icon: CreditCard, label: 'Payments', path: '/payments' },
     { icon: Megaphone, label: 'Marketing', path: '/marketing' },
     { icon: Tag, label: 'Promo Codes', path: '/offers' },
+    { icon: Star, label: 'Reviews', path: '/reviews' },
     { icon: Image, label: 'Site Images', path: '/banners' },
     { icon: Box, label: 'Stocks', path: '/stocks' },
     { icon: Truck, label: 'Courier', path: '/courier' },
@@ -43,9 +44,12 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
       <div className="sidebar-header">
         <h2 className="admin-title">ADMIN DASHBOARD</h2>
+        <button className="sidebar-close-btn" onClick={onClose} aria-label="Close sidebar">
+          <X size={20} />
+        </button>
       </div>
       <nav className="sidebar-nav">
         {menuItems.map((item) => (
@@ -54,6 +58,7 @@ const Sidebar = () => {
             to={item.path}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             end={item.path === '/'}
+            onClick={onClose}
           >
             <item.icon size={20} className="nav-icon" />
             <span className="nav-label">{item.label}</span>

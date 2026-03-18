@@ -727,6 +727,24 @@ export default function Product() {
                     </div>
                     {rev.title && <h4 className="font-bold text-gray-900 mt-3 mb-1">{rev.title}</h4>}
                     <p className="text-gray-600 text-sm leading-relaxed mt-2">{rev.comment}</p>
+
+                    {/* Admin Reply */}
+                    {rev.admin_reply && (
+                      <div className="mt-4 ml-4 sm:ml-8 bg-gradient-to-br from-teal-50/80 to-emerald-50/50 border border-teal-100 rounded-xl p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                            <span className="text-white text-[10px] font-bold">P</span>
+                          </div>
+                          <span className="text-xs font-bold text-teal-700">Printdoot Team</span>
+                          {rev.admin_reply_date && (
+                            <span className="text-[10px] text-gray-400 ml-auto">
+                              {new Date(rev.admin_reply_date).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">{rev.admin_reply}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

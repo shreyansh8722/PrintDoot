@@ -219,7 +219,7 @@ const CheckoutPayment = () => {
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
-                        <OrderSummarySidebar cartItems={cartItems} />
+                        <OrderSummarySidebar cartItems={cartItems} shippingCost={shippingCost != null ? shippingCost : null} />
                         <button
                             onClick={handleContinue}
                             disabled={loading}

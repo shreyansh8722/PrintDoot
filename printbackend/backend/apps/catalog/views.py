@@ -225,7 +225,7 @@ class ProductReviewViewSet(viewsets.ModelViewSet):
     - POST /reviews/{id}/helpful/   — mark a review as helpful (auth required)
     """
     serializer_class = ProductReviewSerializer
-    permission_classes = [ReadOnlyOrAdmin]  # Public read, admin can edit/delete
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  # Public read, any auth user can post
     http_method_names = ['get', 'post', 'head', 'options']  # No PUT/PATCH/DELETE for regular users
     filter_backends = [filters.OrderingFilter]
     ordering_fields = ['created_at', 'rating', 'helpful_count']

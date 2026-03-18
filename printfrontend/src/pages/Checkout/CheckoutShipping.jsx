@@ -298,7 +298,7 @@ const CheckoutShipping = () => {
 
                     {/* ── Sidebar ── */}
                     <div className="lg:col-span-1">
-                        <OrderSummarySidebar cartItems={cartItems} />
+                        <OrderSummarySidebar cartItems={cartItems} shippingCost={getSelectedOption()?.is_free ? 0 : (getSelectedOption()?.cost || null)} />
                     </div>
                 </div>
             </div>

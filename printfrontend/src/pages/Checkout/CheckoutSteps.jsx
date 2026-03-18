@@ -83,10 +83,9 @@ export default function CheckoutSteps({ currentStep }) {
 }
 
 /* ── Shared Order Summary Sidebar ── */
-export function OrderSummarySidebar({ cartItems }) {
+export function OrderSummarySidebar({ cartItems, shippingCost }) {
   const GST_RATE = 0.18;
   const FREE_SHIPPING_THRESHOLD = 999;
-  const FLAT_SHIPPING = 99;
 
   const subtotal = cartItems.reduce((acc, item) => {
     const price = Number(item.finalPrice || item.basePrice || item.base_price || 0);
@@ -95,8 +94,9 @@ export function OrderSummarySidebar({ cartItems }) {
   }, 0);
 
   const taxes = +(subtotal * GST_RATE).toFixed(2);
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING;
-  const total = +(subtotal + taxes + shipping).toFixed(2);
+  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+  const actualShipping = isFreeShipping ? 0 : (shippingCost != null ? shippingCost : null);
+  const total = +(subtotal + taxes + (actualShipping || 0)).toFixed(2);
   const totalItems = cartItems.reduce((a, i) => a + (i.quantity || 1), 0);
 
   return (
@@ -139,10 +139,12 @@ export function OrderSummarySidebar({ cartItems }) {
         </div>
         <div className="flex justify-between">
           <span className="text-gray-500">Shipping</span>
-          {shipping === 0 ? (
+          {isFreeShipping ? (
             <span className="font-medium text-green-600">FREE</span>
+          ) : actualShipping != null ? (
+            <span className="font-medium">₹{actualShipping.toFixed(2)}</span>
           ) : (
-            <span className="font-medium">₹{shipping.toFixed(2)}</span>
+            <span className="font-medium text-gray-500 italic text-xs">Calculated at next step</span>
           )}
         </div>
       </div>
@@ -152,6 +154,9 @@ export function OrderSummarySidebar({ cartItems }) {
           <span className="font-bold text-gray-900">Total</span>
           <span className="text-xl font-extrabold text-gray-900">₹{total.toFixed(2)}</span>
         </div>
+        {actualShipping == null && !isFreeShipping && (
+          <p className="text-[10px] text-gray-400 text-right mt-1">+ shipping (calculated at next step)</p>
+        )}
       </div>
     </div>
   );

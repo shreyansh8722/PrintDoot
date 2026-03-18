@@ -13,9 +13,24 @@
     z-index: 20;
 }
 
+/* Hamburger — hidden on desktop */
+.header-hamburger {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    margin-right: 8px;
+}
+.header-hamburger:hover {
+    background: var(--bg-color);
+}
+
 .header-logo {
     width: var(--sidebar-width);
-    /* Align roughly with sidebar width */
 }
 
 .logo-text {
@@ -26,7 +41,6 @@
 
 .logo-highlight {
     color: #00bcd4;
-    /* Cyan/Blue tone matching image */
     background: #e0f7fa;
     border-radius: 50%;
     width: 40px;
@@ -54,7 +68,6 @@
     padding: 10px 16px 10px 40px;
     border: 1px solid #00897b;
     border-radius: 30px;
-    /* Rounded pill shape */
     outline: none;
     font-size: 1rem;
     color: var(--text-primary);
@@ -70,7 +83,6 @@
 
 .header-profile {
     width: var(--sidebar-width);
-    /* Balance right side */
     display: flex;
     justify-content: flex-end;
 }
@@ -79,7 +91,6 @@
     width: 40px;
     height: 40px;
     background-color: #fca5a5;
-    /* Placeholder color */
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -92,4 +103,57 @@
 
 .avatar svg {
     color: #fff;
+}
+
+/* ═══════════════════════════════════
+   MOBILE / TABLET RESPONSIVE
+   ═══════════════════════════════════ */
+@media (max-width: 1023px) {
+    .header {
+        padding: 0 16px;
+    }
+
+    .header-hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .header-logo {
+        width: auto;
+    }
+
+    .logo-text {
+        font-size: 1.2rem;
+    }
+
+    .logo-highlight {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+
+    .header-search {
+        display: none; /* Hide search on mobile */
+    }
+
+    .header-profile {
+        width: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .header {
+        padding: 0 12px;
+    }
+
+    .logo-text {
+        font-size: 1rem;
+    }
+
+    .logo-highlight {
+        width: 28px;
+        height: 28px;
+        font-size: 0.85rem;
+    }
 }

@@ -90,15 +90,12 @@ const Reviews = () => {
         if (!text || !text.trim()) return;
         try {
             await adminCatalogAPI.updateProductReview(reviewId, { admin_reply: text.trim() });
+            alert('Reply saved successfully!');
             setReplyTexts(prev => ({ ...prev, [reviewId]: '' }));
             fetchReviews();
         } catch (err) {
-            alert('Reply saved!');
-            // Update local state as fallback
-            setReviews(prev => prev.map(r =>
-                r.id === reviewId ? { ...r, admin_reply: text.trim(), reply_date: new Date().toISOString().split('T')[0] } : r
-            ));
-            setReplyTexts(prev => ({ ...prev, [reviewId]: '' }));
+            console.error('Failed to save reply:', err);
+            alert('Failed to save reply. Please try again.');
         }
     };
 
@@ -212,7 +209,7 @@ const Reviews = () => {
                                         <p className="rv-reply-text">{review.admin_reply}</p>
                                         <div className="rv-reply-footer">
                                             <span className="rv-reply-date">
-                                                {review.reply_date || review.updated_at?.split('T')[0] || ''}
+                                                {review.admin_reply_date || review.reply_date || review.updated_at?.split('T')[0] || ''}
                                             </span>
                                             <span className="rv-badge rv-badge-addressed">● Addressed</span>
                                         </div>

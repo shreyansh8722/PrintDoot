@@ -38,7 +38,7 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ['id', 'product', 'user', 'user_email', 'user_name', 'rating', 'title', 'comment', 
-                  'is_verified_purchase', 'helpful_count', 'created_at', 'updated_at']
+                  'is_verified_purchase', 'helpful_count', 'admin_reply', 'admin_reply_date', 'created_at', 'updated_at']
         read_only_fields = ['id', 'product', 'user', 'is_verified_purchase', 'helpful_count', 'created_at', 'updated_at']
     
     def get_user_name(self, obj):

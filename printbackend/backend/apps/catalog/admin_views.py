@@ -131,6 +131,14 @@ class AdminProductReviewViewSet(viewsets.ModelViewSet):
         review.save()
         return Response({'helpful_count': review.helpful_count})
 
+    def perform_update(self, serializer):
+        """Auto-set admin_reply_date when admin_reply is provided"""
+        from django.utils import timezone
+        instance = serializer.save()
+        if instance.admin_reply and not instance.admin_reply_date:
+            instance.admin_reply_date = timezone.now()
+            instance.save(update_fields=['admin_reply_date'])
+
 
 class S3ImageUploadView(APIView):
     """

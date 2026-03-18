@@ -88,7 +88,7 @@ export const adminCatalogAPI = {
     getProductReviews: (params) => api.get('/admin/product-reviews/', { params }),
     getProductReview: (id) => api.get(`/admin/product-reviews/${id}/`),
     createProductReview: (data) => api.post('/admin/product-reviews/', data),
-    updateProductReview: (id, data) => api.put(`/admin/product-reviews/${id}/`, data),
+    updateProductReview: (id, data) => api.patch(`/admin/product-reviews/${id}/`, data),
     deleteProductReview: (id) => api.delete(`/admin/product-reviews/${id}/`),
     markReviewHelpful: (id) => api.post(`/admin/product-reviews/${id}/mark_helpful/`),
 
