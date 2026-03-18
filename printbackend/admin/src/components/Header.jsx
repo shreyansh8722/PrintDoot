@@ -1,9 +1,28 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, User, Menu, LogOut, ChevronDown, ShoppingCart, Package, Users, Star, X, Loader2 } from 'lucide-react';
+import { Search, User, Menu, LogOut, ChevronDown, ShoppingCart, Package, Users, Star, X, Loader2, LayoutDashboard, BarChart3, Tag, CreditCard, Image, Megaphone, MessageSquare, Truck, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI, adminOrdersAPI, adminCatalogAPI, adminUserAPI } from '../services/api';
 import logo from '../assets/logo.webp';
 import './Header.css';
+
+/* ── All admin pages for instant navigation search ── */
+const ADMIN_NAV = [
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, keywords: ['dashboard', 'home', 'overview'] },
+    { name: 'Sales Analytics', path: '/sales', icon: BarChart3, keywords: ['sales', 'analytics', 'revenue', 'charts'] },
+    { name: 'Orders', path: '/orders', icon: ShoppingCart, keywords: ['orders', 'order', 'transactions'] },
+    { name: 'Products', path: '/products', icon: Package, keywords: ['products', 'product', 'catalog', 'items'] },
+    { name: 'Customers', path: '/customers', icon: Users, keywords: ['customers', 'customer', 'users', 'accounts'] },
+    { name: 'User Analytics', path: '/user-analytics', icon: Users, keywords: ['user analytics', 'user stats'] },
+    { name: 'Order Analytics', path: '/order-analytics', icon: BarChart3, keywords: ['order analytics'] },
+    { name: 'Cart Analytics', path: '/cart-analytics', icon: ShoppingCart, keywords: ['cart', 'abandoned'] },
+    { name: 'Promo Codes', path: '/offers', icon: Tag, keywords: ['promo', 'promo codes', 'discount', 'coupon', 'offers'] },
+    { name: 'Payments', path: '/payments', icon: CreditCard, keywords: ['payments', 'offline', 'transactions'] },
+    { name: 'Reviews', path: '/reviews', icon: Star, keywords: ['reviews', 'ratings', 'feedback'] },
+    { name: 'Site Images / Banners', path: '/banners', icon: Image, keywords: ['banners', 'images', 'hero', 'site images'] },
+    { name: 'Marketing', path: '/marketing', icon: Megaphone, keywords: ['marketing', 'campaigns', 'emails'] },
+    { name: 'Stocks', path: '/stocks', icon: Package, keywords: ['stock', 'inventory'] },
+    { name: 'Courier', path: '/courier', icon: Truck, keywords: ['courier', 'shipping', 'delivery', 'shipment'] },
+];
 
 const Header = ({ onToggleSidebar }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -27,9 +46,17 @@ const Header = ({ onToggleSidebar }) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Filter nav items by search term
+    const matchedNav = searchTerm.trim().length >= 1
+        ? ADMIN_NAV.filter(item => {
+            const q = searchTerm.toLowerCase();
+            return item.name.toLowerCase().includes(q) || item.keywords.some(k => k.includes(q));
+        })
+        : [];
+
     // Debounced live search
     const doSearch = useCallback(async (term) => {
-        if (!term || term.length < 2) { setResults({}); setShowResults(false); return; }
+        if (!term || term.length < 2) { setResults({}); return; }
         setSearching(true);
         setShowResults(true);
         const safe = (p) => p.catch(() => ({ data: [] }));
@@ -51,15 +78,23 @@ const Header = ({ onToggleSidebar }) => {
         setSearching(false);
     }, []);
 
+
     const handleInputChange = (e) => {
         const val = e.target.value;
         setSearchTerm(val);
         clearTimeout(searchTimer.current);
-        if (val.trim().length >= 2) {
-            searchTimer.current = setTimeout(() => doSearch(val.trim()), 350);
+        const trimmed = val.trim();
+        if (trimmed.length >= 1) {
+            setShowResults(true); // Show nav results immediately
+        }
+        if (trimmed.length >= 2) {
+            searchTimer.current = setTimeout(() => doSearch(trimmed), 350);
         } else {
             setResults({});
+        }
+        if (trimmed.length < 1) {
             setShowResults(false);
+            setResults({});
         }
     };
 
@@ -71,15 +106,17 @@ const Header = ({ onToggleSidebar }) => {
     const navigateTo = (path) => {
         setShowResults(false);
         setSearchTerm('');
+        setResults({});
         navigate(path);
     };
+
+    const totalResults = Object.values(results).reduce((s, a) => s + (a?.length || 0), 0);
+    const hasAnything = matchedNav.length > 0 || totalResults > 0 || searching;
 
     const handleLogout = () => {
         authAPI.logout();
         navigate('/login');
     };
-
-    const totalResults = Object.values(results).reduce((s, a) => s + (a?.length || 0), 0);
 
     return (
         <header className="header">
@@ -101,7 +138,7 @@ const Header = ({ onToggleSidebar }) => {
                         className="search-input"
                         value={searchTerm}
                         onChange={handleInputChange}
-                        onFocus={() => { if (totalResults > 0) setShowResults(true); }}
+                        onFocus={() => { if (matchedNav.length > 0 || totalResults > 0) setShowResults(true); }}
                     />
                     {searchTerm && (
                         <button type="button" className="search-clear" onClick={() => { setSearchTerm(''); setResults({}); setShowResults(false); }}>
@@ -111,11 +148,26 @@ const Header = ({ onToggleSidebar }) => {
                 </form>
 
                 {/* Live results dropdown */}
-                {showResults && (
+                {showResults && hasAnything && (
                     <div className="search-dropdown">
+                        {/* Navigation pages — always instant */}
+                        {matchedNav.length > 0 && (
+                            <div className="search-dd-section">
+                                <div className="search-dd-header">
+                                    <LayoutDashboard size={13} /> Pages
+                                </div>
+                                {matchedNav.map(item => (
+                                    <div key={item.path} className="search-dd-item search-dd-nav" onClick={() => navigateTo(item.path)}>
+                                        <item.icon size={15} className="search-dd-nav-icon" />
+                                        <span className="search-dd-primary">{item.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {searching ? (
                             <div className="search-dd-loading"><Loader2 size={16} className="search-dd-spinner" /> Searching...</div>
-                        ) : totalResults === 0 ? (
+                        ) : totalResults === 0 && matchedNav.length === 0 ? (
                             <div className="search-dd-empty">No results for "{searchTerm}"</div>
                         ) : (
                             <>

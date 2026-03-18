@@ -177,6 +177,19 @@
     text-overflow: ellipsis;
 }
 
+.search-dd-nav {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+.search-dd-nav-icon {
+    color: #00897b;
+    flex-shrink: 0;
+}
+.search-dd-nav:hover .search-dd-primary {
+    color: #00897b;
+}
+
 /* Profile */
 .header-profile {
     position: relative;
