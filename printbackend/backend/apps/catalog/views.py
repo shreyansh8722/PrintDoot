@@ -8,11 +8,21 @@ from .serializers import (
     ProductReviewSerializer, BannerSerializer, FavoriteSerializer,
 )
 
+# ── CloudFront cache helpers ──────────────────────────────────────────────────
+# s-maxage = CDN (CloudFront) TTL | max-age = browser TTL
+def cache_public(response, cdn_seconds=300, browser_seconds=60, stale=120):
+    """Add Cache-Control headers that CloudFront will respect for public GET responses."""
+    response['Cache-Control'] = (
+        f'public, max-age={browser_seconds}, s-maxage={cdn_seconds}, '
+        f'stale-while-revalidate={stale}'
+    )
+    response['Vary'] = 'Accept-Encoding, Accept'
+    return response
+
 
 class ReadOnlyOrAdmin(permissions.BasePermission):
     """
     Allow read access to everyone, write access only to admin/staff.
-    Prevents regular authenticated users from creating/editing/deleting catalog items.
     """
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
@@ -20,7 +30,6 @@ class ReadOnlyOrAdmin(permissions.BasePermission):
         return request.user and request.user.is_authenticated and (
             request.user.is_staff or request.user.is_superuser
         )
-
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
@@ -31,13 +40,21 @@ class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [ReadOnlyOrAdmin]
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        if request.method == 'GET':
+            cache_public(response, cdn_seconds=600, browser_seconds=120)  # 10 min CDN, 2 min browser
+        return response
+
     @action(detail=False, methods=['get'], url_path='by-slug/(?P<slug>[^/.]+)')
     def by_slug(self, request, slug=None):
         """GET /api/v1/categories/by-slug/{slug}/"""
         try:
             category = Category.objects.get(slug=slug, is_active=True)
             serializer = self.get_serializer(category)
-            return Response(serializer.data)
+            response = Response(serializer.data)
+            cache_public(response, cdn_seconds=600, browser_seconds=120)
+            return response
         except Category.DoesNotExist:
             return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -46,15 +63,20 @@ class SubcategoryViewSet(viewsets.ModelViewSet):
     ViewSet for Subcategories.
     Read: Public. Write: Admin/Staff only.
     """
-    queryset = Subcategory.objects.filter(is_active=True).order_by('display_order')
+    queryset = Subcategory.objects.filter(is_active=True).select_related('category').order_by('display_order')
     serializer_class = SubcategorySerializer
     permission_classes = [ReadOnlyOrAdmin]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'category__name']
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        if request.method == 'GET':
+            cache_public(response, cdn_seconds=600, browser_seconds=120)
+        return response
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        # If accessed via nested route, filter by category
         category_pk = self.kwargs.get('category_pk')
         if category_pk:
             queryset = queryset.filter(category_id=category_pk)
@@ -64,11 +86,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     ViewSet for Products.
     Read: Public. Write: Admin/Staff only.
-    Supports filtering by: category, subcategory (slugs), featured, min_price, max_price, min_rating.
-    Supports search by: name, sku, description.
-    Supports ordering by: base_price, created_at, name, avg_rating.
     """
-    queryset = Product.objects.filter(is_active=True)
+    queryset = Product.objects.filter(is_active=True).select_related('subcategory__category')
     serializer_class = ProductSerializer
     permission_classes = [ReadOnlyOrAdmin]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -134,6 +153,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        # Only cache public (unauthenticated) requests
+        if request.method == 'GET' and not request.user.is_authenticated:
+            cache_public(response, cdn_seconds=300, browser_seconds=60)  # 5 min CDN, 1 min browser
+        return response
+
     @action(detail=False, methods=['get'], url_path='by-slug/(?P<slug>[^/.]+)')
     def by_slug(self, request, slug=None):
         """
@@ -141,9 +167,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         GET /api/v1/products/by-slug/{slug}/
         """
         try:
-            product = Product.objects.get(slug=slug, is_active=True)
+            product = Product.objects.select_related('subcategory__category').get(slug=slug, is_active=True)
             serializer = self.get_serializer(product)
-            return Response(serializer.data)
+            response = Response(serializer.data)
+            cache_public(response, cdn_seconds=900, browser_seconds=120)  # 15 min CDN for single product
+            return response
         except Product.DoesNotExist:
             return Response(
                 {"detail": "Product not found."},
@@ -157,9 +185,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         Returns the most recently created active products.
         """
         limit = min(int(request.query_params.get('limit', 10)), 30)
-        products = Product.objects.filter(is_active=True).order_by('-created_at')[:limit]
+        products = Product.objects.filter(is_active=True).select_related('subcategory__category').order_by('-created_at')[:limit]
         serializer = self.get_serializer(products, many=True)
-        return Response(serializer.data)
+        response = Response(serializer.data)
+        cache_public(response, cdn_seconds=300, browser_seconds=60)
+        return response
 
     @action(detail=False, methods=['get'], url_path='trending')
     def trending(self, request):
@@ -168,11 +198,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         Returns the most popular products based on view_count + order_count.
         """
         limit = min(int(request.query_params.get('limit', 10)), 30)
-        products = Product.objects.filter(is_active=True).annotate(
+        products = Product.objects.filter(is_active=True).select_related('subcategory__category').annotate(
             popularity=models.F('view_count') + models.F('order_count') * 3
         ).order_by('-popularity', '-created_at')[:limit]
         serializer = self.get_serializer(products, many=True)
-        return Response(serializer.data)
+        response = Response(serializer.data)
+        cache_public(response, cdn_seconds=300, browser_seconds=60)
+        return response
 
     @action(detail=True, methods=['post'], url_path='track-view', permission_classes=[permissions.AllowAny])
     def track_view(self, request, pk=None):
@@ -193,7 +225,6 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         GET /api/v1/products/by-ids/?ids=1,2,3
         Returns products matching the given IDs (for recently-viewed, etc.).
-        Preserves the order of the provided IDs.
         """
         ids_param = request.query_params.get('ids', '')
         if not ids_param:
@@ -204,8 +235,7 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response([])
         if not ids:
             return Response([])
-        products = Product.objects.filter(id__in=ids, is_active=True)
-        # Preserve the order of the requested IDs
+        products = Product.objects.filter(id__in=ids, is_active=True).select_related('subcategory__category')
         product_map = {p.id: p for p in products}
         ordered = [product_map[pid] for pid in ids if pid in product_map]
         serializer = self.get_serializer(ordered, many=True)
@@ -283,25 +313,24 @@ class BannerViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = BannerSerializer
     permission_classes = [permissions.AllowAny]
-    
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        cache_public(response, cdn_seconds=300, browser_seconds=60)
+        return response
+
     def get_queryset(self):
         from django.utils import timezone
         now = timezone.now()
-        
         queryset = Banner.objects.filter(is_active=True)
-        
-        # Filter by date range
         queryset = queryset.filter(
             models.Q(start_date__isnull=True) | models.Q(start_date__lte=now)
         ).filter(
             models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
         )
-        
-        # Filter by placement if provided
         placement = self.request.query_params.get('placement', None)
         if placement:
             queryset = queryset.filter(placement=placement)
-        
         return queryset.order_by('display_order', '-created_at')
 
 
