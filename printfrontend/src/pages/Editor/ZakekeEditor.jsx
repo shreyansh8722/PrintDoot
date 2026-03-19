@@ -96,11 +96,10 @@ const ZakekeEditor = () => {
                         return { attributes: [], variants: [] };
                     },
                     addToCart: (zakekeData) => {
-                        // DEBUG: Log what Zakeke actually sends
                         console.log('[Zakeke addToCart] Full callback data:', JSON.stringify(zakekeData, null, 2));
                         
-                        // Zakeke SDK sends designID (capital D) — handle all possible casings
-                        const designId = zakekeData.designID || zakekeData.designId || zakekeData.design_id || zakekeData.id || '';
+                        // Zakeke sends all-lowercase keys: designid, productid, quantity
+                        const designId = zakekeData.designid || zakekeData.designID || zakekeData.designId || zakekeData.design_id || '';
                         const qty = zakekeData.quantity || 1;
                         
                         console.log('[Zakeke addToCart] Extracted designId:', designId, '| quantity:', qty);
