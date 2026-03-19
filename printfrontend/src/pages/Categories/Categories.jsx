@@ -251,7 +251,7 @@ function Categories() {
   return (
     <div className="bg-white min-h-screen">
       <Breadcrumb />
-      <CategoryHero categorySlug={activeCatSlug} categoryName={activeCategory?.name} />
+      <CategoryHero categorySlug={activeCatSlug} categoryName={activeCategory?.name} subcategories={activeCategory?.subcategories} />
 
       <div id="products-section" className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
