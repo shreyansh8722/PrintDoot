@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, filters, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Offer, Banner, PromoCode, OfflinePayment
 from .serializers import OfferSerializer, BannerSerializer, PromoCodeSerializer, OfflinePaymentSerializer
 from apps.users.permissions import IsAdminOrStaff
@@ -138,4 +139,69 @@ class AdminOfflinePaymentViewSet(viewsets.ModelViewSet):
             'received': received,
             'pending': pending,
             'total_amount': float(total_amount),
+        })
+
+
+class FinanceDataView(APIView):
+    """
+    Returns real finance data for the admin Finance & Compliance page.
+    Replaces all approximation-based calculations with actual DB queries.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
+
+    def get(self, request):
+        from django.db.models import Sum, Count
+        from django.db.models.functions import Coalesce
+        from decimal import Decimal
+        from apps.orders.models import Order, Refund
+
+        # ── GST Collected (Online) — from paid orders' tax_total ──
+        gst_online = Order.objects.filter(is_paid=True).aggregate(
+            total=Coalesce(Sum('tax_total'), Decimal('0'))
+        )['total']
+
+        # ── GST Collected (Offline) — from offline payments' gst_amount ──
+        gst_offline = OfflinePayment.objects.filter(status='received').aggregate(
+            total=Coalesce(Sum('gst_amount'), Decimal('0'))
+        )['total']
+
+        # ── Pending Settlements — offline payments with status=pending ──
+        pending_settlement = OfflinePayment.objects.filter(status='pending').aggregate(
+            total=Coalesce(Sum('amount'), Decimal('0'))
+        )['total']
+        pending_settlement_count = OfflinePayment.objects.filter(status='pending').count()
+
+        # ── Refunds ──
+        refunds_completed = Refund.objects.filter(status='Completed').aggregate(
+            total=Coalesce(Sum('amount'), Decimal('0'))
+        )['total']
+        refunds_pending = Refund.objects.filter(status__in=['Pending', 'Processing']).aggregate(
+            total=Coalesce(Sum('amount'), Decimal('0'))
+        )['total']
+        refund_count = Refund.objects.filter(status='Completed').count()
+
+        # ── Total Revenue (online) ──
+        total_revenue = Order.objects.filter(is_paid=True).aggregate(
+            total=Coalesce(Sum('total_amount'), Decimal('0'))
+        )['total']
+
+        # ── Total Offline Revenue ──
+        total_offline_revenue = OfflinePayment.objects.filter(status='received').aggregate(
+            total=Coalesce(Sum('amount'), Decimal('0'))
+        )['total']
+
+        # ── Refunded Orders count ──
+        refunded_orders = Order.objects.filter(status='Refunded').count()
+
+        return Response({
+            'gst_collected_online': str(gst_online),
+            'gst_collected_offline': str(gst_offline),
+            'pending_settlement': str(pending_settlement),
+            'pending_settlement_count': pending_settlement_count,
+            'refunds_completed': str(refunds_completed),
+            'refunds_pending': str(refunds_pending),
+            'refund_count': refund_count,
+            'refunded_orders': refunded_orders,
+            'total_revenue_online': str(total_revenue),
+            'total_revenue_offline': str(total_offline_revenue),
         })

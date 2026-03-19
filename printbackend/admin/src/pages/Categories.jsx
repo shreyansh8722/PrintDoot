@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminCatalogAPI } from '../services/api';
+import { adminCatalogAPI, adminUploadAPI } from '../services/api';
 import { useDataCache } from '../contexts/DataCacheContext';
 import './Categories.css';
 
@@ -12,6 +12,7 @@ const Categories = () => {
     const [editingCategory, setEditingCategory] = useState(null);
     const [editingSubcategory, setEditingSubcategory] = useState(null);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+    const [uploadingBanner, setUploadingBanner] = useState(null); // category id being uploaded
     const { fetchCategories, fetchSubcategories, invalidateCache } = useDataCache();
 
     const [categoryForm, setCategoryForm] = useState({
@@ -19,6 +20,7 @@ const Categories = () => {
         slug: '',
         description: '',
         is_active: true,
+        banner_image: '',
     });
 
     const [subcategoryForm, setSubcategoryForm] = useState({
@@ -58,8 +60,9 @@ const Categories = () => {
                     slug: category.slug,
                     description: category.description || '',
                     is_active: category.is_active,
+                    banner_image: category.banner_image || '',
                 }
-                : { name: '', slug: '', description: '', is_active: true }
+                : { name: '', slug: '', description: '', is_active: true, banner_image: '' }
         );
         setShowCategoryModal(true);
     };
@@ -153,6 +156,80 @@ const Categories = () => {
         }
     };
 
+    /* ── Banner image upload (directly from category card) ── */
+    const handleBannerUpload = async (categoryId, categorySlug, file) => {
+        if (!file) return;
+
+        // Validate file type
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowed.includes(file.type)) {
+            alert('Please upload a valid image file (JPEG, PNG, WebP, or GIF)');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 10MB.');
+            return;
+        }
+
+        setUploadingBanner(categoryId);
+        try {
+            // Upload to S3 in category-specific folder
+            const folder = `category-banners/${categorySlug}`;
+            const res = await adminUploadAPI.uploadImage(file, folder);
+            const url = res.data.url;
+
+            // Save the URL to the category
+            await adminCatalogAPI.updateCategory(categoryId, { banner_image: url });
+
+            // Refresh data
+            invalidateCache(['categories']);
+            await fetchData(true);
+            alert('Banner image uploaded successfully!');
+        } catch (error) {
+            console.error('Banner upload error:', error);
+            const errMsg = error.response?.data?.error || error.message || 'Unknown error';
+            alert('Failed to upload banner: ' + errMsg);
+        } finally {
+            setUploadingBanner(null);
+        }
+    };
+
+    const handleRemoveBanner = async (categoryId) => {
+        if (!window.confirm('Remove the banner image for this category?')) return;
+        try {
+            await adminCatalogAPI.updateCategory(categoryId, { banner_image: '' });
+            invalidateCache(['categories']);
+            await fetchData(true);
+            alert('Banner removed');
+        } catch (error) {
+            console.error('Error removing banner:', error);
+            alert('Failed to remove banner');
+        }
+    };
+
+    /* ── Banner upload in the modal form ── */
+    const handleModalBannerUpload = async (file) => {
+        if (!file) return;
+        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!allowed.includes(file.type)) {
+            alert('Please upload a valid image file (JPEG, PNG, WebP, or GIF)');
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 10MB.');
+            return;
+        }
+        try {
+            const slug = categoryForm.slug || 'new-category';
+            const folder = `category-banners/${slug}`;
+            const res = await adminUploadAPI.uploadImage(file, folder);
+            setCategoryForm({ ...categoryForm, banner_image: res.data.url });
+        } catch (error) {
+            console.error('Banner upload error:', error);
+            alert('Failed to upload image: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
     if (loading) {
         return <div className="loading">Loading categories...</div>;
     }
@@ -193,6 +270,50 @@ const Categories = () => {
                                     Delete
                                 </button>
                             </div>
+                        </div>
+
+                        {/* ── Banner Image Section ── */}
+                        <div className="category-banner-section">
+                            <div className="banner-label">
+                                <span>🖼️ Shop Page Banner</span>
+                            </div>
+                            {category.banner_image ? (
+                                <div className="banner-preview-row">
+                                    <img
+                                        src={category.banner_image}
+                                        alt={`${category.name} banner`}
+                                        className="banner-thumbnail"
+                                    />
+                                    <div className="banner-preview-actions">
+                                        <label className="btn-upload-small" style={{ opacity: uploadingBanner === category.id ? 0.5 : 1 }}>
+                                            {uploadingBanner === category.id ? '⏳ Uploading...' : '🔄 Replace'}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                style={{ display: 'none' }}
+                                                disabled={uploadingBanner === category.id}
+                                                onChange={(e) => handleBannerUpload(category.id, category.slug, e.target.files[0])}
+                                            />
+                                        </label>
+                                        <button onClick={() => handleRemoveBanner(category.id)} className="btn-delete-small">
+                                            ✕ Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <label className="banner-upload-area" style={{ opacity: uploadingBanner === category.id ? 0.5 : 1 }}>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: 'none' }}
+                                        disabled={uploadingBanner === category.id}
+                                        onChange={(e) => handleBannerUpload(category.id, category.slug, e.target.files[0])}
+                                    />
+                                    {uploadingBanner === category.id
+                                        ? '⏳ Uploading to S3...'
+                                        : '📁 Click to upload banner image (shows on shop page for this category)'}
+                                </label>
+                            )}
                         </div>
 
                         <div className="subcategories-list">
@@ -259,6 +380,48 @@ const Categories = () => {
                                     rows="3"
                                 />
                             </div>
+
+                            {/* Banner Image Upload in Modal */}
+                            <div className="form-group">
+                                <label>Shop Page Banner Image</label>
+                                {categoryForm.banner_image ? (
+                                    <div className="modal-banner-preview">
+                                        <img src={categoryForm.banner_image} alt="Banner preview" />
+                                        <div className="modal-banner-actions">
+                                            <label className="btn-upload-small">
+                                                🔄 Replace
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    style={{ display: 'none' }}
+                                                    onChange={(e) => handleModalBannerUpload(e.target.files[0])}
+                                                />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setCategoryForm({ ...categoryForm, banner_image: '' })}
+                                                className="btn-delete-small"
+                                            >
+                                                ✕ Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <label className="banner-upload-area">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            style={{ display: 'none' }}
+                                            onChange={(e) => handleModalBannerUpload(e.target.files[0])}
+                                        />
+                                        📁 Click to upload banner image
+                                    </label>
+                                )}
+                                <small style={{ color: '#888', marginTop: '4px', display: 'block' }}>
+                                    This image appears on the shop page when users browse this category. Recommended: 1200×400px.
+                                </small>
+                            </div>
+
                             <div className="form-group">
                                 <label className="checkbox-label">
                                     <input

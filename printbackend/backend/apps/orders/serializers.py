@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from decimal import Decimal
+from django.db.models import F
+from apps.catalog.models import Product
 from .models import (
     Order, OrderItem, PrintJob, Shipment, ShipmentTrackingEvent,
     OrderStatusHistory,
@@ -297,6 +299,14 @@ class OrderSerializer(serializers.ModelSerializer):
                 design_price=design_price,
                 zakeke_design_id=zakeke_design_id,
             )
+
+        # ── Decrement stock for non-infinite-stock products ──
+        for item_data in items_data:
+            product = item_data['product']
+            if not product.is_infinite_stock:
+                Product.objects.filter(id=product.id).update(
+                    stock_quantity=F('stock_quantity') - item_data['quantity']
+                )
 
         # Create initial status history
         OrderStatusHistory.objects.create(

@@ -38,7 +38,7 @@ const Payments = () => {
     const [saving, setSaving] = useState(false);
 
     const [newPayment, setNewPayment] = useState({
-        customer_name: '', amount: '', payment_method: 'cash', note: '', status: 'received',
+        customer_name: '', amount: '', gst_amount: '', payment_method: 'cash', note: '', status: 'received',
     });
 
     useEffect(() => { fetchData(); }, []);
@@ -79,11 +79,12 @@ const Payments = () => {
             await adminOfflinePaymentAPI.createPayment({
                 customer_name: newPayment.customer_name.trim(),
                 amount: parseFloat(newPayment.amount),
+                gst_amount: parseFloat(newPayment.gst_amount) || 0,
                 payment_method: newPayment.payment_method,
                 status: newPayment.status,
                 note: newPayment.note.trim(),
             });
-            setNewPayment({ customer_name: '', amount: '', payment_method: 'cash', note: '', status: 'received' });
+            setNewPayment({ customer_name: '', amount: '', gst_amount: '', payment_method: 'cash', note: '', status: 'received' });
             setShowNewPaymentModal(false);
             fetchData();
             alert('Offline payment recorded successfully!');
@@ -366,6 +367,12 @@ const Payments = () => {
                                     <label className="pay-form-label">Amount (₹) *</label>
                                     <input type="number" className="pay-form-input" placeholder="0.00" min="0" step="0.01"
                                         value={newPayment.amount} onChange={e => setNewPayment(f => ({ ...f, amount: e.target.value }))} />
+                                </div>
+                                <div className="pay-form-group">
+                                    <label className="pay-form-label">GST Amount (₹)</label>
+                                    <input type="number" className="pay-form-input" placeholder="0.00" min="0" step="0.01"
+                                        value={newPayment.gst_amount} onChange={e => setNewPayment(f => ({ ...f, gst_amount: e.target.value }))} />
+                                    <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '4px', display: 'block' }}>GST collected on this transaction (included in amount)</span>
                                 </div>
                                 <div className="pay-form-group">
                                     <label className="pay-form-label">Payment Method</label>

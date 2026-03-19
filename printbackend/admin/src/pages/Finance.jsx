@@ -7,7 +7,7 @@ import {
     ChevronLeft, ChevronRight
 } from 'lucide-react';
 import FilterDropdown from '../components/FilterDropdown';
-import { adminDashboardAPI, adminOrdersAPI } from '../services/api';
+import { adminDashboardAPI, adminFinanceAPI } from '../services/api';
 import './Finance.css';
 
 const PERIOD_OPTIONS = ['Last 30 Days', 'Last 7 Days', 'Last 90 Days', 'This Year'];
@@ -25,7 +25,7 @@ const DONUT_COLORS = ['#00897b', '#e0f2f1'];
 
 const Finance = () => {
     const [analytics, setAnalytics] = useState(null);
-    const [salesData, setSalesData] = useState(null);
+    const [financeData, setFinanceData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [periodFilter, setPeriodFilter] = useState('Last 30 Days');
     const [buFilter, setBuFilter] = useState('All Business Units');
@@ -35,12 +35,12 @@ const Finance = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [analyticsRes, salesRes] = await Promise.all([
+            const [analyticsRes, financeRes] = await Promise.all([
                 adminDashboardAPI.getAnalytics(),
-                adminDashboardAPI.getSalesOrderAnalytics(),
+                adminFinanceAPI.getSummary(),
             ]);
             setAnalytics(analyticsRes.data);
-            setSalesData(salesRes.data);
+            setFinanceData(financeRes.data);
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -53,8 +53,30 @@ const Finance = () => {
         return `₹${parseFloat(amount).toLocaleString('en-IN')}`;
     };
 
+    // ── Real data from finance API ──
+    const gstOnline = parseFloat(financeData?.gst_collected_online || 0);
+    const gstOffline = parseFloat(financeData?.gst_collected_offline || 0);
+    const pendingSettlement = parseFloat(financeData?.pending_settlement || 0);
+    const pendingSettlementCount = financeData?.pending_settlement_count || 0;
+    const refundsCompleted = parseFloat(financeData?.refunds_completed || 0);
+    const refundsPending = parseFloat(financeData?.refunds_pending || 0);
+    const refundCount = financeData?.refund_count || 0;
+    const refundedOrders = financeData?.refunded_orders || 0;
+    const totalRevenueOnline = parseFloat(financeData?.total_revenue_online || 0);
+    const totalRevenueOffline = parseFloat(financeData?.total_revenue_offline || 0);
+
+    // Coupon usage tracker (from analytics)
+    const totalOrders = analytics?.total_orders || 0;
+    const couponRedeemed = Math.round(totalOrders * 0.3) || 0;
+    const couponUnused = totalOrders - couponRedeemed;
+    const couponData = [
+        { name: 'Redeemed', value: couponRedeemed || 1 },
+        { name: 'Unused', value: couponUnused || 1 },
+    ];
+    const totalDiscount = parseFloat(analytics?.expense_payment || 0);
+
     const handleDownloadReport = () => {
-        const csvContent = `GST Summary Report\nPeriod,${periodFilter}\nBusiness Unit,${buFilter}\n\nGST Collected,${formatCurrency(gstCollected)}\nGST Paid,${formatCurrency(gstPaid)}\nOffline Payments Due,${formatCurrency(offlinePaymentsDue)}\nRefunds,${formatCurrency(refundsOnline)}`;
+        const csvContent = `GST & Finance Summary Report\nPeriod,${periodFilter}\nBusiness Unit,${buFilter}\n\nGST Collected (Online),${formatCurrency(gstOnline)}\nGST Collected (Offline),${formatCurrency(gstOffline)}\nPending Settlements,${formatCurrency(pendingSettlement)}\nRefunds Completed,${formatCurrency(refundsCompleted)}\nRefunds Pending,${formatCurrency(refundsPending)}\nTotal Revenue (Online),${formatCurrency(totalRevenueOnline)}\nTotal Revenue (Offline),${formatCurrency(totalRevenueOffline)}`;
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -65,18 +87,7 @@ const Finance = () => {
     };
 
     const handleExportExcel = () => {
-        const csvRows = [
-            ['Date & Time', 'User / Admin', 'Action Type', 'Details', 'Previous Value', 'New Value'],
-            ...auditTrail.map(log => [log.date, log.user, log.actionType, log.details, log.prevValue, log.newValue])
-        ];
-        const csvContent = csvRows.map(r => r.join(',')).join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `audit_trail_${new Date().toISOString().split('T')[0]}.csv`;
-        link.click();
-        URL.revokeObjectURL(url);
+        handleDownloadReport();
     };
 
     const handlePrintSnapshot = () => {
@@ -87,56 +98,9 @@ const Finance = () => {
         alert('Settlement request initiated. Processing offline payments and refunds.');
     };
 
-    const cyclePeriod = () => {
-        const idx = PERIOD_OPTIONS.indexOf(periodFilter);
-        setPeriodFilter(PERIOD_OPTIONS[(idx + 1) % PERIOD_OPTIONS.length]);
-    };
-
-    const cycleBU = () => {
-        const idx = BU_OPTIONS.indexOf(buFilter);
-        setBuFilter(BU_OPTIONS[(idx + 1) % BU_OPTIONS.length]);
-    };
-
     if (loading) {
         return <div className="fin-loading"><div className="fin-spinner"></div><p>Loading finance data...</p></div>;
     }
-
-    const totalRevenue = parseFloat(analytics?.total_revenue || 0);
-    // GST approximation (18% of revenue)
-    const gstCollected = Math.round(totalRevenue * 0.18);
-    const gstPaid = Math.round(gstCollected * 0.7);
-
-    // Coupon usage tracker
-    const totalOrders = analytics?.total_orders || 0;
-    const couponRedeemed = Math.round(totalOrders * 0.3) || 0;
-    const couponUnused = totalOrders - couponRedeemed;
-    const couponData = [
-        { name: 'Redeemed', value: couponRedeemed || 1 },
-        { name: 'Unused', value: couponUnused || 1 },
-    ];
-    const totalDiscount = Math.round(totalRevenue * 0.05);
-    const salesImpact = Math.round(totalRevenue * 0.15);
-
-    // Pending settlements
-    const offlinePaymentsDue = Math.round(totalRevenue * 0.12);
-    const refundsOnline = Math.round(totalRevenue * 0.03);
-
-    // Audit trail (constructed from order data)
-    const auditTrail = (salesData?.recent_orders || []).slice(0, 6).map((order, index) => {
-        const actions = ['Pricing Change', 'Stock Edit', 'Discount Update'];
-        const actionType = actions[index % actions.length];
-        return {
-            date: order.created_at ? new Date(order.created_at).toLocaleString('en-US', {
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit'
-            }) : '—',
-            user: index % 2 === 0 ? 'Admin User' : 'System',
-            actionType,
-            details: `Order #${order.id}`,
-            prevValue: formatCurrency(order.total_amount * 0.9),
-            newValue: formatCurrency(order.total_amount),
-        };
-    });
 
     return (
         <div className="fin-page">
@@ -166,34 +130,49 @@ const Finance = () => {
                         <h2 className="fin-section-title">GST Summary</h2>
                         <div className="fin-gst-cards">
                             <div className="fin-gst-card">
-                                <span className="fin-gst-label">GST Collected</span>
-                                <span className="fin-gst-value">{formatCurrency(gstCollected)}</span>
+                                <span className="fin-gst-label">GST Collected (Online)</span>
+                                <span className="fin-gst-value">{formatCurrency(gstOnline)}</span>
+                                <span className="fin-gst-sub">From {totalOrders} paid orders</span>
                             </div>
                             <div className="fin-gst-card">
-                                <span className="fin-gst-label">GST Paid</span>
-                                <span className="fin-gst-value">{formatCurrency(gstPaid)}</span>
+                                <span className="fin-gst-label">GST Collected (Offline)</span>
+                                <span className="fin-gst-value">{formatCurrency(gstOffline)}</span>
+                                <span className="fin-gst-sub">From offline transactions</span>
                             </div>
                         </div>
                         <button className="fin-download-btn" onClick={handleDownloadReport}>
                             <Download size={15} /> Download Monthly Report
                         </button>
                         <p className="fin-note">
-                            Note: This summary provides an overview of GST activities for the selected period and business units.
-                            For detailed reports, please download the monthly report.
+                            Online GST is calculated from order tax totals. Offline GST is recorded when adding offline transactions.
                         </p>
                     </section>
 
-                    {/* Pending Settlements */}
+                    {/* Pending Settlements & Refunds */}
                     <section className="fin-section">
-                        <h2 className="fin-section-title">Pending Settlements</h2>
+                        <h2 className="fin-section-title">Settlements & Refunds</h2>
                         <div className="fin-gst-cards">
                             <div className="fin-gst-card">
-                                <span className="fin-gst-label">Offline Payments Due</span>
-                                <span className="fin-gst-value">{formatCurrency(offlinePaymentsDue)}</span>
+                                <span className="fin-gst-label">Pending Settlements</span>
+                                <span className="fin-gst-value">{formatCurrency(pendingSettlement)}</span>
+                                <span className="fin-gst-sub">{pendingSettlementCount} pending offline payment{pendingSettlementCount !== 1 ? 's' : ''}</span>
                             </div>
                             <div className="fin-gst-card">
-                                <span className="fin-gst-label">Refunds online/ Offline</span>
-                                <span className="fin-gst-value">{formatCurrency(refundsOnline)}</span>
+                                <span className="fin-gst-label">Refunds Completed</span>
+                                <span className="fin-gst-value">{formatCurrency(refundsCompleted)}</span>
+                                <span className="fin-gst-sub">{refundCount} refund{refundCount !== 1 ? 's' : ''} processed</span>
+                            </div>
+                        </div>
+                        <div className="fin-gst-cards" style={{ marginTop: '12px' }}>
+                            <div className="fin-gst-card">
+                                <span className="fin-gst-label">Refunds Pending</span>
+                                <span className="fin-gst-value" style={{ color: '#ef4444' }}>{formatCurrency(refundsPending)}</span>
+                                <span className="fin-gst-sub">{refundedOrders} refunded order{refundedOrders !== 1 ? 's' : ''}</span>
+                            </div>
+                            <div className="fin-gst-card">
+                                <span className="fin-gst-label">Total Revenue</span>
+                                <span className="fin-gst-value">{formatCurrency(totalRevenueOnline + totalRevenueOffline)}</span>
+                                <span className="fin-gst-sub">Online: {formatCurrency(totalRevenueOnline)} | Offline: {formatCurrency(totalRevenueOffline)}</span>
                             </div>
                         </div>
                         <button className="fin-settle-btn" onClick={handleSettle}>Settle Now</button>
@@ -232,69 +211,18 @@ const Finance = () => {
 
                         <div className="fin-coupon-stats">
                             <div className="fin-coupon-stat">
-                                <span className="fin-cstat-label">Total Discount Value</span>
+                                <span className="fin-cstat-label">Total Discount Given</span>
                                 <span className="fin-cstat-value">{formatCurrency(totalDiscount)}</span>
                             </div>
                             <div className="fin-coupon-stat">
-                                <span className="fin-cstat-label">Sales Impact</span>
-                                <span className="fin-cstat-value">{formatCurrency(salesImpact)}</span>
+                                <span className="fin-cstat-label">Avg Order Value</span>
+                                <span className="fin-cstat-value">{formatCurrency(analytics?.avg_order_value)}</span>
                             </div>
                         </div>
                         <p className="fin-coupon-tiny">Note: This section tracks the usage of coupons, including</p>
                     </div>
                 </div>
             </div>
-
-            {/* ═══ AUDIT TRAIL LOGS ═══ */}
-            <section className="fin-audit-section">
-                <h2 className="fin-section-title">Audit Trail Logs</h2>
-                <div className="fin-table-wrap">
-                    <table className="fin-table">
-                        <thead>
-                            <tr>
-                                <th>DATE & TIME</th>
-                                <th>USER / ADMIN</th>
-                                <th>ACTION TYPE</th>
-                                <th>DETAILS</th>
-                                <th>PREVIOUS VALUE</th>
-                                <th>NEW VALUE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {auditTrail.length === 0 ? (
-                                <tr><td colSpan="6" className="fin-empty">No audit logs available</td></tr>
-                            ) : (
-                                auditTrail.map((log, idx) => {
-                                    const badgeCfg = ACTION_BADGE[log.actionType] || { bg: '#f3f4f6', color: '#374151' };
-                                    return (
-                                        <tr key={idx}>
-                                            <td className="fin-date-cell">{log.date}</td>
-                                            <td className="fin-user-cell">{log.user}</td>
-                                            <td>
-                                                <span className="fin-action-badge" style={{ background: badgeCfg.bg, color: badgeCfg.color }}>
-                                                    {log.actionType}
-                                                </span>
-                                            </td>
-                                            <td className="fin-detail-cell">{log.details}</td>
-                                            <td className="fin-prev-val">{log.prevValue}</td>
-                                            <td className="fin-new-val">{log.newValue}</td>
-                                        </tr>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination */}
-                <div className="fin-pagination">
-                    <span className="fin-page-info">Showing 1 to {auditTrail.length} of {auditTrail.length} results</span>
-                    <div className="fin-page-btns">
-                        <button className="fin-page-btn" disabled>Previous</button>
-                        <button className="fin-page-btn" disabled>Next</button>
-                    </div>
-                </div>
-            </section>
 
             {/* ═══ BOTTOM ACTIONS ═══ */}
             <div className="fin-bottom-actions">

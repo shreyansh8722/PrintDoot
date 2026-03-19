@@ -5,6 +5,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, help_text="URL-friendly version of the name")
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='categories/', null=True, blank=True)
+    banner_image = models.URLField(max_length=1000, blank=True, default="", help_text="S3 URL for the category page banner image")
     is_active = models.BooleanField(default=True)
     display_order = models.IntegerField(default=0)
     

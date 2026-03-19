@@ -82,7 +82,7 @@ class OfflinePaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfflinePayment
         fields = [
-            'id', 'customer_name', 'amount', 'payment_method', 'method_display',
+            'id', 'customer_name', 'amount', 'gst_amount', 'payment_method', 'method_display',
             'status', 'status_display', 'note', 'created_at', 'updated_at',
         ]
         read_only_fields = ['created_at', 'updated_at']

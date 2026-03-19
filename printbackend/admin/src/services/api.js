@@ -221,4 +221,9 @@ export const adminOfflinePaymentAPI = {
     getStats: () => api.get('/admin/offline-payments/stats/'),
 };
 
+// Finance Summary API
+export const adminFinanceAPI = {
+    getSummary: () => api.get('/admin/finance/summary/'),
+};
+
 export default api;

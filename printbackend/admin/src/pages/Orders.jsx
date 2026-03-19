@@ -42,11 +42,18 @@ const CATEGORY_COLORS = [
 ];
 
 const STATUS_BAR_COLORS = {
-    Pending: '#3b82f6',
-    Processing: '#3b82f6',
-    Shipped: '#93c5fd',
-    Delivered: '#93c5fd',
-    Cancelled: '#bfdbfe',
+    Pending: '#f59e0b',
+    Confirmed: '#3b82f6',
+    Paid: '#10b981',
+    Processing: '#6366f1',
+    Printing: '#8b5cf6',
+    Shipped: '#0ea5e9',
+    'Out for Delivery': '#14b8a6',
+    Delivered: '#22c55e',
+    Cancelled: '#ef4444',
+    Refunded: '#f43f5e',
+    'Return Requested': '#f97316',
+    Returned: '#64748b',
 };
 
 const Orders = () => {
@@ -284,11 +291,13 @@ const Orders = () => {
                         </div>
                         <span className="ord-insight-sub">Total <span className="ord-green-text">+12%</span></span>
                         <div className="ord-insight-bar-chart">
-                            <ResponsiveContainer width="100%" height={120}>
-                                <BarChart data={statusBarData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
-                                    <YAxis hide />
-                                    <Bar dataKey="value" radius={[3, 3, 0, 0]} maxBarSize={32}>
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={statusBarData} margin={{ top: 10, right: 5, left: -20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} interval={0} angle={-25} textAnchor="end" height={45} />
+                                    <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                    <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '0.85rem' }} />
+                                    <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={36}>
                                         {statusBarData.map((entry, idx) => (
                                             <Cell key={idx} fill={STATUS_BAR_COLORS[entry.name] || '#93c5fd'} />
                                         ))}

@@ -196,6 +196,7 @@ class OfflinePayment(models.Model):
 
     customer_name = models.CharField(max_length=200, help_text="Customer name")
     amount = models.DecimalField(max_digits=12, decimal_places=2, help_text="Payment amount (₹)")
+    gst_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="GST collected on this transaction (₹)")
     payment_method = models.CharField(max_length=20, choices=METHOD_CHOICES, default='cash')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='received')
     note = models.CharField(max_length=500, blank=True, default="", help_text="Invoice number, description, etc.")

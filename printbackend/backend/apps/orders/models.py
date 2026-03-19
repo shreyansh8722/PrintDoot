@@ -102,6 +102,16 @@ class Order(models.Model):
             if product_ids:
                 Product.objects.filter(id__in=product_ids).update(order_count=F('order_count') + 1)
 
+        # ── Restore stock when order is cancelled or refunded ──
+        if new_status in ('Cancelled', 'Refunded'):
+            from apps.catalog.models import Product
+            from django.db.models import F
+            for item in self.items.select_related('product').all():
+                if item.product and not item.product.is_infinite_stock:
+                    Product.objects.filter(id=item.product_id).update(
+                        stock_quantity=F('stock_quantity') + item.quantity
+                    )
+
         self.save()
 
         # Create status history record

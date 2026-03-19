@@ -51,7 +51,7 @@ const DEFAULT_BANNER = {
  * Compact category hero banner — inspired by VistaPrint's clean design.
  * Shows category-specific image + text. Scrolls to products on CTA click.
  */
-const CategoryHero = ({ categorySlug, categoryName, subcategories }) => {
+const CategoryHero = ({ categorySlug, categoryName, subcategories, apiBannerImage }) => {
   // Match slug → banner config
   const slug = categorySlug?.toLowerCase().trim();
   let banner = (slug && CATEGORY_BANNERS[slug]) || null;
@@ -64,6 +64,11 @@ const CategoryHero = ({ categorySlug, categoryName, subcategories }) => {
 
   // Final fallback
   if (!banner) banner = { ...DEFAULT_BANNER };
+
+  // If admin uploaded a banner image via S3, use that instead
+  if (apiBannerImage) {
+    banner = { ...banner, image: apiBannerImage };
+  }
 
   // If we have a real category name, use it as title
   const displayTitle = categoryName || banner.title;
