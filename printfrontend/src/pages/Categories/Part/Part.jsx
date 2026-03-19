@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const CategoryHero = () => {
   return (
@@ -14,9 +15,9 @@ const CategoryHero = () => {
               Find high-quality customised products you need for your business and beyond.
             </p>
             <div className="pt-4">
-              <button className="bg-white text-black px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-100 transition-all active:scale-95">
+              <Link to="/view-all" className="bg-white text-black px-8 py-3 rounded-full font-bold shadow-lg hover:bg-gray-100 transition-all active:scale-95 inline-block">
                 Explore Now
-              </button>
+              </Link>
             </div>
           </div>
 

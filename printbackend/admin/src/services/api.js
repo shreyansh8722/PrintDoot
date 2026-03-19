@@ -213,12 +213,12 @@ export const authAPI = {
 };
 // Offline Payments API
 export const adminOfflinePaymentAPI = {
-    getPayments: (params = {}) => api.get('/admin/pages/offline-payments/', { params }),
-    getPayment: (id) => api.get(`/admin/pages/offline-payments/${id}/`),
-    createPayment: (data) => api.post('/admin/pages/offline-payments/', data),
-    updatePayment: (id, data) => api.patch(`/admin/pages/offline-payments/${id}/`, data),
-    deletePayment: (id) => api.delete(`/admin/pages/offline-payments/${id}/`),
-    getStats: () => api.get('/admin/pages/offline-payments/stats/'),
+    getPayments: (params = {}) => api.get('/admin/offline-payments/', { params }),
+    getPayment: (id) => api.get(`/admin/offline-payments/${id}/`),
+    createPayment: (data) => api.post('/admin/offline-payments/', data),
+    updatePayment: (id, data) => api.patch(`/admin/offline-payments/${id}/`, data),
+    deletePayment: (id) => api.delete(`/admin/offline-payments/${id}/`),
+    getStats: () => api.get('/admin/offline-payments/stats/'),
 };
 
 export default api;

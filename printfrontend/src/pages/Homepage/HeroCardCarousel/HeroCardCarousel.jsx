@@ -11,6 +11,7 @@ import heroCard4 from '../../../assets/hero-card-4.webp';
 const DEFAULT_CARDS = [
     {
         image: heroCard1,
+        mobileImage: null,
         title: 'My Name, My Pride',
         subtitle: 'Premium visiting cards with gold foil & embossed finishes',
         cta: 'ORDER NOW',
@@ -19,6 +20,7 @@ const DEFAULT_CARDS = [
     },
     {
         image: heroCard2,
+        mobileImage: null,
         title: 'Custom Apparel, Your Way',
         subtitle: 'T-shirts, hoodies & caps printed with your designs',
         cta: 'ORDER NOW',
@@ -27,6 +29,7 @@ const DEFAULT_CARDS = [
     },
     {
         image: heroCard3,
+        mobileImage: null,
         title: 'Gifts, Wrapped in Love',
         subtitle: 'Photo mugs, cushions, frames & curated hampers',
         cta: 'ORDER NOW',
@@ -35,6 +38,7 @@ const DEFAULT_CARDS = [
     },
     {
         image: heroCard4,
+        mobileImage: null,
         title: 'Corporate Gifting Made Easy',
         subtitle: 'Employee kits, branded merch & bulk orders',
         cta: 'EXPLORE NOW',
@@ -48,6 +52,14 @@ const HeroCardCarousel = () => {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
     const [heroCards, setHeroCards] = useState(DEFAULT_CARDS);
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+
+    /* Track mobile/desktop for responsive banner images */
+    useEffect(() => {
+        const handler = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handler);
+        return () => window.removeEventListener('resize', handler);
+    }, []);
 
     /* Fetch banners from API — only REPLACE defaults if admin has added hero banners */
     useEffect(() => {
@@ -56,7 +68,8 @@ const HeroCardCarousel = () => {
                 const banners = res.data?.results || res.data || [];
                 if (banners.length > 0) {
                     const apiCards = banners.map(b => ({
-                        image: b.image_url || b.mobile_image_url,
+                        image: b.image_url,
+                        mobileImage: b.mobile_image_url || '',
                         title: b.title || '',
                         subtitle: b.subtitle || '',
                         cta: 'ORDER NOW',
@@ -112,6 +125,9 @@ const HeroCardCarousel = () => {
                             ? 'bg-gradient-to-r from-white/20 to-transparent'
                             : 'bg-gradient-to-r from-black/30 to-transparent';
 
+                        // Use mobile image on small screens if available, otherwise fall back to desktop
+                        const displayImage = (isMobile && card.mobileImage) ? card.mobileImage : card.image;
+
                         return (
                             <div
                                 key={idx}
@@ -119,7 +135,7 @@ const HeroCardCarousel = () => {
                             >
                                 {/* Background Image */}
                                 <img
-                                    src={card.image}
+                                    src={displayImage}
                                     alt={card.title}
                                     className="absolute inset-0 w-full h-full object-cover"
                                     loading={idx === 0 ? 'eager' : 'lazy'}
@@ -186,3 +202,4 @@ const HeroCardCarousel = () => {
 };
 
 export default HeroCardCarousel;
+
