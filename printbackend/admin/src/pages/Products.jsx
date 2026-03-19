@@ -150,17 +150,22 @@ const Products = () => {
         fetchProductsData();
         fetchCategoriesData();
         fetchSubcategoriesData();
-        fetchStats();
     }, []);
 
-    const fetchStats = async () => {
-        try {
-            const res = await adminCatalogAPI.getProductStats();
-            setStats(res.data);
-        } catch (e) {
-            console.error('Error fetching product stats:', e);
+    // Compute stats from local product + category data (always accurate)
+    useEffect(() => {
+        if (products.length > 0 || categories.length > 0) {
+            const total = products.length;
+            const inStock = products.filter(p => p.is_infinite_stock || p.stock_quantity > 0).length;
+            const outOfStock = products.filter(p => !p.is_infinite_stock && (p.stock_quantity === 0 || p.stock_quantity === null || p.stock_quantity === undefined)).length;
+            setStats({
+                total,
+                in_stock: inStock,
+                out_of_stock: outOfStock,
+                categories_count: categories.length,
+            });
         }
-    };
+    }, [products, categories]);
 
     const fetchProductsData = async (forceRefresh = false) => {
         try {
@@ -212,7 +217,6 @@ const Products = () => {
         fetchProductsData(true);
         fetchCategoriesData(true);
         fetchSubcategoriesData(true);
-        fetchStats();
     };
 
     const openCreateModal = () => {
@@ -292,8 +296,6 @@ const Products = () => {
             setShowModal(false);
             invalidateCache(['products']);
             fetchProductsData(true);
-            // Small delay to ensure DB has committed before re-fetching stats
-            setTimeout(() => fetchStats(), 500);
         } catch (error) {
             console.error('Error saving product:', error);
             alert('Failed to save product: ' + (error.response?.data?.detail || JSON.stringify(error.response?.data) || error.message));
@@ -307,7 +309,6 @@ const Products = () => {
                 alert('Product deleted successfully');
                 invalidateCache(['products']);
                 fetchProductsData(true);
-                setTimeout(() => fetchStats(), 500);
             } catch (error) {
                 console.error('Error deleting product:', error);
                 alert('Failed to delete product');

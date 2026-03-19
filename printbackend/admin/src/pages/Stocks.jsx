@@ -13,6 +13,8 @@ const STATUS_BADGE = {
     out_of_stock: { label: 'Out of Stock', bg: '#fee2e2', color: '#991b1b' },
 };
 
+const ITEMS_PER_PAGE = 20;
+
 const Stocks = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
@@ -23,19 +25,41 @@ const Stocks = () => {
     const [threshold, setThreshold] = useState(10);
     const [editingStock, setEditingStock] = useState({});
     const [showBulkModal, setShowBulkModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showInactive, setShowInactive] = useState(true);
 
     useEffect(() => { fetchAll(); }, []);
 
     const fetchAll = async () => {
         try {
             setLoading(true);
-            const [stockRes, productsRes] = await Promise.all([
-                adminStockAPI.getStockAlerts({ threshold }),
-                adminCatalogAPI.getProducts({ page_size: 100 }),
-            ]);
-            setStockData(stockRes.data);
-            const prodData = productsRes.data;
-            setProducts(Array.isArray(prodData) ? prodData : (prodData.results || []));
+            // Auto-paginate: fetch ALL products from the API
+            let allProducts = [];
+            let page = 1;
+            let hasMore = true;
+            while (hasMore) {
+                const res = await adminCatalogAPI.getProducts({ page, page_size: 100 });
+                const data = res.data;
+                if (Array.isArray(data)) {
+                    allProducts = data;
+                    hasMore = false;
+                } else if (data.results) {
+                    allProducts = [...allProducts, ...data.results];
+                    hasMore = !!data.next;
+                    page++;
+                } else {
+                    hasMore = false;
+                }
+            }
+            setProducts(allProducts);
+
+            // Also fetch stock alerts
+            try {
+                const stockRes = await adminStockAPI.getStockAlerts({ threshold });
+                setStockData(stockRes.data);
+            } catch (e) {
+                console.error('Stock alerts fetch error:', e);
+            }
         } catch (error) {
             console.error('Error:', error);
         } finally {
@@ -46,16 +70,9 @@ const Stocks = () => {
     const getStockStatus = (product) => {
         // Infinite stock (POD) products are always in stock
         if (product.is_infinite_stock) return 'in_stock';
-        if (product.stock_quantity === 0) return 'out_of_stock';
+        if (product.stock_quantity === 0 || product.stock_quantity === null || product.stock_quantity === undefined) return 'out_of_stock';
         if (product.stock_quantity <= threshold) return 'low_stock';
         return 'in_stock';
-    };
-
-    const getMovement = (product) => {
-        // Mock movement data (would come from backend in production)
-        const movements = ['+100', '-50', '+200', '-20', '+50', '-10'];
-        const idx = product.id % movements.length;
-        return movements[idx];
     };
 
     const filteredProducts = products.filter(p => {
@@ -68,9 +85,37 @@ const Stocks = () => {
         if (activeTab === 'In Stock') matchTab = status === 'in_stock';
         if (activeTab === 'Low Stock') matchTab = status === 'low_stock';
         if (activeTab === 'Out of Stock') matchTab = status === 'out_of_stock';
+        if (activeTab === 'Active') matchTab = p.is_active === true;
+        if (activeTab === 'Inactive') matchTab = p.is_active === false;
+
+        // If showInactive is off, only show active products
+        if (!showInactive && !p.is_active) return false;
 
         return matchSearch && matchTab;
     });
+
+    // Pagination
+    const totalFiltered = filteredProducts.length;
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / ITEMS_PER_PAGE));
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedProducts = filteredProducts.slice(startIdx, startIdx + ITEMS_PER_PAGE);
+
+    const goToPage = (page) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
+
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisible = 5;
+        let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let end = Math.min(totalPages, start + maxVisible - 1);
+        if (end - start < maxVisible - 1) start = Math.max(1, end - maxVisible + 1);
+        for (let i = start; i <= end; i++) pages.push(i);
+        return pages;
+    };
+
+    // Reset page when filters change
+    useEffect(() => { setCurrentPage(1); }, [searchTerm, activeTab, showInactive]);
 
     const handleStockChange = (productId, value) => {
         setEditingStock(prev => ({ ...prev, [productId]: parseInt(value) || 0 }));
@@ -95,11 +140,14 @@ const Stocks = () => {
         return <div className="stk-loading"><div className="stk-spinner"></div><p>Loading inventory...</p></div>;
     }
 
-    // Stats for alert cards
-    const totalProducts = products.filter(p => !p.is_infinite_stock).length;
-    const outOfStockCount = products.filter(p => !p.is_infinite_stock && p.stock_quantity === 0).length;
-    const lowStockCount = products.filter(p => !p.is_infinite_stock && p.stock_quantity > 0 && p.stock_quantity <= threshold).length;
+    // Stats for alert cards (exclude infinite stock items)
+    const finiteProducts = products.filter(p => !p.is_infinite_stock);
+    const totalProducts = finiteProducts.length;
+    const outOfStockCount = finiteProducts.filter(p => p.stock_quantity === 0 || p.stock_quantity === null || p.stock_quantity === undefined).length;
+    const lowStockCount = finiteProducts.filter(p => p.stock_quantity > 0 && p.stock_quantity <= threshold).length;
     const inStockCount = totalProducts - outOfStockCount - lowStockCount;
+    const activeCount = products.filter(p => p.is_active).length;
+    const inactiveCount = products.filter(p => !p.is_active).length;
 
     return (
         <div className="stk-page">
@@ -107,10 +155,10 @@ const Stocks = () => {
             <h1 className="stk-page-title">Stock and Inventory Management</h1>
 
             {/* ═══ STOCK ALERT CARDS ═══ */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total SKUs</div>
-                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>{totalProducts}</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>{products.length}</div>
                 </div>
                 <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px' }}>
                     <div style={{ fontSize: '12px', color: '#15803d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>In Stock</div>
@@ -123,6 +171,14 @@ const Stocks = () => {
                 <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '16px' }}>
                     <div style={{ fontSize: '12px', color: '#991b1b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Out of Stock</div>
                     <div style={{ fontSize: '28px', fontWeight: 700, color: '#991b1b', marginTop: '4px' }}>{outOfStockCount}</div>
+                </div>
+                <div style={{ background: '#e0f2fe', border: '1px solid #bae6fd', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#0369a1', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Active</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#0369a1', marginTop: '4px' }}>{activeCount}</div>
+                </div>
+                <div style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Inactive</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#64748b', marginTop: '4px' }}>{inactiveCount}</div>
                 </div>
             </div>
 
@@ -143,7 +199,7 @@ const Stocks = () => {
                         />
                     </div>
                     <div className="stk-tabs">
-                        {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map(tab => (
+                        {['All', 'In Stock', 'Low Stock', 'Out of Stock', 'Active', 'Inactive'].map(tab => (
                             <button
                                 key={tab}
                                 className={`stk-tab ${activeTab === tab ? 'stk-tab-active' : ''}`}
@@ -169,7 +225,6 @@ const Stocks = () => {
                             Apply
                         </button>
                     </div>
-                    <button className="stk-filter-btn"><Filter size={15} /> Filter</button>
                     <button className="stk-add-btn" onClick={() => navigate('/products')}>
                         <Plus size={15} /> Add Product
                     </button>
@@ -182,39 +237,47 @@ const Stocks = () => {
                             <tr>
                                 <th>PRODUCT NAME</th>
                                 <th>SKU</th>
-                                <th>STATUS</th>
+                                <th>ACTIVE</th>
+                                <th>STOCK STATUS</th>
                                 <th>CURRENT STOCK</th>
-                                <th>MOVEMENT</th>
                                 <th>LOW STOCK ALERT</th>
                                 <th>ACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredProducts.length === 0 ? (
+                            {paginatedProducts.length === 0 ? (
                                 <tr><td colSpan="7" className="stk-empty">
                                     <Package size={28} strokeWidth={1.2} />
                                     <span>No products found</span>
                                 </td></tr>
                             ) : (
-                                filteredProducts.map(product => {
+                                paginatedProducts.map(product => {
                                     const status = getStockStatus(product);
                                     const cfg = STATUS_BADGE[status];
-                                    const movement = getMovement(product);
-                                    const movementPositive = movement.startsWith('+');
                                     return (
-                                        <tr key={product.id}>
+                                        <tr key={product.id} style={{ opacity: product.is_active ? 1 : 0.6 }}>
                                             <td className="stk-prod-name">{product.name}</td>
                                             <td><code className="stk-sku">{product.sku || '—'}</code></td>
                                             <td>
-                                                <span className="stk-status-badge" style={{ background: cfg.bg, color: cfg.color }}>
-                                                    {cfg.label}
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    padding: '2px 10px',
+                                                    borderRadius: '999px',
+                                                    fontSize: '12px',
+                                                    fontWeight: 600,
+                                                    background: product.is_active ? '#dcfce7' : '#f1f5f9',
+                                                    color: product.is_active ? '#15803d' : '#94a3b8',
+                                                }}>
+                                                    {product.is_active ? 'Active' : 'Inactive'}
                                                 </span>
                                             </td>
-                                            <td className="stk-stock-val">{product.stock_quantity?.toLocaleString() || 0} units</td>
                                             <td>
-                                                <span className={`stk-movement ${movementPositive ? 'stk-mov-up' : 'stk-mov-down'}`}>
-                                                    {movement}
+                                                <span className="stk-status-badge" style={{ background: cfg.bg, color: cfg.color }}>
+                                                    {product.is_infinite_stock ? '∞ POD' : cfg.label}
                                                 </span>
+                                            </td>
+                                            <td className="stk-stock-val">
+                                                {product.is_infinite_stock ? '∞' : (product.stock_quantity?.toLocaleString() ?? 0)} units
                                             </td>
                                             <td className="stk-alert-val">{threshold} units</td>
                                             <td>
@@ -247,11 +310,25 @@ const Stocks = () => {
                 {/* Pagination */}
                 <div className="stk-pagination">
                     <span className="stk-page-info">
-                        Showing 1 to {Math.min(filteredProducts.length, 6)} of {filteredProducts.length} results
+                        Showing {totalFiltered === 0 ? 0 : startIdx + 1} to {Math.min(startIdx + ITEMS_PER_PAGE, totalFiltered)} of {totalFiltered} products
                     </span>
                     <div className="stk-page-btns">
-                        <button className="stk-page-btn" disabled>Previous</button>
-                        <button className="stk-page-btn" disabled={filteredProducts.length <= 6}>Next</button>
+                        <button className="stk-page-btn" disabled={currentPage === 1} onClick={() => goToPage(currentPage - 1)}>
+                            <ChevronLeft size={14} /> Previous
+                        </button>
+                        {getPageNumbers().map((num) => (
+                            <button
+                                key={num}
+                                className={`stk-page-btn ${num === currentPage ? 'stk-page-active' : ''}`}
+                                onClick={() => goToPage(num)}
+                                style={num === currentPage ? { background: '#0f172a', color: '#fff', borderColor: '#0f172a' } : {}}
+                            >
+                                {num}
+                            </button>
+                        ))}
+                        <button className="stk-page-btn" disabled={currentPage === totalPages} onClick={() => goToPage(currentPage + 1)}>
+                            Next <ChevronRight size={14} />
+                        </button>
                     </div>
                 </div>
 
