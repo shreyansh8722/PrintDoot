@@ -4,6 +4,7 @@ import SearchDropdown, { addRecentSearch } from "./SearchDropdown";
 import AccountDropdown from "./AccountDropdown";
 import SignInDropdown from "./SignInDropdown";
 import NavBar from "./NavBar";
+import { fetchMenuData } from "../services/menuApi.js";
 import userService from "../../../services/userService";
 import catalogService from "../../../services/catalogService";
 import { useShop } from "../../../context/ShopContext";
@@ -20,6 +21,10 @@ export default function Header() {
   const [username, setUsername] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [mobileNavLevel, setMobileNavLevel] = useState(0); // 0=main, 1=subcats, 2=products
+  const [menuData, setMenuData] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [desktopQuery, setDesktopQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const { cartItems } = useShop();
@@ -69,7 +74,15 @@ export default function Header() {
     setShowSignIn(false);
     setMobileMenuOpen(false);
     setMobileSearchOpen(false);
+    setMobileNavLevel(0);
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
   }, [location.pathname]);
+
+  // Load menu data for mobile nav
+  useEffect(() => {
+    fetchMenuData().then(data => setMenuData(data || []));
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -323,41 +336,157 @@ export default function Header() {
 
         {/* Nav links */}
         <nav className="py-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
-          <MobileLink to="/view-all" label="Shop All Products" onClose={() => setMobileMenuOpen(false)}>
-            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" /></svg>
-          </MobileLink>
-          <MobileLink to="/account/designs" label="My Projects" onClose={() => setMobileMenuOpen(false)}>
-            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
-          </MobileLink>
-          <MobileLink to="/favorites" label="My Wishlist" onClose={() => setMobileMenuOpen(false)}>
-            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
-          </MobileLink>
-          <MobileLink to="/cart" label="Cart" onClose={() => setMobileMenuOpen(false)}>
-            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-          </MobileLink>
 
-          <div className="my-1.5 mx-5 border-t border-gray-100" />
-
-          <MobileLink to="/account/orders" label="My Orders" onClose={() => setMobileMenuOpen(false)} />
-          <MobileLink to="/account/addresses" label="My Addresses" onClose={() => setMobileMenuOpen(false)} />
-
-          <div className="my-1.5 mx-5 border-t border-gray-100" />
-
-          <MobileLink to="/help" label="Help & Support" onClose={() => setMobileMenuOpen(false)}>
-            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
-          </MobileLink>
-          <MobileLink to="/contact" label="Contact Us" onClose={() => setMobileMenuOpen(false)} />
-
-          {isAuthenticated && (
+          {/* ─── LEVEL 0: Main Menu with Categories ─── */}
+          {mobileNavLevel === 0 && (
             <>
+              {/* Quick links */}
+              <MobileLink to="/account/designs" label="My Projects" onClose={() => setMobileMenuOpen(false)}>
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" /></svg>
+              </MobileLink>
+              <MobileLink to="/favorites" label="My Wishlist" onClose={() => setMobileMenuOpen(false)}>
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+              </MobileLink>
+              <MobileLink to="/cart" label="Cart" onClose={() => setMobileMenuOpen(false)}>
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+              </MobileLink>
+
               <div className="my-1.5 mx-5 border-t border-gray-100" />
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-5 py-3 text-left text-red-500 hover:bg-red-50/60 transition-colors text-[13px] font-medium"
+
+              {/* Category list */}
+              <Link
+                to="/view-all"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3.5 text-gray-800 hover:bg-gray-50 transition-colors text-[14px] font-semibold"
               >
-                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-                Sign Out
+                <svg className="w-[18px] h-[18px] text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" /></svg>
+                View All
+              </Link>
+
+              {menuData.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => { setSelectedCategory(cat); setMobileNavLevel(1); }}
+                  className="w-full flex items-center justify-between px-5 py-3.5 text-gray-700 hover:bg-gray-50 transition-colors text-[14px] font-medium"
+                >
+                  <span>{cat.label}</span>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                </button>
+              ))}
+
+              <div className="my-1.5 mx-5 border-t border-gray-100" />
+
+              <MobileLink to="/account/orders" label="My Orders" onClose={() => setMobileMenuOpen(false)} />
+              <MobileLink to="/account/addresses" label="My Addresses" onClose={() => setMobileMenuOpen(false)} />
+
+              <div className="my-1.5 mx-5 border-t border-gray-100" />
+
+              <MobileLink to="/help" label="Help & Support" onClose={() => setMobileMenuOpen(false)}>
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+              </MobileLink>
+              <MobileLink to="/contact" label="Contact Us" onClose={() => setMobileMenuOpen(false)} />
+
+              {isAuthenticated && (
+                <>
+                  <div className="my-1.5 mx-5 border-t border-gray-100" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-5 py-3 text-left text-red-500 hover:bg-red-50/60 transition-colors text-[13px] font-medium"
+                  >
+                    <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                    Sign Out
+                  </button>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ─── LEVEL 1: Subcategories within a Category ─── */}
+          {mobileNavLevel === 1 && selectedCategory && (
+            <>
+              <button
+                onClick={() => { setMobileNavLevel(0); setSelectedCategory(null); }}
+                className="w-full flex items-center gap-2 px-5 py-3 text-gray-500 hover:bg-gray-50 transition-colors text-[13px] font-medium border-b border-gray-100"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                Back
               </button>
+              <div className="px-5 py-3 bg-gray-50/60 border-b border-gray-100">
+                <h3 className="font-bold text-[15px] text-gray-900">{selectedCategory.label}</h3>
+              </div>
+
+              {/* See All for this category */}
+              <Link
+                to={selectedCategory.footerLink?.path || `/categories/${selectedCategory.id}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-brand hover:bg-brand-50/40 transition-colors text-[13px] font-semibold"
+              >
+                See All {selectedCategory.label}
+              </Link>
+
+              {(selectedCategory.sections || []).map((sub, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (sub.links?.length > 0) {
+                      setSelectedSubcategory(sub);
+                      setMobileNavLevel(2);
+                    } else {
+                      // No products, navigate directly
+                      navigate(sub.path);
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  className="w-full flex items-center justify-between px-5 py-3.5 text-gray-700 hover:bg-gray-50 transition-colors text-[14px] font-medium"
+                >
+                  <span>{sub.title}</span>
+                  {sub.links?.length > 0 && (
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                  )}
+                </button>
+              ))}
+            </>
+          )}
+
+          {/* ─── LEVEL 2: Products within a Subcategory ─── */}
+          {mobileNavLevel === 2 && selectedSubcategory && (
+            <>
+              <button
+                onClick={() => { setMobileNavLevel(1); setSelectedSubcategory(null); }}
+                className="w-full flex items-center gap-2 px-5 py-3 text-gray-500 hover:bg-gray-50 transition-colors text-[13px] font-medium border-b border-gray-100"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                {selectedCategory?.label}
+              </button>
+              <div className="px-5 py-3 bg-gray-50/60 border-b border-gray-100">
+                <h3 className="font-bold text-[15px] text-gray-900">{selectedSubcategory.title}</h3>
+              </div>
+
+              {/* See All for this subcategory */}
+              <Link
+                to={selectedSubcategory.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-5 py-3 text-brand hover:bg-brand-50/40 transition-colors text-[13px] font-semibold"
+              >
+                See All {selectedSubcategory.title}
+              </Link>
+
+              {(selectedSubcategory.links || []).map((product, pIdx) => (
+                <Link
+                  key={pIdx}
+                  to={product.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-5 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-[13px] font-medium"
+                >
+                  {product.image && (
+                    <img src={product.image} alt="" className="w-8 h-8 rounded-lg object-cover border border-gray-100 flex-shrink-0" />
+                  )}
+                  <span className="flex-1">{product.name}</span>
+                  {product.isNew && (
+                    <span className="text-[10px] font-bold text-white bg-brand px-2 py-0.5 rounded-full">NEW</span>
+                  )}
+                </Link>
+              ))}
             </>
           )}
         </nav>

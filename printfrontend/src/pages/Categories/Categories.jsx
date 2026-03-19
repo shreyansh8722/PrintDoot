@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaStar, FaSortAmountDown } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaStar, FaSortAmountDown, FaSlidersH, FaTimes } from 'react-icons/fa';
 import Breadcrumb from './Breadcrumb/Breadcrumb';
 import CategoryHero from './Part/Part';
 import Sidebar from './Sidebar/Sidebar';
@@ -113,6 +113,7 @@ function Categories() {
 
   // Sorting
   const [ordering, setOrdering] = useState('-created_at');
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // Sync URL category param with filter state
   useEffect(() => {
@@ -255,8 +256,8 @@ function Categories() {
 
       <div id="products-section" className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* ── Sidebar with Filters ── */}
-          <aside className="lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
+          {/* ── Sidebar with Filters — Desktop only ── */}
+          <aside className="hidden lg:block lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
             <Sidebar
               categories={displayedCategories}
               allCategories={allCategories}
@@ -270,6 +271,81 @@ function Categories() {
               }}
             />
           </aside>
+
+          {/* ── Mobile Filter Button ── */}
+          <div className="lg:hidden flex items-center gap-3 mb-2">
+            <button
+              onClick={() => setMobileFilterOpen(true)}
+              className="inline-flex items-center gap-2 bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-semibold shadow-sm hover:bg-gray-800 active:scale-[0.97] transition-all"
+            >
+              <FaSlidersH className="text-xs" /> Filters
+              {(filters.minPrice || filters.maxPrice || filters.minRating) && (
+                <span className="w-2 h-2 bg-brand rounded-full" />
+              )}
+            </button>
+            {/* Mobile sort */}
+            <div className="flex items-center gap-2">
+              <select
+                value={ordering}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="text-sm border border-gray-200 rounded-lg px-3 py-2.5 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black cursor-pointer"
+              >
+                <option value="-created_at">Newest</option>
+                <option value="base_price">Price: Low → High</option>
+                <option value="-base_price">Price: High → Low</option>
+                <option value="-avg_rating">Top Rated</option>
+              </select>
+            </div>
+          </div>
+
+          {/* ── Mobile Filter Drawer (slide-up) ── */}
+          {mobileFilterOpen && (
+            <>
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] lg:hidden"
+                onClick={() => setMobileFilterOpen(false)}
+              />
+              <div className="fixed inset-x-0 bottom-0 z-[90] lg:hidden bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-slideUp">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                  <h3 className="font-bold text-lg text-gray-900">Filters</h3>
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+                  >
+                    <FaTimes className="text-sm" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-5 py-4">
+                  <Sidebar
+                    categories={displayedCategories}
+                    allCategories={allCategories}
+                    showProducts={!!activeCatSlug}
+                    onFilterChange={(f) => { handleFilterChange(f); }}
+                    activeFilters={{
+                      minPrice: filters.minPrice,
+                      maxPrice: filters.maxPrice,
+                      minRating: filters.minRating,
+                      categorySlug: activeCatSlug || '',
+                    }}
+                  />
+                </div>
+                <div className="px-5 py-4 border-t border-gray-100 flex gap-3">
+                  <button
+                    onClick={() => { handleFilterChange({ minPrice: '', maxPrice: '', minRating: '' }); setMobileFilterOpen(false); }}
+                    className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+                  >
+                    Apply Filters
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* ── Main Content ── */}
           <main className="lg:w-3/4">

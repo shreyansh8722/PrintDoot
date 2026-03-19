@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   FaStar, FaRegStar, FaStarHalfAlt, FaThumbsUp, FaCheckCircle,
   FaShippingFast, FaShieldAlt, FaUndo, FaPhoneAlt, FaChevronLeft, FaChevronRight,
+  FaHeart, FaRegHeart,
 } from "react-icons/fa";
 import { IoChevronDown } from "react-icons/io5";
 import { HiMinus, HiPlus } from "react-icons/hi2";
@@ -214,6 +215,8 @@ export default function Product() {
   const [imgZoom, setImgZoom] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const [toast, setToast] = useState(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
 
   const relatedScrollRef = useRef(null);
   const toastTimer = useRef(null);
@@ -275,6 +278,35 @@ export default function Product() {
     };
     load();
   }, [activeSlug]);
+
+  /* ── Check favorited status ── */
+  useEffect(() => {
+    const checkFav = async () => {
+      if (!product?.id) return;
+      try {
+        if (userService.isAuthenticated()) {
+          const ids = await catalogService.getFavoriteIds();
+          setIsFavorited(Array.isArray(ids) && ids.includes(product.id));
+        }
+      } catch { /* ignore */ }
+    };
+    checkFav();
+  }, [product?.id]);
+
+  const handleToggleFavorite = async () => {
+    if (!userService.isAuthenticated()) {
+      navigate('/login');
+      return;
+    }
+    try {
+      setFavLoading(true);
+      await catalogService.toggleFavorite(product.id);
+      setIsFavorited(prev => !prev);
+      window.dispatchEvent(new Event('favoritesChanged'));
+      showToast(isFavorited ? 'Removed from wishlist' : 'Added to wishlist ❤️');
+    } catch { showToast('Failed to update wishlist'); }
+    finally { setFavLoading(false); }
+  };
 
   /* ── Derived data ── */
   const ratingBreakdown = useMemo(() => {
@@ -396,6 +428,20 @@ export default function Product() {
                   {product.discount}
                 </span>
               )}
+
+              {/* Favorite heart button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); handleToggleFavorite(); }}
+                disabled={favLoading}
+                className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center shadow-md z-20 transition-all duration-200 ${
+                  isFavorited
+                    ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                    : 'bg-white/90 backdrop-blur-sm text-gray-400 hover:text-red-500 hover:bg-white'
+                } ${favLoading ? 'opacity-50 cursor-wait' : 'hover:scale-110 active:scale-95'}`}
+                aria-label={isFavorited ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                {isFavorited ? <FaHeart className="text-lg" /> : <FaRegHeart className="text-lg" />}
+              </button>
 
               {imageList.length > 1 && (
                 <>
