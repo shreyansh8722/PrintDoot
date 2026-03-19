@@ -4,6 +4,7 @@ import { useShop } from '../../context/ShopContext';
 import userService from '../../services/userService';
 import orderService from '../../services/orderService';
 import paymentService from '../../services/paymentService';
+import zakekeService from '../../services/zakekeService';
 import apiHook from '../../services/apiConfig';
 import CheckoutSteps from './CheckoutSteps';
 import {
@@ -18,7 +19,110 @@ import {
     FaTag,
     FaTimes,
     FaCheck,
+    FaSearchPlus,
 } from 'react-icons/fa';
+
+/* ── Checkout Order Item with Zakeke Preview ── */
+const CheckoutOrderItem = ({ item }) => {
+    const [designDetails, setDesignDetails] = useState(null);
+    const [loading, setLoading] = useState(!!item.designId);
+    const [showPreview, setShowPreview] = useState(false);
+
+    useEffect(() => {
+        if (item.designId) {
+            zakekeService
+                .getDesignDetails(item.designId)
+                .then((data) => {
+                    setDesignDetails(data);
+                    setLoading(false);
+                })
+                .catch(() => setLoading(false));
+        }
+    }, [item.designId]);
+
+    const price = Number(item.finalPrice || item.basePrice || item.base_price || 0);
+    const qty = item.quantity || 1;
+    const previewUrl = designDetails?.tempPreviewImageUrl;
+    const imgSrc = previewUrl || item.image || item.img || 'https://placehold.co/64x64';
+
+    return (
+        <>
+            <div className="flex gap-4 py-4 first:pt-0 last:pb-0">
+                <div
+                    className={`w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 ${
+                        previewUrl ? 'cursor-pointer ring-2 ring-purple-200 hover:ring-purple-400 transition-all' : ''
+                    }`}
+                    onClick={() => previewUrl && setShowPreview(true)}
+                    title={previewUrl ? 'Click to preview design' : ''}
+                >
+                    {loading ? (
+                        <div className="w-full h-full animate-pulse bg-gray-200" />
+                    ) : (
+                        <img
+                            src={imgSrc}
+                            alt={item.title || 'Product'}
+                            className="w-full h-full object-contain p-1"
+                        />
+                    )}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{item.title || item.name}</p>
+                    <p className="text-sm text-gray-500">Qty: {qty}</p>
+                    {item.designId && (
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">
+                                <FaPaintBrush className="text-[8px]" /> Customized
+                            </span>
+                            {previewUrl && (
+                                <button
+                                    onClick={() => setShowPreview(true)}
+                                    className="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 hover:text-blue-800 transition"
+                                >
+                                    <FaSearchPlus className="text-[8px]" /> Preview
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <span className="text-sm font-bold text-gray-900 flex-shrink-0">
+                    ₹{(price * qty).toFixed(2)}
+                </span>
+            </div>
+
+            {/* Full-screen design preview modal */}
+            {showPreview && previewUrl && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+                    onClick={() => setShowPreview(false)}
+                >
+                    <div
+                        className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowPreview(false)}
+                            className="absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
+                        >
+                            <FaTimes />
+                        </button>
+                        <p className="text-sm font-bold text-gray-900 mb-3 pr-8 truncate">
+                            {item.title || item.name} — Your Design
+                        </p>
+                        <img
+                            src={previewUrl}
+                            alt="Your custom design"
+                            className="w-full rounded-xl border border-gray-100"
+                        />
+                        <p className="text-xs text-gray-400 mt-2 text-center">
+                            This is a preview of your customized design
+                        </p>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
 
 const GST_RATE = 0.18;
 
@@ -319,33 +423,9 @@ const CheckoutReview = () => {
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                             <h2 className="text-lg font-bold text-gray-900 mb-4">Order Items</h2>
                             <div className="divide-y divide-gray-100">
-                                {cartItems.map((item) => {
-                                    const price = Number(item.finalPrice || item.basePrice || item.base_price || 0);
-                                    const qty = item.quantity || 1;
-                                    return (
-                                        <div key={item.cartId} className="flex gap-4 py-4 first:pt-0 last:pb-0">
-                                            <div className="w-16 h-16 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
-                                                <img
-                                                    src={item.image || item.img || 'https://placehold.co/64x64'}
-                                                    alt={item.title || 'Product'}
-                                                    className="w-full h-full object-contain p-1"
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-gray-900 truncate">{item.title || item.name}</p>
-                                                <p className="text-sm text-gray-500">Qty: {qty}</p>
-                                                {item.designId && (
-                                                    <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full">
-                                                        <FaPaintBrush className="text-[8px]" /> Customized
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <span className="text-sm font-bold text-gray-900 flex-shrink-0">
-                                                ₹{(price * qty).toFixed(2)}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
+                                {cartItems.map((item) => (
+                                    <CheckoutOrderItem key={item.cartId} item={item} />
+                                ))}
                             </div>
                         </div>
 
