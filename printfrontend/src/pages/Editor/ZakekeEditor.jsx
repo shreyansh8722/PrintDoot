@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import catalogService from '../../services/catalogService';
 import zakekeService from '../../services/zakekeService';
+import designService from '../../services/designService';
 import { useShop } from '../../context/ShopContext';
 import './ZakekeEditor.css';
 
@@ -94,9 +95,39 @@ const ZakekeEditor = () => {
                     getProductAttribute: () => {
                         return { attributes: [], variants: [] };
                     },
-                    addToCart: (zakekeData) => {
+                    addToCart: async (zakekeData) => {
                         const { designId, quantity } = zakekeData;
-                        addToCart(prod, quantity || 1, designId);
+                        
+                        // Save design to backend so it appears in My Projects
+                        try {
+                            const details = await zakekeService.getDesignDetails(designId);
+                            const previewUrl = details?.tempPreviewImageUrl || '';
+                            
+                            const saved = await designService.createDesign({
+                                product: prod.id,
+                                name: `${prod.title || 'Custom'} Design`,
+                                zakeke_design_id: designId,
+                                preview_url: previewUrl,
+                                design_json: { 
+                                    zakeke_design_id: designId, 
+                                    preview_url: previewUrl,
+                                    created_via: 'zakeke_editor'
+                                },
+                                tags: ['zakeke'],
+                            });
+                            
+                            // Add to cart with both Zakeke design ID and backend design ID
+                            addToCart(
+                                { ...prod, backendDesignId: saved.id },
+                                quantity || 1,
+                                designId
+                            );
+                        } catch (saveErr) {
+                            console.warn('Design save to My Projects failed (non-blocking):', saveErr);
+                            // Still add to cart even if save fails
+                            addToCart(prod, quantity || 1, designId);
+                        }
+                        
                         navigate('/cart');
                     },
                     onBackClicked: () => {

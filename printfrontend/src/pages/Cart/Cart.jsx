@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useShop } from '../../context/ShopContext';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTrash, FaEdit, FaPaintBrush, FaTruck, FaShieldAlt, FaTag } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaPaintBrush, FaTruck, FaShieldAlt, FaTag, FaSearchPlus, FaTimes } from 'react-icons/fa';
 import zakekeService from '../../services/zakekeService';
 import userService from '../../services/userService';
 
@@ -15,6 +15,7 @@ const FREE_SHIPPING_THRESHOLD = 999;
 const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
   const [designDetails, setDesignDetails] = useState(null);
   const [loading, setLoading] = useState(!!item.designId);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (item.designId) {
@@ -33,16 +34,25 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
   const unitPrice = basePrice + customizationPrice;
   const qty = item.quantity || 1;
   const lineTotal = unitPrice * qty;
+  const previewUrl = designDetails?.tempPreviewImageUrl;
+  const imgSrc = previewUrl || item.image || item.img || 'https://placehold.co/120x120';
 
   return (
+    <>
     <div className="flex gap-4 sm:gap-6 py-6 border-b border-gray-100 last:border-0">
       {/* Image */}
-      <div className="w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+      <div
+        className={`w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 ${
+          previewUrl ? 'cursor-pointer ring-2 ring-purple-200 hover:ring-purple-400 transition-all' : ''
+        }`}
+        onClick={() => previewUrl && setShowPreview(true)}
+        title={previewUrl ? 'Click to preview your design' : ''}
+      >
         {loading ? (
           <div className="w-full h-full animate-pulse bg-gray-200" />
         ) : (
           <img
-            src={designDetails?.tempPreviewImageUrl || item.image || item.img || 'https://placehold.co/120x120'}
+            src={imgSrc}
             alt={item.title || 'Product'}
             className="w-full h-full object-contain p-2"
           />
@@ -107,17 +117,68 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
           </span>
         </div>
 
-        {/* Edit design link */}
+        {/* Design action buttons */}
         {item.designId && (
-          <Link
-            to={`/zakeke-editor/${item.slug}?designId=${item.designId}`}
-            className="inline-flex items-center gap-1 mt-2 text-sm text-brand hover:underline"
-          >
-            <FaEdit className="text-xs" /> Edit Design
-          </Link>
+          <div className="flex items-center gap-3 mt-2">
+            {previewUrl && (
+              <button
+                onClick={() => setShowPreview(true)}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-all"
+              >
+                <FaSearchPlus className="text-xs" /> Preview Design
+              </button>
+            )}
+            <Link
+              to={`/zakeke-editor/${item.slug}?designId=${item.designId}`}
+              className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
+            >
+              <FaEdit className="text-xs" /> Edit Design
+            </Link>
+          </div>
         )}
       </div>
     </div>
+
+    {/* Full-screen design preview modal */}
+    {showPreview && previewUrl && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+        onClick={() => setShowPreview(false)}
+      >
+        <div
+          className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => setShowPreview(false)}
+            className="absolute top-3 right-3 p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
+          >
+            <FaTimes />
+          </button>
+          <p className="text-sm font-bold text-gray-900 mb-3 pr-8 truncate">
+            {item.title || item.name} — Your Design Preview
+          </p>
+          <img
+            src={previewUrl}
+            alt="Your custom design"
+            className="w-full rounded-xl border border-gray-100"
+          />
+          <div className="flex items-center justify-between mt-3">
+            <p className="text-xs text-gray-400">
+              This is a preview of your customized design
+            </p>
+            <Link
+              to={`/zakeke-editor/${item.slug}?designId=${item.designId}`}
+              className="text-xs font-semibold text-brand hover:underline"
+            >
+              Edit Design →
+            </Link>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 

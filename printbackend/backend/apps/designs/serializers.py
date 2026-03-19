@@ -15,7 +15,7 @@ class AssetSerializer(serializers.ModelSerializer):
 class SavedDesignSerializer(serializers.ModelSerializer):
     class Meta:
         model = SavedDesign
-        fields = ['id', 'user', 'product', 'name', 'design_json', 'preview_image', 'version', 'tags', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'product', 'name', 'design_json', 'preview_image', 'preview_url', 'zakeke_design_id', 'version', 'tags', 'created_at', 'updated_at']
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
     def create(self, validated_data):

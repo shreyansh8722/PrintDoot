@@ -1,4 +1,4 @@
-﻿from django.db import models
+from django.db import models
 from django.conf import settings
 from apps.catalog.models import Product
 
@@ -43,6 +43,10 @@ class SavedDesign(models.Model):
     design_json = models.JSONField(help_text="Fabric.js or similar canvas state")
     preview_image = models.ImageField(upload_to='previews/', null=True, blank=True)
     thumbnail_high_res = models.ImageField(upload_to='previews/hq/', null=True, blank=True)
+    
+    # Zakeke integration
+    zakeke_design_id = models.CharField(max_length=255, blank=True, default='', help_text="Zakeke design ID for customized products")
+    preview_url = models.URLField(max_length=1024, blank=True, default='', help_text="External preview URL (e.g. from Zakeke)")
     
     # Organization
     version = models.IntegerField(default=1)

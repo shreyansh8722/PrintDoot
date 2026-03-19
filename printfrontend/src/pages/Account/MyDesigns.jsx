@@ -37,8 +37,10 @@ const MyDesigns = () => {
     };
 
     const handleEdit = (design) => {
-        if (design.product?.zakeke_product_id) {
-            navigate(`/zakeke-editor/${design.product.zakeke_product_id}?designId=${design.id}`);
+        if (design.zakeke_design_id || design.product?.zakeke_product_id) {
+            const zakekeProductId = design.product?.zakeke_product_id || design.product?.slug;
+            const zakekeDesignId = design.zakeke_design_id || design.design_json?.zakeke_design_id || design.id;
+            navigate(`/zakeke-editor/${zakekeProductId}?designId=${zakekeDesignId}`);
         } else {
             navigate(`/editor/${design.id}`);
         }
@@ -183,7 +185,7 @@ const MyDesigns = () => {
    DESIGN CARD
    ══════════════════════════════════════════════════ */
 const DesignCard = ({ design, onEdit, onDelete }) => {
-    const previewImage = design.preview_image || design.product?.primary_image || 'https://placehold.co/300x300';
+    const previewImage = design.preview_url || design.preview_image || design.product?.primary_image || 'https://placehold.co/300x300';
     const productName = design.product?.name || 'Unknown Product';
 
     return (
