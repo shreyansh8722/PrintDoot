@@ -27,7 +27,11 @@ const MyDesigns = () => {
             
             try {
                 const data = await designService.getMyDesigns();
-                backendDesigns = Array.isArray(data) ? data : [];
+                // Map product_detail from API to product for frontend use
+                backendDesigns = (Array.isArray(data) ? data : []).map(d => ({
+                    ...d,
+                    product: d.product_detail || d.product || null,
+                }));
                 
                 // User is logged in — try to sync each local design to backend
                 if (localDesigns.length > 0) {
@@ -122,9 +126,10 @@ const MyDesigns = () => {
 
     const handleEdit = (design) => {
         if (design.zakeke_design_id || design.product?.zakeke_product_id) {
-            const zakekeProductId = design.product?.zakeke_product_id || design.product?.slug;
+            // Always use product SLUG for routing (ZakekeEditor does getProductBySlug)
+            const productSlug = design.product?.slug || design.product?.zakeke_product_id;
             const zakekeDesignId = design.zakeke_design_id || design.design_json?.zakeke_design_id || design.id;
-            navigate(`/zakeke-editor/${zakekeProductId}?designId=${zakekeDesignId}`);
+            navigate(`/zakeke-editor/${productSlug}?designId=${zakekeDesignId}`);
         } else {
             navigate(`/editor/${design.id}`);
         }

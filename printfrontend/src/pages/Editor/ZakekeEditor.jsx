@@ -119,7 +119,7 @@ const ZakekeEditor = () => {
                                     designId,
                                     productId: prod.id,
                                     productTitle: prod.title || prod.name,
-                                    productSlug: prod.slug,
+                                    productSlug: productId, // Use route param slug (this is what ZakekeEditor expects)
                                     productImage: prod.primary_image || prod.image || '',
                                     previewUrl: '',
                                     createdAt: new Date().toISOString(),
