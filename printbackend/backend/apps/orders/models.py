@@ -597,3 +597,86 @@ class PincodeServiceability(models.Model):
 
     def __str__(self):
         return f"{self.pincode} → {self.zone.name} ({self.city})"
+
+
+# =============================================================================
+# CART STOCK HOLD — Temporary stock reservation for checkout
+# =============================================================================
+
+class StockHold(models.Model):
+    """
+    Temporarily holds stock for a product while a customer is in the checkout flow.
+    Holds expire after HOLD_DURATION_MINUTES (default 10 minutes).
+    Expired holds are cleaned up by the `cleanup_stock_holds` management command.
+    """
+    HOLD_DURATION_MINUTES = 10
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='stock_holds')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='stock_holds', null=True, blank=True,
+    )
+    session_key = models.CharField(max_length=100, blank=True, default='')
+    quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_released = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['product', 'is_released', 'expires_at']),
+        ]
+
+    def __str__(self):
+        return f"Hold: {self.quantity}x {self.product.name} (expires {self.expires_at})"
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() >= self.expires_at
+
+    @property
+    def is_active(self):
+        return not self.is_released and not self.is_expired
+
+    def release(self):
+        """Release this hold, making the stock available again."""
+        self.is_released = True
+        self.save(update_fields=['is_released'])
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            from django.utils import timezone
+            from datetime import timedelta
+            self.expires_at = timezone.now() + timedelta(minutes=self.HOLD_DURATION_MINUTES)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_held_quantity(cls, product_id):
+        """Total quantity currently held (active, non-expired) for a product."""
+        from django.utils import timezone
+        return cls.objects.filter(
+            product_id=product_id,
+            is_released=False,
+            expires_at__gt=timezone.now(),
+        ).aggregate(total=models.Sum('quantity'))['total'] or 0
+
+    @classmethod
+    def get_available_stock(cls, product):
+        """Available stock = stock_quantity - active holds."""
+        if product.is_infinite_stock:
+            return 999999  # Infinite
+        held = cls.get_held_quantity(product.id)
+        return max(0, product.stock_quantity - held)
+
+    @classmethod
+    def cleanup_expired(cls):
+        """Release all expired holds. Call from management command or cron."""
+        from django.utils import timezone
+        expired = cls.objects.filter(
+            is_released=False,
+            expires_at__lte=timezone.now(),
+        )
+        count = expired.update(is_released=True)
+        return count

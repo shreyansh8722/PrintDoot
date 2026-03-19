@@ -45,6 +45,48 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         return obj.user.get_full_name() if hasattr(obj.user, 'get_full_name') and obj.user.get_full_name() else obj.user.username
 
 
+class ProductListSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for product lists — NO nested reviews (avoids N+1)."""
+    subcategory_name = serializers.ReadOnlyField(source='subcategory.name')
+    images = ProductImageSerializer(many=True, read_only=True)
+    final_price = serializers.ReadOnlyField()
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    zakeke_product_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'subcategory', 'subcategory_name', 'name', 'slug', 'sku',
+            'description', 'base_price', 'stock_quantity',
+            'discount_type', 'discount_value', 'discount_start_date', 'discount_end_date', 'is_on_sale',
+            'final_price', 'primary_image', 'images',
+            'average_rating', 'review_count',
+            'zakeke_product_id',
+            'meta_title', 'meta_description', 'is_active', 'is_featured',
+            'view_count', 'order_count', 'created_at'
+        ]
+
+    def get_average_rating(self, obj):
+        # Use annotated value from queryset if available, else compute
+        if hasattr(obj, '_avg_rating'):
+            return round(obj._avg_rating, 1) if obj._avg_rating else 0
+        reviews = obj.reviews.all()
+        if reviews:
+            return round(sum(r.rating for r in reviews) / len(reviews), 1)
+        return 0
+
+    def get_review_count(self, obj):
+        if hasattr(obj, '_review_count'):
+            return obj._review_count or 0
+        return obj.reviews.count()
+
+    def get_zakeke_product_id(self, obj):
+        if hasattr(obj, 'zakeke_mapping'):
+            return obj.zakeke_mapping.zakeke_product_id
+        return None
+
+
 class ProductSerializer(serializers.ModelSerializer):
     subcategory_name = serializers.ReadOnlyField(source='subcategory.name')
     images = ProductImageSerializer(many=True, read_only=True)
@@ -70,7 +112,7 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_average_rating(self, obj):
         reviews = obj.reviews.all()
         if reviews:
-            return sum(r.rating for r in reviews) / len(reviews)
+            return round(sum(r.rating for r in reviews) / len(reviews), 1)
         return 0
     
     def get_review_count(self, obj):

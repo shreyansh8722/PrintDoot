@@ -4,8 +4,28 @@
 
 upstream django_backend {
     server 127.0.0.1:8000;
+    keepalive 32;  # Reuse connections to gunicorn
 }
 
+# ─── Gzip compression ───
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 6;
+gzip_min_length 256;
+gzip_types
+    application/json
+    application/javascript
+    text/css
+    text/plain
+    text/xml
+    application/xml
+    application/xml+rss
+    text/javascript
+    application/vnd.ms-fontobject
+    application/x-font-ttf
+    font/opentype
+    image/svg+xml;
 server {
     listen 80;
     server_name api.printdoot.com;

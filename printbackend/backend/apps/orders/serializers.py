@@ -308,6 +308,18 @@ class OrderSerializer(serializers.ModelSerializer):
                     stock_quantity=F('stock_quantity') - item_data['quantity']
                 )
 
+        # ── Release stock holds — order is now placed, holds are no longer needed ──
+        try:
+            from .models import StockHold
+            product_ids = [item_data['product'].id for item_data in items_data]
+            StockHold.objects.filter(
+                user=self.context['request'].user,
+                product_id__in=product_ids,
+                is_released=False,
+            ).update(is_released=True)
+        except Exception:
+            pass  # Non-critical — don't block order creation
+
         # Create initial status history
         OrderStatusHistory.objects.create(
             order=order,

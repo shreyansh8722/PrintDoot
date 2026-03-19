@@ -746,3 +746,110 @@ class ShiprocketWebhookView(APIView):
                 {'error': 'Webhook processing failed'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+# =============================================================================
+# CART STOCK HOLD / RELEASE
+# =============================================================================
+
+class CartStockHoldView(APIView):
+    """
+    POST /api/v1/orders/cart/hold-stock/
+    Hold stock for a product while the user is in the checkout flow.
+    Body: { "product_id": <int>, "quantity": <int> }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from apps.catalog.models import Product
+        from .models import StockHold
+
+        # Lazy cleanup of expired holds
+        StockHold.cleanup_expired()
+
+        product_id = request.data.get('product_id')
+        quantity = int(request.data.get('quantity', 1))
+
+        if not product_id:
+            return Response({'error': 'product_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if quantity < 1:
+            return Response({'error': 'quantity must be >= 1'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(id=product_id, is_active=True)
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if product.is_infinite_stock:
+            return Response({
+                'status': 'ok',
+                'message': 'Product has infinite stock, no hold needed.',
+                'available_stock': 999999,
+            })
+
+        # Release any existing holds by this user for the same product
+        StockHold.objects.filter(
+            product=product,
+            user=request.user,
+            is_released=False,
+        ).update(is_released=True)
+
+        # Check available stock
+        available = StockHold.get_available_stock(product)
+        if quantity > available:
+            return Response({
+                'error': f'Insufficient stock. Available: {available}',
+                'available_stock': available,
+            }, status=status.HTTP_409_CONFLICT)
+
+        # Create hold
+        hold = StockHold.objects.create(
+            product=product,
+            user=request.user,
+            session_key=request.session.session_key or '',
+            quantity=quantity,
+        )
+
+        return Response({
+            'status': 'ok',
+            'hold_id': hold.id,
+            'product_id': product.id,
+            'quantity': quantity,
+            'expires_at': hold.expires_at.isoformat(),
+            'available_stock': StockHold.get_available_stock(product),
+        }, status=status.HTTP_201_CREATED)
+
+
+class CartStockReleaseView(APIView):
+    """
+    POST /api/v1/orders/cart/release-stock/
+    Release a stock hold (e.g., when user removes item from cart).
+    Body: { "hold_id": <int> } or { "product_id": <int> }
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from .models import StockHold
+
+        hold_id = request.data.get('hold_id')
+        product_id = request.data.get('product_id')
+
+        if hold_id:
+            holds = StockHold.objects.filter(
+                id=hold_id, user=request.user, is_released=False
+            )
+        elif product_id:
+            holds = StockHold.objects.filter(
+                product_id=product_id, user=request.user, is_released=False
+            )
+        else:
+            return Response(
+                {'error': 'Provide hold_id or product_id'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        count = holds.update(is_released=True)
+        return Response({
+            'status': 'ok',
+            'released_count': count,
+        })

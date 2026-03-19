@@ -46,7 +46,7 @@ class AdminProductViewSet(viewsets.ModelViewSet):
     """
     Admin-only ViewSet for managing products.
     """
-    queryset = Product.objects.all().select_related('subcategory__category')
+    queryset = Product.objects.all().select_related('subcategory__category').prefetch_related('images')
     serializer_class = ProductSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdminOrStaff]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]

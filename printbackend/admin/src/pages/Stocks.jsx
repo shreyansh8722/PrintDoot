@@ -44,6 +44,8 @@ const Stocks = () => {
     };
 
     const getStockStatus = (product) => {
+        // Infinite stock (POD) products are always in stock
+        if (product.is_infinite_stock) return 'in_stock';
         if (product.stock_quantity === 0) return 'out_of_stock';
         if (product.stock_quantity <= threshold) return 'low_stock';
         return 'in_stock';
@@ -93,10 +95,36 @@ const Stocks = () => {
         return <div className="stk-loading"><div className="stk-spinner"></div><p>Loading inventory...</p></div>;
     }
 
+    // Stats for alert cards
+    const totalProducts = products.filter(p => !p.is_infinite_stock).length;
+    const outOfStockCount = products.filter(p => !p.is_infinite_stock && p.stock_quantity === 0).length;
+    const lowStockCount = products.filter(p => !p.is_infinite_stock && p.stock_quantity > 0 && p.stock_quantity <= threshold).length;
+    const inStockCount = totalProducts - outOfStockCount - lowStockCount;
+
     return (
         <div className="stk-page">
             {/* ═══ HEADER ═══ */}
             <h1 className="stk-page-title">Stock and Inventory Management</h1>
+
+            {/* ═══ STOCK ALERT CARDS ═══ */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total SKUs</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#0f172a', marginTop: '4px' }}>{totalProducts}</div>
+                </div>
+                <div style={{ background: '#dcfce7', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#15803d', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>In Stock</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#15803d', marginTop: '4px' }}>{inStockCount}</div>
+                </div>
+                <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#92400e', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Low Stock</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#92400e', marginTop: '4px' }}>{lowStockCount}</div>
+                </div>
+                <div style={{ background: '#fee2e2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '16px' }}>
+                    <div style={{ fontSize: '12px', color: '#991b1b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Out of Stock</div>
+                    <div style={{ fontSize: '28px', fontWeight: 700, color: '#991b1b', marginTop: '4px' }}>{outOfStockCount}</div>
+                </div>
+            </div>
 
             <section className="stk-overview">
                 <h2 className="stk-heading">Inventory Overview</h2>
@@ -124,6 +152,22 @@ const Stocks = () => {
                                 {tab}
                             </button>
                         ))}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <label style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap' }}>Low stock alert:</label>
+                        <input
+                            type="number"
+                            min="1"
+                            value={threshold}
+                            onChange={(e) => setThreshold(parseInt(e.target.value) || 10)}
+                            style={{ width: '60px', padding: '6px 8px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '13px', textAlign: 'center' }}
+                        />
+                        <button
+                            onClick={fetchAll}
+                            style={{ padding: '6px 12px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            Apply
+                        </button>
                     </div>
                     <button className="stk-filter-btn"><Filter size={15} /> Filter</button>
                     <button className="stk-add-btn" onClick={() => navigate('/products')}>

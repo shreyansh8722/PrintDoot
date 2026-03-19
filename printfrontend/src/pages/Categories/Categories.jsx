@@ -298,52 +298,64 @@ function Categories() {
             </div>
           </div>
 
-          {/* ── Mobile Filter Drawer (slide-up) ── */}
+          {/* ── Mobile Filter Popup (centered modal) ── */}
           {mobileFilterOpen && (
             <>
               <div
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80] lg:hidden"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[80] lg:hidden"
                 onClick={() => setMobileFilterOpen(false)}
               />
-              <div className="fixed inset-x-0 bottom-0 z-[90] lg:hidden bg-white rounded-t-2xl shadow-2xl max-h-[85vh] flex flex-col animate-slideUp">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                  <h3 className="font-bold text-lg text-gray-900">Filters</h3>
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
-                  >
-                    <FaTimes className="text-sm" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-5 py-4">
-                  <Sidebar
-                    categories={displayedCategories}
-                    allCategories={allCategories}
-                    showProducts={!!activeCatSlug}
-                    onFilterChange={(f) => { handleFilterChange(f); }}
-                    activeFilters={{
-                      minPrice: filters.minPrice,
-                      maxPrice: filters.maxPrice,
-                      minRating: filters.minRating,
-                      categorySlug: activeCatSlug || '',
-                    }}
-                  />
-                </div>
-                <div className="px-5 py-4 border-t border-gray-100 flex gap-3">
-                  <button
-                    onClick={() => { handleFilterChange({ minPrice: '', maxPrice: '', minRating: '' }); setMobileFilterOpen(false); }}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    Clear All
-                  </button>
-                  <button
-                    onClick={() => setMobileFilterOpen(false)}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
-                  >
-                    Apply Filters
-                  </button>
+              <div className="fixed inset-0 z-[90] lg:hidden flex items-center justify-center p-4">
+                <div
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col"
+                  style={{ animation: 'filterPopupIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
+                >
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                    <h3 className="font-bold text-lg text-gray-900">Filters</h3>
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors"
+                    >
+                      <FaTimes className="text-sm" />
+                    </button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto px-5 py-4">
+                    <Sidebar
+                      categories={displayedCategories}
+                      allCategories={allCategories}
+                      showProducts={!!activeCatSlug}
+                      onFilterChange={(f) => { handleFilterChange(f); }}
+                      activeFilters={{
+                        minPrice: filters.minPrice,
+                        maxPrice: filters.maxPrice,
+                        minRating: filters.minRating,
+                        categorySlug: activeCatSlug || '',
+                      }}
+                    />
+                  </div>
+                  <div className="px-5 py-4 border-t border-gray-100 flex gap-3">
+                    <button
+                      onClick={() => { handleFilterChange({ minPrice: '', maxPrice: '', minRating: '' }); setMobileFilterOpen(false); }}
+                      className="flex-1 py-3 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                    >
+                      Clear All
+                    </button>
+                    <button
+                      onClick={() => setMobileFilterOpen(false)}
+                      className="flex-1 py-3 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-800 transition-colors"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
                 </div>
               </div>
+              {/* Inline animation keyframes */}
+              <style>{`
+                @keyframes filterPopupIn {
+                  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+                  to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+              `}</style>
             </>
           )}
 
@@ -363,8 +375,8 @@ function Categories() {
                 )}
               </p>
 
-              {/* Sort dropdown */}
-              <div className="flex items-center gap-2">
+              {/* Sort dropdown — hidden on mobile (mobile has its own in the toolbar above) */}
+              <div className="hidden sm:flex items-center gap-2">
                 <FaSortAmountDown className="text-gray-400 text-xs" />
                 <select
                   value={ordering}

@@ -5,6 +5,7 @@ from .views import (
     CreateInstamojoPaymentView, VerifyPaymentView, InstamojoWebhookView, TransactionLogsView,
     CheckServiceabilityView, CalculateShippingView,
     CreateShipmentView, TrackShipmentView, ShiprocketWebhookView,
+    CartStockHoldView, CartStockReleaseView,
 )
 
 router = DefaultRouter()
@@ -30,4 +31,8 @@ urlpatterns = [
     path('tracking/create-shipment/', CreateShipmentView.as_view(), name='tracking-create-shipment'),
     path('tracking/<int:order_id>/', TrackShipmentView.as_view(), name='tracking-detail'),
     path('tracking/webhook/', ShiprocketWebhookView.as_view(), name='tracking-webhook'),
+
+    # ── Module 7: Cart Stock Hold ──
+    path('cart/hold-stock/', CartStockHoldView.as_view(), name='cart-hold-stock'),
+    path('cart/release-stock/', CartStockReleaseView.as_view(), name='cart-release-stock'),
 ]

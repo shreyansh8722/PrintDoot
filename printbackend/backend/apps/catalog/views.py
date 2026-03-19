@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from django.db import models
 from .models import Category, Subcategory, Product, ProductReview, Banner, Favorite
 from .serializers import (
-    CategorySerializer, SubcategorySerializer, ProductSerializer,
+    CategorySerializer, SubcategorySerializer,
+    ProductSerializer, ProductListSerializer,
     ProductReviewSerializer, BannerSerializer, FavoriteSerializer,
 )
 
@@ -87,8 +88,10 @@ class ProductViewSet(viewsets.ModelViewSet):
     ViewSet for Products.
     Read: Public. Write: Admin/Staff only.
     """
-    queryset = Product.objects.filter(is_active=True).select_related('subcategory__category')
-    serializer_class = ProductSerializer
+    queryset = Product.objects.filter(is_active=True).select_related(
+        'subcategory__category'
+    ).prefetch_related('images')
+    serializer_class = ProductListSerializer  # Lightweight for lists
     permission_classes = [ReadOnlyOrAdmin]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'slug', 'sku', 'description']
@@ -96,7 +99,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        
+
+        # Annotate with rating stats for ProductListSerializer
+        queryset = queryset.annotate(
+            _avg_rating=models.Avg('reviews__rating'),
+            _review_count=models.Count('reviews'),
+        )
+
         # If accessed via nested route /subcategories/{id}/products/
         subcategory_pk = self.kwargs.get('subcategory_pk')
         if subcategory_pk:
@@ -138,20 +147,22 @@ class ProductViewSet(viewsets.ModelViewSet):
         if min_rating is not None:
             try:
                 min_r = float(min_rating)
-                queryset = queryset.annotate(
-                    avg_rating=models.Avg('reviews__rating')
-                ).filter(avg_rating__gte=min_r)
+                queryset = queryset.filter(_avg_rating__gte=min_r)
             except (ValueError, TypeError):
                 pass
 
-        # Ordering by avg_rating (special handling since it's an annotation)
+        # Ordering by avg_rating (special handling — use the annotation)
         ordering = self.request.query_params.get('ordering', None)
         if ordering in ('avg_rating', '-avg_rating'):
-            if not hasattr(queryset.query, 'annotations') or 'avg_rating' not in queryset.query.annotations:
-                queryset = queryset.annotate(avg_rating=models.Avg('reviews__rating'))
-            queryset = queryset.order_by(ordering)
+            queryset = queryset.order_by(ordering.replace('avg_rating', '_avg_rating'))
 
         return queryset
+
+    def get_serializer_class(self):
+        """Use full ProductSerializer only for single-product detail views."""
+        if self.action == 'retrieve' or self.action == 'by_slug':
+            return ProductSerializer
+        return ProductListSerializer
 
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -165,10 +176,15 @@ class ProductViewSet(viewsets.ModelViewSet):
         """
         Retrieve a single product by its slug.
         GET /api/v1/products/by-slug/{slug}/
+        Uses full ProductSerializer with reviews.
         """
         try:
-            product = Product.objects.select_related('subcategory__category').get(slug=slug, is_active=True)
-            serializer = self.get_serializer(product)
+            product = Product.objects.select_related(
+                'subcategory__category'
+            ).prefetch_related(
+                'images', 'reviews__user'
+            ).get(slug=slug, is_active=True)
+            serializer = ProductSerializer(product)
             response = Response(serializer.data)
             cache_public(response, cdn_seconds=900, browser_seconds=120)  # 15 min CDN for single product
             return response
