@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaSearch, FaPlus, FaChevronRight } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaPlus, FaChevronRight, FaSignInAlt } from 'react-icons/fa';
 import { HiOutlinePaintBrush } from 'react-icons/hi2';
 import designService from '../../services/designService';
 
@@ -11,14 +11,67 @@ const MyDesigns = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTag, setSelectedTag] = useState('all');
     const [error, setError] = useState('');
+    const [isGuest, setIsGuest] = useState(false);
 
     useEffect(() => { loadDesigns(); }, []);
 
     const loadDesigns = async () => {
         try {
             setLoading(true);
-            const data = await designService.getMyDesigns();
-            setDesigns(data);
+            
+            // Get localStorage designs (works for guests and logged-in users)
+            const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+            
+            let backendDesigns = [];
+            let userIsGuest = false;
+            
+            try {
+                const data = await designService.getMyDesigns();
+                backendDesigns = data;
+                
+                // User is logged in — sync any local designs to backend
+                if (localDesigns.length > 0) {
+                    for (const local of localDesigns) {
+                        try {
+                            await designService.createDesign({
+                                product: local.productId,
+                                name: `${local.productTitle || 'Custom'} Design`,
+                                zakeke_design_id: local.designId,
+                                preview_url: local.previewUrl || '',
+                                design_json: { zakeke_design_id: local.designId, preview_url: local.previewUrl || '', created_via: 'zakeke_editor' },
+                                tags: ['zakeke'],
+                            });
+                        } catch { /* skip duplicates or errors */ }
+                    }
+                    // Clear localStorage after sync
+                    localStorage.removeItem('zakeke_designs');
+                    // Re-fetch backend designs after sync
+                    const refreshed = await designService.getMyDesigns();
+                    backendDesigns = refreshed;
+                }
+            } catch {
+                // User is not logged in — show local designs only
+                userIsGuest = true;
+            }
+            
+            setIsGuest(userIsGuest);
+            
+            if (userIsGuest && localDesigns.length > 0) {
+                // Show local designs for guests
+                setDesigns(localDesigns.map((d, idx) => ({
+                    id: `local-${idx}`,
+                    name: `${d.productTitle || 'Custom'} Design`,
+                    preview_url: d.previewUrl || '',
+                    zakeke_design_id: d.designId,
+                    product: { slug: d.productSlug, name: d.productTitle },
+                    tags: ['zakeke'],
+                    updated_at: d.createdAt,
+                    version: 1,
+                    _isLocal: true,
+                })));
+            } else {
+                setDesigns(backendDesigns);
+            }
         } catch {
             setError('Failed to load designs');
         } finally {
@@ -29,8 +82,17 @@ const MyDesigns = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this design?')) return;
         try {
-            await designService.deleteDesign(id);
-            await loadDesigns();
+            if (String(id).startsWith('local-')) {
+                // Delete from localStorage
+                const idx = parseInt(String(id).split('-')[1], 10);
+                const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+                localDesigns.splice(idx, 1);
+                localStorage.setItem('zakeke_designs', JSON.stringify(localDesigns));
+                await loadDesigns();
+            } else {
+                await designService.deleteDesign(id);
+                await loadDesigns();
+            }
         } catch {
             alert('Failed to delete design');
         }
@@ -103,6 +165,20 @@ const MyDesigns = () => {
                         <FaPlus className="text-xs" /> Create New
                     </Link>
                 </div>
+
+                {/* ── Guest sign-in banner ── */}
+                {isGuest && designs.length > 0 && (
+                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-3">
+                        <FaSignInAlt className="text-amber-600 text-lg flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-amber-800">Sign in to save your designs permanently</p>
+                            <p className="text-xs text-amber-600">Your designs are saved locally. Sign in to sync them to your account.</p>
+                        </div>
+                        <Link to="/auth/login" className="text-sm font-semibold text-amber-700 bg-amber-100 px-4 py-2 rounded-lg hover:bg-amber-200 transition-colors whitespace-nowrap">
+                            Sign In
+                        </Link>
+                    </div>
+                )}
 
                 {/* ── Search ── */}
                 <div className="mb-5">

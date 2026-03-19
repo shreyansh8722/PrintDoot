@@ -138,9 +138,9 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
         ) : item.zakeke_product_id ? (
           <Link
             to={`/zakeke-editor/${item.slug}`}
-            className="inline-flex items-center gap-2 mt-3 bg-gradient-to-r from-purple-600 to-brand text-white text-sm font-semibold py-2.5 px-5 rounded-xl hover:shadow-lg hover:shadow-purple-200 active:scale-[0.98] transition-all"
+            className="inline-flex items-center mt-3 text-sm font-medium text-brand border border-brand/30 bg-brand/5 py-2 px-4 rounded-lg hover:bg-brand/10 transition-colors"
           >
-            <FaPaintBrush className="text-xs" /> ✏️ Personalize This Product
+            Personalize
           </Link>
         ) : null}
       </div>

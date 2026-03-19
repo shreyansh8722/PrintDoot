@@ -95,40 +95,50 @@ const ZakekeEditor = () => {
                     getProductAttribute: () => {
                         return { attributes: [], variants: [] };
                     },
-                    addToCart: async (zakekeData) => {
+                    addToCart: (zakekeData) => {
                         const { designId, quantity } = zakekeData;
                         
-                        // Save design to backend so it appears in My Projects
-                        try {
-                            const details = await zakekeService.getDesignDetails(designId);
-                            const previewUrl = details?.tempPreviewImageUrl || '';
-                            
-                            const saved = await designService.createDesign({
-                                product: prod.id,
-                                name: `${prod.title || 'Custom'} Design`,
-                                zakeke_design_id: designId,
-                                preview_url: previewUrl,
-                                design_json: { 
-                                    zakeke_design_id: designId, 
-                                    preview_url: previewUrl,
-                                    created_via: 'zakeke_editor'
-                                },
-                                tags: ['zakeke'],
-                            });
-                            
-                            // Add to cart with both Zakeke design ID and backend design ID
-                            addToCart(
-                                { ...prod, backendDesignId: saved.id },
-                                quantity || 1,
-                                designId
-                            );
-                        } catch (saveErr) {
-                            console.warn('Design save to My Projects failed (non-blocking):', saveErr);
-                            // Still add to cart even if save fails
-                            addToCart(prod, quantity || 1, designId);
-                        }
+                        // 1. Add to cart FIRST (synchronous - must happen before navigate)
+                        addToCart(prod, quantity || 1, designId);
                         
+                        // 2. Navigate to cart immediately
                         navigate('/cart');
+                        
+                        // 3. Fire-and-forget: save design to backend + localStorage
+                        (async () => {
+                            try {
+                                const details = await zakekeService.getDesignDetails(designId);
+                                const previewUrl = details?.tempPreviewImageUrl || '';
+                                
+                                // Save to localStorage (works for guests too)
+                                const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+                                localDesigns.push({
+                                    designId,
+                                    productId: prod.id,
+                                    productTitle: prod.title || prod.name,
+                                    productSlug: prod.slug,
+                                    previewUrl,
+                                    createdAt: new Date().toISOString(),
+                                });
+                                localStorage.setItem('zakeke_designs', JSON.stringify(localDesigns));
+                                
+                                // Try saving to backend (only works if logged in)
+                                await designService.createDesign({
+                                    product: prod.id,
+                                    name: `${prod.title || 'Custom'} Design`,
+                                    zakeke_design_id: designId,
+                                    preview_url: previewUrl,
+                                    design_json: { 
+                                        zakeke_design_id: designId, 
+                                        preview_url: previewUrl,
+                                        created_via: 'zakeke_editor'
+                                    },
+                                    tags: ['zakeke'],
+                                });
+                            } catch (err) {
+                                console.warn('Design save (non-blocking):', err);
+                            }
+                        })();
                     },
                     onBackClicked: () => {
                         window.history.back();
