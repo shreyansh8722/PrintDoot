@@ -118,7 +118,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
         </div>
 
         {/* Design action buttons */}
-        {item.designId && (
+        {item.designId ? (
           <div className="flex items-center gap-3 mt-2">
             {previewUrl && (
               <button
@@ -135,7 +135,14 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
               <FaEdit className="text-xs" /> Edit Design
             </Link>
           </div>
-        )}
+        ) : item.zakeke_product_id ? (
+          <Link
+            to={`/zakeke-editor/${item.slug}`}
+            className="inline-flex items-center gap-2 mt-3 bg-gradient-to-r from-purple-600 to-brand text-white text-sm font-semibold py-2.5 px-5 rounded-xl hover:shadow-lg hover:shadow-purple-200 active:scale-[0.98] transition-all"
+          >
+            <FaPaintBrush className="text-xs" /> ✏️ Personalize This Product
+          </Link>
+        ) : null}
       </div>
     </div>
 
