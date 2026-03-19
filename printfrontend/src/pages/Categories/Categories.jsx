@@ -251,9 +251,9 @@ function Categories() {
   return (
     <div className="bg-white min-h-screen">
       <Breadcrumb />
-      <CategoryHero />
+      <CategoryHero categorySlug={activeCatSlug} categoryName={activeCategory?.name} />
 
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div id="products-section" className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* ── Sidebar with Filters ── */}
           <aside className="lg:w-1/4 lg:sticky lg:top-24 lg:self-start">
