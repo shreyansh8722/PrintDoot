@@ -138,9 +138,9 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
         ) : item.zakeke_product_id ? (
           <Link
             to={`/zakeke-editor/${item.slug}`}
-            className="inline-flex items-center mt-3 text-sm font-medium text-brand border border-brand/30 bg-brand/5 py-2 px-4 rounded-lg hover:bg-brand/10 transition-colors"
+            className="inline-flex items-center mt-3 text-sm font-medium text-white bg-gray-900 py-2 px-5 rounded-lg hover:bg-gray-800 transition-colors"
           >
-            Personalize
+            Add Your Design
           </Link>
         ) : null}
       </div>
