@@ -123,16 +123,16 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
             {previewUrl && (
               <button
                 onClick={() => setShowPreview(true)}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-all"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-gray-900 px-3 py-1.5 rounded-lg hover:bg-gray-800 transition-colors"
               >
-                <FaSearchPlus className="text-xs" /> Preview Design
+                Preview Design
               </button>
             )}
             <Link
               to={`/zakeke-editor/${item.slug}?designId=${item.designId}`}
-              className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-gray-900 hover:underline"
             >
-              <FaEdit className="text-xs" /> Edit Design
+              Edit Design
             </Link>
           </div>
         ) : item.zakeke_product_id ? (

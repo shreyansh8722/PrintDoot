@@ -19,7 +19,7 @@ const MyDesigns = () => {
         try {
             setLoading(true);
             
-            // Get localStorage designs (works for guests and logged-in users)
+            // Always read localStorage designs first
             const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
             
             let backendDesigns = [];
@@ -27,11 +27,21 @@ const MyDesigns = () => {
             
             try {
                 const data = await designService.getMyDesigns();
-                backendDesigns = data;
+                backendDesigns = Array.isArray(data) ? data : [];
                 
-                // User is logged in — sync any local designs to backend
+                // User is logged in — try to sync each local design to backend
                 if (localDesigns.length > 0) {
-                    for (const local of localDesigns) {
+                    const syncedIndexes = [];
+                    for (let i = 0; i < localDesigns.length; i++) {
+                        const local = localDesigns[i];
+                        // Skip if already exists in backend
+                        const alreadyExists = backendDesigns.some(
+                            bd => bd.zakeke_design_id === local.designId
+                        );
+                        if (alreadyExists) {
+                            syncedIndexes.push(i);
+                            continue;
+                        }
                         try {
                             await designService.createDesign({
                                 product: local.productId,
@@ -41,37 +51,49 @@ const MyDesigns = () => {
                                 design_json: { zakeke_design_id: local.designId, preview_url: local.previewUrl || '', created_via: 'zakeke_editor' },
                                 tags: ['zakeke'],
                             });
-                        } catch { /* skip duplicates or errors */ }
+                            syncedIndexes.push(i);
+                        } catch { /* skip failed syncs — keep in localStorage */ }
                     }
-                    // Clear localStorage after sync
-                    localStorage.removeItem('zakeke_designs');
+                    
+                    // Only remove successfully synced items from localStorage
+                    if (syncedIndexes.length > 0) {
+                        const remaining = localDesigns.filter((_, i) => !syncedIndexes.includes(i));
+                        localStorage.setItem('zakeke_designs', JSON.stringify(remaining));
+                    }
+                    
                     // Re-fetch backend designs after sync
-                    const refreshed = await designService.getMyDesigns();
-                    backendDesigns = refreshed;
+                    if (syncedIndexes.length > 0) {
+                        const refreshed = await designService.getMyDesigns();
+                        backendDesigns = Array.isArray(refreshed) ? refreshed : [];
+                    }
                 }
             } catch {
-                // User is not logged in — show local designs only
                 userIsGuest = true;
             }
             
             setIsGuest(userIsGuest);
             
-            if (userIsGuest && localDesigns.length > 0) {
-                // Show local designs for guests
-                setDesigns(localDesigns.map((d, idx) => ({
-                    id: `local-${idx}`,
-                    name: `${d.productTitle || 'Custom'} Design`,
-                    preview_url: d.previewUrl || '',
-                    zakeke_design_id: d.designId,
-                    product: { slug: d.productSlug, name: d.productTitle },
-                    tags: ['zakeke'],
-                    updated_at: d.createdAt,
-                    version: 1,
-                    _isLocal: true,
-                })));
-            } else {
-                setDesigns(backendDesigns);
-            }
+            // Build local design objects for display
+            const remainingLocal = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+            const localDisplayDesigns = remainingLocal.map((d, idx) => ({
+                id: `local-${idx}`,
+                name: `${d.productTitle || 'Custom'} Design`,
+                preview_url: d.previewUrl || '',
+                zakeke_design_id: d.designId,
+                product: { slug: d.productSlug, name: d.productTitle },
+                tags: ['zakeke'],
+                updated_at: d.createdAt,
+                version: 1,
+                _isLocal: true,
+            }));
+            
+            // Merge: backend first, then any remaining local designs not in backend
+            const backendZakekeIds = new Set(backendDesigns.map(bd => bd.zakeke_design_id).filter(Boolean));
+            const uniqueLocalDesigns = localDisplayDesigns.filter(
+                ld => !backendZakekeIds.has(ld.zakeke_design_id)
+            );
+            
+            setDesigns([...backendDesigns, ...uniqueLocalDesigns]);
         } catch {
             setError('Failed to load designs');
         } finally {

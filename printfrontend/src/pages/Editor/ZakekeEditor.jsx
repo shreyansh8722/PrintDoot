@@ -111,30 +111,47 @@ const ZakekeEditor = () => {
                         // 1. Add to cart FIRST (synchronous)
                         addToCart(prod, qty, designId);
                         
-                        // 2. Navigate to cart
+                        // 2. Save to localStorage SYNCHRONOUSLY (before navigate kills the component)
+                        if (designId) {
+                            try {
+                                const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+                                localDesigns.push({
+                                    designId,
+                                    productId: prod.id,
+                                    productTitle: prod.title || prod.name,
+                                    productSlug: prod.slug,
+                                    productImage: prod.primary_image || prod.image || '',
+                                    previewUrl: '',
+                                    createdAt: new Date().toISOString(),
+                                });
+                                localStorage.setItem('zakeke_designs', JSON.stringify(localDesigns));
+                                console.log('[Zakeke] Design saved to localStorage');
+                            } catch (e) {
+                                console.warn('[Zakeke] localStorage save failed:', e);
+                            }
+                        }
+                        
+                        // 3. Navigate to cart
                         navigate('/cart');
                         
-                        // 3. Fire-and-forget: save design to backend + localStorage
+                        // 4. Fire-and-forget: save to backend + fetch preview URL
                         if (designId) {
                             (async () => {
                                 try {
                                     const details = await zakekeService.getDesignDetails(designId);
                                     const previewUrl = details?.tempPreviewImageUrl || '';
                                     
-                                    // Save to localStorage (works for guests too)
-                                    const localDesigns = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
-                                    localDesigns.push({
-                                        designId,
-                                        productId: prod.id,
-                                        productTitle: prod.title || prod.name,
-                                        productSlug: prod.slug,
-                                        productImage: prod.primary_image || prod.image || '',
-                                        previewUrl,
-                                        createdAt: new Date().toISOString(),
-                                    });
-                                    localStorage.setItem('zakeke_designs', JSON.stringify(localDesigns));
+                                    // Update localStorage with preview URL
+                                    if (previewUrl) {
+                                        const stored = JSON.parse(localStorage.getItem('zakeke_designs') || '[]');
+                                        const last = stored[stored.length - 1];
+                                        if (last && last.designId === designId) {
+                                            last.previewUrl = previewUrl;
+                                            localStorage.setItem('zakeke_designs', JSON.stringify(stored));
+                                        }
+                                    }
                                     
-                                    // Try saving to backend (only works if logged in)
+                                    // Save to backend (only works if logged in)
                                     await designService.createDesign({
                                         product: prod.id,
                                         name: `${prod.title || 'Custom'} Design`,
@@ -147,9 +164,9 @@ const ZakekeEditor = () => {
                                         },
                                         tags: ['zakeke'],
                                     });
-                                    console.log('[Zakeke] Design saved to backend & localStorage');
+                                    console.log('[Zakeke] Design saved to backend');
                                 } catch (err) {
-                                    console.warn('[Zakeke] Design save (non-blocking):', err);
+                                    console.warn('[Zakeke] Backend save (non-blocking):', err);
                                 }
                             })();
                         }
