@@ -15,7 +15,7 @@ def add_gst_amount_column(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('pages', '0008_promocode'),
+        ('pages', '0004_offlinepayment_promocode'),
     ]
     operations = [
         migrations.RunPython(add_gst_amount_column, migrations.RunPython.noop),
