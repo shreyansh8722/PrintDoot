@@ -219,11 +219,13 @@ export const adminOfflinePaymentAPI = {
     updatePayment: (id, data) => api.patch(`/admin/offline-payments/${id}/`, data),
     deletePayment: (id) => api.delete(`/admin/offline-payments/${id}/`),
     getStats: () => api.get('/admin/offline-payments/stats/'),
+    settlePayments: (amount) => api.post('/admin/offline-payments/settle/', { amount }),
 };
 
 // Finance Summary API
 export const adminFinanceAPI = {
     getSummary: () => api.get('/admin/finance/summary/'),
+    settlePending: (amount) => api.post('/admin/offline-payments/settle/', { amount }),
 };
 
 export default api;

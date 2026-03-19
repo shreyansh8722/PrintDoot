@@ -141,6 +141,67 @@ class AdminOfflinePaymentViewSet(viewsets.ModelViewSet):
             'total_amount': float(total_amount),
         })
 
+    @action(detail=False, methods=['post'])
+    def settle(self, request):
+        """
+        Settle pending offline payments up to a given amount.
+        Marks pending payments as 'received' (oldest first).
+        Expects: { "amount": 1500.00 }
+        """
+        from decimal import Decimal, InvalidOperation
+        from django.db.models import Sum
+        from django.db.models.functions import Coalesce
+
+        try:
+            settle_amount = Decimal(str(request.data.get('amount', '0')))
+        except (InvalidOperation, ValueError, TypeError):
+            return Response({'error': 'Invalid amount'}, status=400)
+
+        if settle_amount <= 0:
+            return Response({'error': 'Amount must be greater than 0'}, status=400)
+
+        # Get pending payments, oldest first
+        pending_payments = OfflinePayment.objects.filter(status='pending').order_by('created_at')
+
+        total_pending = pending_payments.aggregate(
+            total=Coalesce(Sum('amount'), Decimal('0'))
+        )['total']
+
+        if settle_amount > total_pending:
+            return Response({
+                'error': f'Settlement amount (₹{settle_amount}) exceeds total pending (₹{total_pending})'
+            }, status=400)
+
+        remaining = settle_amount
+        settled_count = 0
+        settled_ids = []
+
+        for payment in pending_payments:
+            if remaining <= 0:
+                break
+            if payment.amount <= remaining:
+                # Fully settle this payment
+                payment.status = 'received'
+                payment.save()
+                remaining -= payment.amount
+                settled_count += 1
+                settled_ids.append(payment.id)
+            else:
+                # Partially settle — mark the full payment as received
+                # since user specified this amount to settle
+                payment.status = 'received'
+                payment.save()
+                settled_count += 1
+                settled_ids.append(payment.id)
+                remaining = Decimal('0')
+
+        return Response({
+            'settled_amount': str(settle_amount),
+            'settled_count': settled_count,
+            'settled_ids': settled_ids,
+            'message': f'Successfully settled ₹{settle_amount} across {settled_count} payment(s)',
+        })
+
 
 class FinanceDataView(APIView):
     """

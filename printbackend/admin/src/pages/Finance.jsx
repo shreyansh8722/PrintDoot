@@ -94,8 +94,39 @@ const Finance = () => {
         window.print();
     };
 
+    const [showSettleModal, setShowSettleModal] = useState(false);
+    const [settleAmount, setSettleAmount] = useState('');
+    const [settling, setSettling] = useState(false);
+
     const handleSettle = () => {
-        alert('Settlement request initiated. Processing offline payments and refunds.');
+        // Pre-fill with total pending amount
+        setSettleAmount(pendingSettlement > 0 ? pendingSettlement.toFixed(2) : '');
+        setShowSettleModal(true);
+    };
+
+    const confirmSettle = async () => {
+        const amount = parseFloat(settleAmount);
+        if (!amount || amount <= 0) {
+            alert('Please enter a valid amount greater than 0');
+            return;
+        }
+        if (amount > pendingSettlement) {
+            alert(`Settlement amount (₹${amount}) cannot exceed pending amount (₹${pendingSettlement.toFixed(2)})`);
+            return;
+        }
+        setSettling(true);
+        try {
+            const res = await adminFinanceAPI.settlePending(amount);
+            alert(res.data.message || `Successfully settled ₹${amount}`);
+            setShowSettleModal(false);
+            setSettleAmount('');
+            // Refresh data to update pending and total sales
+            fetchData();
+        } catch (error) {
+            alert('Settlement failed: ' + (error.response?.data?.error || error.message));
+        } finally {
+            setSettling(false);
+        }
     };
 
     if (loading) {
@@ -236,6 +267,76 @@ const Finance = () => {
                     <Printer size={15} /> Print Snapshot
                 </button>
             </div>
+
+            {/* ═══ SETTLEMENT MODAL ═══ */}
+            {showSettleModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
+                }} onClick={() => setShowSettleModal(false)}>
+                    <div style={{
+                        background: '#fff', borderRadius: '16px', padding: '32px',
+                        width: '420px', maxWidth: '90vw', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+                    }} onClick={(e) => e.stopPropagation()}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '4px', color: '#0f172a' }}>
+                            Settle Pending Payments
+                        </h2>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
+                            Total pending: <strong style={{ color: '#ef4444' }}>₹{pendingSettlement.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong> from {pendingSettlementCount} payment{pendingSettlementCount !== 1 ? 's' : ''}
+                        </p>
+
+                        <label style={{ fontSize: '13px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                            Settlement Amount (₹)
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max={pendingSettlement}
+                            value={settleAmount}
+                            onChange={(e) => setSettleAmount(e.target.value)}
+                            style={{
+                                width: '100%', padding: '12px 14px', border: '2px solid #e2e8f0',
+                                borderRadius: '10px', fontSize: '16px', fontWeight: 600,
+                                outline: 'none', transition: 'border-color 0.2s',
+                                boxSizing: 'border-box',
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#00897b'}
+                            onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
+                            placeholder="Enter amount to settle"
+                            autoFocus
+                        />
+                        <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '8px', marginBottom: '24px' }}>
+                            This amount will be moved from Pending Settlements to Total Sales (Offline Revenue).
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setShowSettleModal(false)}
+                                style={{
+                                    padding: '10px 20px', border: '1px solid #e2e8f0', borderRadius: '10px',
+                                    background: '#fff', color: '#64748b', fontSize: '14px', fontWeight: 600,
+                                    cursor: 'pointer',
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={confirmSettle}
+                                disabled={settling || !settleAmount || parseFloat(settleAmount) <= 0}
+                                style={{
+                                    padding: '10px 24px', border: 'none', borderRadius: '10px',
+                                    background: settling ? '#94a3b8' : '#00897b', color: '#fff',
+                                    fontSize: '14px', fontWeight: 600, cursor: settling ? 'not-allowed' : 'pointer',
+                                }}
+                            >
+                                {settling ? 'Processing...' : 'Confirm Settlement'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
